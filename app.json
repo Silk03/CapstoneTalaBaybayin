@@ -21,7 +21,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "package": "com.pipoy03.talabaybayin"
     },
     "web": {
       "bundler": "metro",
@@ -33,6 +33,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8a764557-4562-410e-aea3-35b6ff37c58b"
+      }
+    },
+    "owner": "pipoy03"
   }
 }
