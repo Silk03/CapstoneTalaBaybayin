@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,11 @@ import {
   StyleSheet,
   SafeAreaView,
   Dimensions,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Lesson, BaybayinCharacter } from '../../types/lesson';
+import { useProgress } from '../../contexts/ProgressContext';
 
 interface LessonScreenProps {
   lesson: Lesson;
@@ -22,10 +24,57 @@ const { width } = Dimensions.get('window');
 export default function LessonScreen({ lesson, onBack, onComplete }: LessonScreenProps) {
   const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
   const [completedCharacters, setCompletedCharacters] = useState<Set<number>>(new Set());
+  const [startTime, setStartTime] = useState<Date>(new Date());
+  const { completeLesson, updateStreak, isLessonCompleted } = useProgress();
 
   const currentCharacter = lesson.characters[currentCharacterIndex];
   const isLastCharacter = currentCharacterIndex === lesson.characters.length - 1;
   const allCharactersCompleted = completedCharacters.size === lesson.characters.length;
+  const wasAlreadyCompleted = isLessonCompleted(lesson.id);
+
+  useEffect(() => {
+    setStartTime(new Date());
+  }, []);
+
+  const handleComplete = async () => {
+    try {
+      const endTime = new Date();
+      const timeSpent = Math.floor((endTime.getTime() - startTime.getTime()) / 1000); // in seconds
+      const score = calculateScore(timeSpent);
+      
+      await completeLesson(lesson.id, score, timeSpent);
+      await updateStreak();
+      
+      Alert.alert(
+        'Lesson Completed! 🎉',
+        `Great job! You earned ${Math.round(score)} points${!wasAlreadyCompleted ? ' and gained experience!' : '!'}`,
+        [
+          {
+            text: 'Continue',
+            onPress: onComplete
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error completing lesson:', error);
+      Alert.alert('Error', 'Failed to save progress. Please try again.');
+    }
+  };
+
+  const calculateScore = (timeSpentSeconds: number): number => {
+    // Base score
+    let score = 80;
+    
+    // Time bonus (faster completion = higher score)
+    const timeBonus = Math.max(0, 20 - Math.floor(timeSpentSeconds / 30));
+    score += timeBonus;
+    
+    // Character completion bonus
+    const completionBonus = (completedCharacters.size / lesson.characters.length) * 10;
+    score += completionBonus;
+    
+    return Math.min(100, Math.max(50, score));
+  };
 
   const handleNext = () => {
     // Mark current character as completed
@@ -33,12 +82,10 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
     newCompleted.add(currentCharacterIndex);
     setCompletedCharacters(newCompleted);
 
-    if (isLastCharacter) {
+    if (isLastCharacter && newCompleted.size === lesson.characters.length) {
       // All characters completed
-      if (allCharactersCompleted) {
-        onComplete();
-      }
-    } else {
+      handleComplete();
+    } else if (!isLastCharacter) {
       setCurrentCharacterIndex(currentCharacterIndex + 1);
     }
   };

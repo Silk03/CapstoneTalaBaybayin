@@ -9,6 +9,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { ProgressProvider } from '@/contexts/ProgressContext';
 import AuthContainer from '@/components/auth/AuthContainer';
 import { View, ActivityIndicator } from 'react-native';
 
@@ -48,7 +49,9 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <ProgressProvider>
+        <RootLayoutNav />
+      </ProgressProvider>
     </AuthProvider>
   );
 }

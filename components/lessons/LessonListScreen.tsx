@@ -10,12 +10,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { lessons } from '../../data/lessons';
 import { Lesson, DifficultyLevel } from '../../types/lesson';
+import { useProgress } from '../../contexts/ProgressContext';
 
 interface LessonListScreenProps {
   onSelectLesson: (lesson: Lesson) => void;
 }
 
 export default function LessonListScreen({ onSelectLesson }: LessonListScreenProps) {
+  const { isLessonCompleted, getLessonProgress } = useProgress();
+
   const getDifficultyColor = (difficulty: DifficultyLevel) => {
     switch (difficulty) {
       case DifficultyLevel.BEGINNER:
@@ -42,43 +45,53 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
     }
   };
 
-  const renderLessonItem = ({ item }: { item: Lesson }) => (
-    <TouchableOpacity
-      style={[styles.lessonCard, item.isCompleted && styles.completedCard]}
-      onPress={() => onSelectLesson(item)}
-    >
-      <View style={styles.lessonHeader}>
-        <View style={styles.lessonInfo}>
-          <Text style={styles.lessonTitle}>{item.title}</Text>
-          <Text style={styles.lessonDescription}>{item.description}</Text>
-        </View>
-        
-        <View style={styles.lessonMeta}>
-          <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(item.difficulty) }]}>
-            <Ionicons 
-              name={getDifficultyIcon(item.difficulty) as any} 
-              size={16} 
-              color="white" 
-            />
-            <Text style={styles.difficultyText}>
-              {item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}
-            </Text>
+  const renderLessonItem = ({ item }: { item: Lesson }) => {
+    const isCompleted = isLessonCompleted(item.id);
+    const lessonProgress = getLessonProgress(item.id);
+    
+    return (
+      <TouchableOpacity
+        style={[styles.lessonCard, isCompleted && styles.completedCard]}
+        onPress={() => onSelectLesson(item)}
+      >
+        <View style={styles.lessonHeader}>
+          <View style={styles.lessonInfo}>
+            <Text style={styles.lessonTitle}>{item.title}</Text>
+            <Text style={styles.lessonDescription}>{item.description}</Text>
+            {isCompleted && lessonProgress && (
+              <Text style={styles.scoreText}>
+                Score: {Math.round(lessonProgress.score)} points
+              </Text>
+            )}
           </View>
           
-          {item.isCompleted && (
-            <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
-          )}
+          <View style={styles.lessonMeta}>
+            <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(item.difficulty) }]}>
+              <Ionicons 
+                name={getDifficultyIcon(item.difficulty) as any} 
+                size={16} 
+                color="white" 
+              />
+              <Text style={styles.difficultyText}>
+                {item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}
+              </Text>
+            </View>
+            
+            {isCompleted && (
+              <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
+            )}
+          </View>
         </View>
-      </View>
-      
-      <View style={styles.lessonFooter}>
-        <Text style={styles.characterCount}>
-          {item.characters.length} characters
-        </Text>
-        <Ionicons name="chevron-forward" size={20} color="#8B4513" />
-      </View>
-    </TouchableOpacity>
-  );
+        
+        <View style={styles.lessonFooter}>
+          <Text style={styles.characterCount}>
+            {item.characters.length} characters
+          </Text>
+          <Ionicons name="chevron-forward" size={20} color="#8B4513" />
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -158,6 +171,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
+  },
+  scoreText: {
+    fontSize: 12,
+    color: '#4CAF50',
+    fontWeight: '600',
+    marginTop: 4,
   },
   lessonMeta: {
     alignItems: 'flex-end',
