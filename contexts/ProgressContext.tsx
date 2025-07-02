@@ -7,11 +7,14 @@ import { UserProgress, LessonProgress, Achievement } from '../types/progress';
 interface ProgressContextType {
   userProgress: UserProgress | null;
   completeLesson: (lessonId: string, score: number, timeSpent: number) => Promise<void>;
+  completeQuiz: (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }) => Promise<void>;
   updateStreak: () => Promise<void>;
   addExperience: (points: number) => Promise<void>;
   unlockAchievement: (achievement: Achievement) => Promise<void>;
   getLessonProgress: (lessonId: string) => LessonProgress | null;
   isLessonCompleted: (lessonId: string) => boolean;
+  isQuizCompleted: (quizId: string) => boolean;
+  getQuizScore: (quizId: string) => number;
   getUserLevel: () => number;
   loading: boolean;
 }
@@ -65,6 +68,8 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
             userId: user.uid,
             completedLessons: [],
             lessonScores: {},
+            completedQuizzes: [],
+            quizScores: {},
             totalScore: 0,
             streak: 0,
             lastLearningDate: new Date(),
@@ -91,8 +96,16 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     if (!user) return;
     
     try {
-      await updateDoc(doc(db, 'userProgress', user.uid), { ...progress });
+      // Update local state immediately for better UX
       setUserProgress(progress);
+      
+      // Then update Firestore using setDoc to replace the entire document
+      await setDoc(doc(db, 'userProgress', user.uid), progress);
+      
+      console.log('Progress saved successfully to Firestore:', {
+        completedLessons: progress.completedLessons,
+        lessonScores: progress.lessonScores
+      });
     } catch (error) {
       console.error('Error saving progress:', error);
     }
@@ -101,8 +114,38 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
   const completeLesson = async (lessonId: string, score: number, timeSpent: number) => {
     if (!userProgress || !user) return;
 
+    console.log('=== COMPLETING LESSON ===');
+    console.log('Lesson ID:', lessonId);
+    console.log('Current completed lessons:', userProgress.completedLessons);
+    console.log('Is already completed?', userProgress.completedLessons.includes(lessonId));
+
     const isFirstCompletion = !userProgress.completedLessons.includes(lessonId);
+    
+    // If it's not the first completion and the score isn't better, skip the update
+    const currentScore = userProgress.lessonScores[lessonId] || 0;
+    if (!isFirstCompletion && score <= currentScore) {
+      console.log('Lesson already completed with equal or better score, skipping update');
+      return;
+    }
+
     const experienceGained = isFirstCompletion ? 50 + Math.floor(score / 2) : Math.floor(score / 4);
+
+    // Update streak logic (integrated here to avoid race conditions)
+    const today = new Date();
+    const lastDate = new Date(userProgress.lastLearningDate);
+    const diffTime = Math.abs(today.getTime() - lastDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    let newStreak = userProgress.streak;
+    
+    if (diffDays === 1) {
+      // Continue streak
+      newStreak += 1;
+    } else if (diffDays > 1) {
+      // Reset streak
+      newStreak = 1;
+    }
+    // If same day, keep current streak
 
     const updatedProgress: UserProgress = {
       ...userProgress,
@@ -116,8 +159,13 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
       totalScore: userProgress.totalScore + (isFirstCompletion ? score : 0),
       experience: userProgress.experience + experienceGained,
       totalTimeSpent: userProgress.totalTimeSpent + Math.floor(timeSpent / 60),
-      lastLearningDate: new Date(),
+      lastLearningDate: today,
+      streak: newStreak,
     };
+
+    console.log('Updated completed lessons:', updatedProgress.completedLessons);
+    console.log('Updated lesson scores:', updatedProgress.lessonScores);
+    console.log('=== END LESSON COMPLETION ===');
 
     // Check for level up
     const newLevel = Math.floor(updatedProgress.experience / 100) + 1;
@@ -164,34 +212,6 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
       }
     }
 
-    await saveProgress(updatedProgress);
-  };
-
-  const updateStreak = async () => {
-    if (!userProgress || !user) return;
-
-    const today = new Date();
-    const lastDate = new Date(userProgress.lastLearningDate);
-    const diffTime = Math.abs(today.getTime() - lastDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    let newStreak = userProgress.streak;
-    
-    if (diffDays === 1) {
-      // Continue streak
-      newStreak += 1;
-    } else if (diffDays > 1) {
-      // Reset streak
-      newStreak = 1;
-    }
-    // If same day, keep current streak
-
-    const updatedProgress: UserProgress = {
-      ...userProgress,
-      streak: newStreak,
-      lastLearningDate: today,
-    };
-
     // Check for streak achievements
     if (newStreak === 3 && userProgress.streak < 3) {
       const streakAchievement: Achievement = {
@@ -217,7 +237,75 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
       updatedProgress.achievements = [...updatedProgress.achievements, weekStreakAchievement];
     }
 
+    // Single save operation with all updates
     await saveProgress(updatedProgress);
+    
+    console.log('=== LESSON COMPLETION SAVED ===');
+    console.log('Final lesson completion state:', {
+      lessonId,
+      completedLessons: updatedProgress.completedLessons,
+      isNowCompleted: updatedProgress.completedLessons.includes(lessonId)
+    });
+    console.log('=== END SAVE CONFIRMATION ===');
+  };
+
+  const completeQuiz = async (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }) => {
+    if (!userProgress || !user) return;
+
+    const isFirstCompletion = !userProgress.completedQuizzes.includes(quizId);
+    const experienceGained = isFirstCompletion ? Math.floor(score / 2) : Math.floor(score / 4);
+
+    const updatedProgress: UserProgress = {
+      ...userProgress,
+      completedQuizzes: isFirstCompletion 
+        ? [...userProgress.completedQuizzes, quizId]
+        : userProgress.completedQuizzes,
+      quizScores: {
+        ...userProgress.quizScores,
+        [quizId]: Math.max(userProgress.quizScores[quizId] || 0, score)
+      },
+      totalScore: userProgress.totalScore + (isFirstCompletion ? score : 0),
+      experience: userProgress.experience + experienceGained,
+      totalTimeSpent: userProgress.totalTimeSpent + Math.floor(timeSpent / 60),
+      lastLearningDate: new Date(),
+    };
+
+    // Check for quiz achievements
+    if (isFirstCompletion) {
+      const completedQuizCount = updatedProgress.completedQuizzes.length;
+      
+      if (completedQuizCount === 1) {
+        const firstQuizAchievement: Achievement = {
+          id: 'first_quiz',
+          title: 'Quiz Master',
+          description: 'Completed your first quiz!',
+          icon: '🧠',
+          unlockedAt: new Date(),
+          type: 'lesson'
+        };
+        updatedProgress.achievements = [...updatedProgress.achievements, firstQuizAchievement];
+      }
+
+      if (score >= 95) {
+        const perfectScoreAchievement: Achievement = {
+          id: `perfect_${quizId}`,
+          title: 'Perfect Score!',
+          description: 'Scored 95% or higher on a quiz!',
+          icon: '💯',
+          unlockedAt: new Date(),
+          type: 'score'
+        };
+        updatedProgress.achievements = [...updatedProgress.achievements, perfectScoreAchievement];
+      }
+    }
+
+    await saveProgress(updatedProgress);
+  };
+
+  const updateStreak = async () => {
+    // This function is now integrated into completeLesson to avoid race conditions
+    // Keeping it for backward compatibility but it will just refetch the latest state
+    console.log('updateStreak called - but streak is now updated within lesson completion');
   };
 
   const addExperience = async (points: number) => {
@@ -266,6 +354,14 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     return userProgress?.completedLessons.includes(lessonId) || false;
   };
 
+  const isQuizCompleted = (quizId: string): boolean => {
+    return userProgress?.completedQuizzes.includes(quizId) || false;
+  };
+
+  const getQuizScore = (quizId: string): number => {
+    return userProgress?.quizScores[quizId] || 0;
+  };
+
   const getUserLevel = (): number => {
     return userProgress?.level || 1;
   };
@@ -273,11 +369,14 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
   const value = {
     userProgress,
     completeLesson,
+    completeQuiz,
     updateStreak,
     addExperience,
     unlockAchievement,
     getLessonProgress,
     isLessonCompleted,
+    isQuizCompleted,
+    getQuizScore,
     getUserLevel,
     loading,
   };

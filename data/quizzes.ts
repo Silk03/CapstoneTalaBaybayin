@@ -1,0 +1,142 @@
+import { Quiz, QuizQuestion, QuestionType, QuizCategory, DifficultyLevel } from '../types/quiz';
+
+// Sample quiz questions
+const beginnerQuestions: QuizQuestion[] = [
+  {
+    id: 'q1',
+    type: QuestionType.CHARACTER_RECOGNITION,
+    question: 'What is the romanized form of this Baybayin character?',
+    baybayinCharacter: 'ᜀ',
+    options: ['A', 'E', 'O', 'I'],
+    correctAnswer: 'A',
+    explanation: 'ᜀ represents the vowel sound "A" in Baybayin.',
+    difficulty: DifficultyLevel.BEGINNER,
+    points: 10
+  },
+  {
+    id: 'q2',
+    type: QuestionType.ROMANIZED_TO_BAYBAYIN,
+    question: 'Which Baybayin character represents "BA"?',
+    romanizedCharacter: 'BA',
+    options: ['ᜊ', 'ᜃ', 'ᜇ', 'ᜄ'],
+    correctAnswer: 'ᜊ',
+    explanation: 'ᜊ is the Baybayin character for "BA".',
+    difficulty: DifficultyLevel.BEGINNER,
+    points: 10
+  },
+  {
+    id: 'q3',
+    type: QuestionType.MULTIPLE_CHOICE,
+    question: 'How many basic vowel sounds are there in Baybayin?',
+    options: ['2', '3', '4', '5'],
+    correctAnswer: '3',
+    explanation: 'Baybayin has 3 basic vowel sounds: A, E/I, and O/U.',
+    difficulty: DifficultyLevel.BEGINNER,
+    points: 10
+  },
+  {
+    id: 'q4',
+    type: QuestionType.CHARACTER_RECOGNITION,
+    question: 'What sound does this character make?',
+    baybayinCharacter: 'ᜋ',
+    options: ['MA', 'NA', 'LA', 'SA'],
+    correctAnswer: 'MA',
+    explanation: 'ᜋ represents the "MA" sound in Baybayin.',
+    difficulty: DifficultyLevel.BEGINNER,
+    points: 10
+  },
+  {
+    id: 'q5',
+    type: QuestionType.TRUE_FALSE,
+    question: 'Baybayin is read from left to right.',
+    options: ['True', 'False'],
+    correctAnswer: 'True',
+    explanation: 'Modern Baybayin is typically written and read from left to right.',
+    difficulty: DifficultyLevel.BEGINNER,
+    points: 10
+  }
+];
+
+const intermediateQuestions: QuizQuestion[] = [
+  {
+    id: 'q6',
+    type: QuestionType.CHARACTER_RECOGNITION,
+    question: 'Which character represents "NGA"?',
+    baybayinCharacter: 'ᜅ',
+    options: ['NA', 'NGA', 'GA', 'HA'],
+    correctAnswer: 'NGA',
+    explanation: 'ᜅ represents the "NGA" sound, which is unique to Filipino languages.',
+    difficulty: DifficultyLevel.INTERMEDIATE,
+    points: 15
+  },
+  {
+    id: 'q7',
+    type: QuestionType.ROMANIZED_TO_BAYBAYIN,
+    question: 'How would you write "TALA" in Baybayin?',
+    romanizedCharacter: 'TALA',
+    options: ['ᜆᜎ', 'ᜆᜀᜎᜀ', 'ᜆᜎᜀ', 'ᜆᜁᜎᜁ'],
+    correctAnswer: 'ᜆᜎ',
+    explanation: 'In traditional Baybayin, consonants have an inherent "A" sound, so TALA is written as TA-LA (ᜆᜎ).',
+    difficulty: DifficultyLevel.INTERMEDIATE,
+    points: 20
+  },
+  {
+    id: 'q8',
+    type: QuestionType.MULTIPLE_CHOICE,
+    question: 'What is the traditional direction of writing Baybayin?',
+    options: ['Left to right', 'Right to left', 'Top to bottom', 'Bottom to top'],
+    correctAnswer: 'Bottom to top',
+    explanation: 'Traditional Baybayin was written from bottom to top, then left to right in columns.',
+    difficulty: DifficultyLevel.INTERMEDIATE,
+    points: 15
+  }
+];
+
+// Sample quizzes
+export const quizzes: Quiz[] = [
+  {
+    id: 'quiz_1',
+    title: 'Baybayin Basics Quiz',
+    description: 'Test your knowledge of basic Baybayin vowels and consonants',
+    questions: beginnerQuestions,
+    timeLimit: 300, // 5 minutes
+    passingScore: 70, // 70% to pass
+    category: QuizCategory.CHARACTER_RECOGNITION,
+    difficulty: DifficultyLevel.BEGINNER,
+    prerequisiteLessons: ['lesson_1', 'lesson_2']
+  },
+  {
+    id: 'quiz_2',
+    title: 'Intermediate Baybayin Quiz',
+    description: 'Advanced character recognition and writing concepts',
+    questions: intermediateQuestions,
+    timeLimit: 240, // 4 minutes
+    passingScore: 75,
+    category: QuizCategory.MIXED,
+    difficulty: DifficultyLevel.INTERMEDIATE,
+    prerequisiteLessons: ['lesson_1', 'lesson_2', 'lesson_3']
+  },
+  {
+    id: 'quiz_3',
+    title: 'Quick Character Recognition',
+    description: 'Fast-paced character identification quiz',
+    questions: beginnerQuestions.slice(0, 3),
+    timeLimit: 120, // 2 minutes
+    passingScore: 80,
+    category: QuizCategory.CHARACTER_RECOGNITION,
+    difficulty: DifficultyLevel.BEGINNER,
+    prerequisiteLessons: ['lesson_1']
+  }
+];
+
+export const getQuizById = (id: string): Quiz | undefined => {
+  return quizzes.find(quiz => quiz.id === id);
+};
+
+export const getQuizzesByDifficulty = (difficulty: DifficultyLevel): Quiz[] => {
+  return quizzes.filter(quiz => quiz.difficulty === difficulty);
+};
+
+export const getQuizzesByCategory = (category: QuizCategory): Quiz[] => {
+  return quizzes.filter(quiz => quiz.category === category);
+};

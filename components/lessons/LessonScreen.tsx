@@ -25,7 +25,8 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
   const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
   const [completedCharacters, setCompletedCharacters] = useState<Set<number>>(new Set());
   const [startTime, setStartTime] = useState<Date>(new Date());
-  const { completeLesson, updateStreak, isLessonCompleted } = useProgress();
+  const [isCompleting, setIsCompleting] = useState(false);
+  const { completeLesson, isLessonCompleted } = useProgress();
 
   const currentCharacter = lesson.characters[currentCharacterIndex];
   const isLastCharacter = currentCharacterIndex === lesson.characters.length - 1;
@@ -37,13 +38,29 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
   }, []);
 
   const handleComplete = async () => {
+    // Prevent multiple completions
+    if (isCompleting) {
+      console.log('Lesson completion already in progress, ignoring duplicate call');
+      return;
+    }
+
+    setIsCompleting(true);
+    
     try {
       const endTime = new Date();
       const timeSpent = Math.floor((endTime.getTime() - startTime.getTime()) / 1000); // in seconds
       const score = calculateScore(timeSpent);
       
+      console.log('About to complete lesson:', {
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        score,
+        timeSpent,
+        charactersCompleted: completedCharacters.size,
+        totalCharacters: lesson.characters.length
+      });
+      
       await completeLesson(lesson.id, score, timeSpent);
-      await updateStreak();
       
       Alert.alert(
         'Lesson Completed! 🎉',
@@ -51,13 +68,20 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
         [
           {
             text: 'Continue',
-            onPress: onComplete
+            onPress: () => {
+              // Small delay to ensure state updates propagate properly
+              setTimeout(() => {
+                onComplete();
+              }, 200);
+            }
           }
         ]
       );
     } catch (error) {
       console.error('Error completing lesson:', error);
       Alert.alert('Error', 'Failed to save progress. Please try again.');
+    } finally {
+      setIsCompleting(false);
     }
   };
 

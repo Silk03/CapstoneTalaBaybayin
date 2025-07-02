@@ -17,7 +17,7 @@ interface LessonListScreenProps {
 }
 
 export default function LessonListScreen({ onSelectLesson }: LessonListScreenProps) {
-  const { isLessonCompleted, getLessonProgress } = useProgress();
+  const { isLessonCompleted, getLessonProgress, userProgress } = useProgress();
 
   const getDifficultyColor = (difficulty: DifficultyLevel) => {
     switch (difficulty) {
@@ -48,6 +48,17 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
   const renderLessonItem = ({ item }: { item: Lesson }) => {
     const isCompleted = isLessonCompleted(item.id);
     const lessonProgress = getLessonProgress(item.id);
+    
+    // Debug for specific lessons that aren't working
+    if (item.id === 'lesson_2' || item.id === 'lesson_3' || item.id === 'lesson_4') {
+      console.log(`=== LESSON ${item.id} DEBUG ===`);
+      console.log('Lesson title:', item.title);
+      console.log('Is completed:', isCompleted);
+      console.log('Lesson progress:', lessonProgress);
+      console.log('User completed lessons:', userProgress?.completedLessons);
+      console.log('User lesson scores:', userProgress?.lessonScores);
+      console.log('=== END LESSON DEBUG ===');
+    }
     
     return (
       <TouchableOpacity
