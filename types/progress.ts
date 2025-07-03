@@ -1,5 +1,6 @@
 export interface UserProgress {
   userId: string;
+  displayName?: string;
   completedLessons: string[]; // lesson IDs
   lessonScores: { [lessonId: string]: number }; // scores out of 100
   completedQuizzes: string[]; // quiz IDs

@@ -66,6 +66,7 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
           // Create initial progress document
           const initialProgress: UserProgress = {
             userId: user.uid,
+            displayName: user.displayName || user.email?.split('@')[0] || 'Anonymous User',
             completedLessons: [],
             lessonScores: {},
             completedQuizzes: [],
@@ -96,15 +97,21 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     if (!user) return;
     
     try {
+      // Ensure display name is included
+      const progressToSave = {
+        ...progress,
+        displayName: progress.displayName || user.displayName || user.email?.split('@')[0] || 'Anonymous User'
+      };
+      
       // Update local state immediately for better UX
-      setUserProgress(progress);
+      setUserProgress(progressToSave);
       
       // Then update Firestore using setDoc to replace the entire document
-      await setDoc(doc(db, 'userProgress', user.uid), progress);
+      await setDoc(doc(db, 'userProgress', user.uid), progressToSave);
       
       console.log('Progress saved successfully to Firestore:', {
-        completedLessons: progress.completedLessons,
-        lessonScores: progress.lessonScores
+        completedLessons: progressToSave.completedLessons,
+        lessonScores: progressToSave.lessonScores
       });
     } catch (error) {
       console.error('Error saving progress:', error);
