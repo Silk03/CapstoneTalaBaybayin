@@ -20,12 +20,18 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
 
   const handleSignup = async () => {
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password || !confirmPassword || !username) {
       Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (username.length < 3) {
+      Alert.alert('Error', 'Username must be at least 3 characters');
       return;
     }
 
@@ -41,7 +47,7 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
 
     try {
       setLoading(true);
-      await signup(email, password);
+      await signup(email, password, username);
       Alert.alert('Success', 'Account created successfully!');
     } catch (error: any) {
       Alert.alert('Signup Error', error.message);
@@ -63,6 +69,15 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
 
         <View style={styles.formContainer}>
           <Text style={styles.title}>Create Account</Text>
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            placeholderTextColor="#666"
+          />
           
           <TextInput
             style={styles.input}

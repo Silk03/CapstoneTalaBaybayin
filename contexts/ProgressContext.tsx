@@ -55,6 +55,7 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
           // Convert Firestore timestamps back to Date objects
           const progressData: UserProgress = {
             ...data,
+            displayName: data.displayName || user.displayName || user.email?.split('@')[0] || 'Anonymous User',
             lastLearningDate: data.lastLearningDate?.toDate ? data.lastLearningDate.toDate() : new Date(data.lastLearningDate || Date.now()),
             achievements: (data.achievements || []).map((achievement: any) => ({
               ...achievement,

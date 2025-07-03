@@ -1,13 +1,17 @@
 import { StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
+import ProfileSettings from '@/components/auth/ProfileSettings';
 
 export default function TabOneScreen() {
   const { user, logout } = useAuth();
   const { userProgress } = useProgress();
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -20,11 +24,24 @@ export default function TabOneScreen() {
     );
   };
 
+  if (showProfileSettings) {
+    return (
+      <ProfileSettings onBack={() => setShowProfileSettings(false)} />
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Welcome to TalaBaybayin!</Text>
-        <Text style={styles.welcomeText}>Hello, {user?.email}</Text>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Welcome to TalaBaybayin!</Text>
+            <Text style={styles.welcomeText}>Hello, {user?.displayName || user?.email}</Text>
+          </View>
+          <TouchableOpacity onPress={() => setShowProfileSettings(true)} style={styles.profileButton}>
+            <Ionicons name="person-circle" size={32} color="#2196F3" />
+          </TouchableOpacity>
+        </View>
         <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
         
         {/* Debug Progress Info */}
@@ -102,6 +119,16 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 5,
     fontFamily: 'monospace',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
+  },
+  profileButton: {
+    padding: 5,
   },
   logoutButton: {
     backgroundColor: '#8B4513',
