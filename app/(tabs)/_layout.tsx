@@ -68,13 +68,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="question-circle" color={color} />,
         }}
       />
-      <Tabs.Screen
-        name="handwriting"
-        options={{
-          title: 'Practice',
-          tabBarIcon: ({ color }) => <TabBarIcon name="edit" color={color} />,
-        }}
-      />
     </Tabs>
   );
 }
