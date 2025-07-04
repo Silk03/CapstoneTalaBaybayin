@@ -23,11 +23,28 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   const [answers, setAnswers] = useState<{ [questionId: string]: string }>({});
   const [timeLeft, setTimeLeft] = useState(quiz.timeLimit || 0);
   const [startTime] = useState(new Date());
-  const { addExperience } = useProgress();
+  const [questionStartTime, setQuestionStartTime] = useState(new Date());
+  const [questionTimes, setQuestionTimes] = useState<{ [questionId: string]: number }>({});
+  const [showPointsGained, setShowPointsGained] = useState<{ points: number; timeBonus: number; isCorrect: boolean } | null>(null);
+  const [totalPointsEarned, setTotalPointsEarned] = useState(0);
+  const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
+  const { addExperience, isQuizCompleted } = useProgress();
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
   const selectedAnswer = answers[currentQuestion.id];
+  const isRetake = isQuizCompleted(quiz.id);
+
+  // Show retake warning on mount
+  useEffect(() => {
+    if (isRetake) {
+      Alert.alert(
+        'Retake Quiz',
+        'You have already completed this quiz. You can retake it for practice, but no points will be awarded.',
+        [{ text: 'Continue', style: 'default' }]
+      );
+    }
+  }, [isRetake]);
 
   // Timer effect
   useEffect(() => {
@@ -46,6 +63,28 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
     return () => clearInterval(timer);
   }, [quiz.timeLimit]);
 
+  // Reset question timer when question changes
+  useEffect(() => {
+    setQuestionStartTime(new Date());
+  }, [currentQuestionIndex]);
+
+  const calculateQuestionScore = (answerTime: number, basePoints: number): { points: number; timeBonus: number } => {
+    // Time bonus calculation (max 10 seconds for full bonus)
+    const maxTimeForBonus = 10; // seconds
+    const timeBonus = Math.max(0, Math.floor((maxTimeForBonus - answerTime) * (basePoints * 0.5 / maxTimeForBonus)));
+    const totalPoints = basePoints + timeBonus;
+    
+    return {
+      points: Math.max(basePoints, totalPoints),
+      timeBonus: timeBonus
+    };
+  };
+
+  const showPointsAnimation = (points: number, timeBonus: number, isCorrect: boolean) => {
+    setShowPointsGained({ points, timeBonus, isCorrect });
+    setTimeout(() => setShowPointsGained(null), 2000);
+  };
+
   const handleTimeUp = () => {
     Alert.alert(
       'Time\'s Up!',
@@ -55,10 +94,41 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   };
 
   const handleAnswerSelect = (answer: string) => {
+    // Prevent re-answering the same question
+    if (answeredQuestions.has(currentQuestion.id)) {
+      return;
+    }
+
+    // Calculate time taken for this question
+    const answerTime = (new Date().getTime() - questionStartTime.getTime()) / 1000;
+    
+    // Store the answer
     setAnswers(prev => ({
       ...prev,
       [currentQuestion.id]: answer
     }));
+
+    // Store the time taken
+    setQuestionTimes(prev => ({
+      ...prev,
+      [currentQuestion.id]: answerTime
+    }));
+
+    // Mark question as answered
+    setAnsweredQuestions(prev => new Set(prev).add(currentQuestion.id));
+
+    // Check if answer is correct
+    const isCorrect = answer === currentQuestion.correctAnswer;
+    
+    if (isCorrect) {
+      // Correct answer: add points with time bonus
+      const scoreData = calculateQuestionScore(answerTime, currentQuestion.points);
+      setTotalPointsEarned(prev => prev + scoreData.points);
+      showPointsAnimation(scoreData.points, scoreData.timeBonus, true);
+    } else {
+      // Wrong answer: just show visual feedback, no point deduction
+      showPointsAnimation(0, 0, false);
+    }
   };
 
   const handleNext = () => {
@@ -83,38 +153,51 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   const handleSubmitQuiz = async () => {
     const endTime = new Date();
     const timeSpent = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+    
+    // Check if this is a retake (no points for retakes)
+    const isRetake = isQuizCompleted(quiz.id);
 
-    // Calculate score
+    // Calculate detailed score with time bonuses
     let correctAnswers = 0;
-    let totalPoints = 0;
+    let totalPossiblePoints = 0;
+    let actualPointsEarned = 0;
+    let totalTimeBonus = 0;
 
     quiz.questions.forEach(question => {
-      totalPoints += question.points;
+      totalPossiblePoints += question.points;
+      
       if (answers[question.id] === question.correctAnswer) {
         correctAnswers++;
+        const answerTime = questionTimes[question.id] || 10; // Default to 10s if no time recorded
+        const scoreData = calculateQuestionScore(answerTime, question.points);
+        actualPointsEarned += scoreData.points;
+        totalTimeBonus += scoreData.timeBonus;
       }
     });
 
-    const score = (correctAnswers / quiz.questions.length) * 100;
-    const pointsEarned = Math.floor((correctAnswers / quiz.questions.length) * totalPoints);
-    const passed = score >= quiz.passingScore;
+    const accuracy = (correctAnswers / quiz.questions.length) * 100;
+    const passed = accuracy >= quiz.passingScore;
 
-    // Add experience points if passed
-    if (passed) {
-      await addExperience(pointsEarned);
+    // Add experience points only if passed and not a retake
+    if (passed && !isRetake) {
+      await addExperience(actualPointsEarned);
     }
 
     Alert.alert(
       passed ? 'Quiz Passed! 🎉' : 'Quiz Complete',
-      `Score: ${Math.round(score)}%\nPoints Earned: ${pointsEarned}/${totalPoints}\n${passed ? 'Congratulations!' : 'Keep practicing!'}`,
+      `Accuracy: ${Math.round(accuracy)}%\n` +
+      `Points Earned: ${actualPointsEarned}/${totalPossiblePoints}\n` +
+      `Time Bonus: +${totalTimeBonus} points\n` +
+      `${isRetake ? '⚠️ No points awarded for retakes' : ''}` +
+      `${passed ? 'Congratulations on your fast answers!' : 'Keep practicing!'}`,
       [
         {
           text: 'Review Answers',
-          onPress: () => showResults(score, pointsEarned, timeSpent)
+          onPress: () => showResults(accuracy, actualPointsEarned, timeSpent)
         },
         {
           text: 'Continue',
-          onPress: () => onComplete(score, pointsEarned, timeSpent)
+          onPress: () => onComplete(accuracy, actualPointsEarned, timeSpent)
         }
       ]
     );
@@ -172,25 +255,45 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   const renderOptions = () => {
     if (!currentQuestion.options) return null;
 
+    const isQuestionAnswered = answeredQuestions.has(currentQuestion.id);
+
     return (
       <View style={styles.optionsContainer}>
-        {currentQuestion.options.map((option, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.optionButton,
-              selectedAnswer === option && styles.selectedOption
-            ]}
-            onPress={() => handleAnswerSelect(option)}
-          >
-            <Text style={[
-              styles.optionText,
-              selectedAnswer === option && styles.selectedOptionText
-            ]}>
-              {option}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {currentQuestion.options.map((option, index) => {
+          const isSelected = selectedAnswer === option;
+          const isCorrect = option === currentQuestion.correctAnswer;
+          const isWrong = isQuestionAnswered && isSelected && !isCorrect;
+          const shouldShowCorrect = isQuestionAnswered && isCorrect;
+
+          return (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.optionButton,
+                isSelected && styles.selectedOption,
+                isWrong && styles.wrongOption,
+                shouldShowCorrect && styles.correctOption,
+              ]}
+              onPress={() => handleAnswerSelect(option)}
+              disabled={isQuestionAnswered}
+            >
+              <Text style={[
+                styles.optionText,
+                isSelected && styles.selectedOptionText,
+                isWrong && styles.wrongOptionText,
+                shouldShowCorrect && styles.correctOptionText,
+              ]}>
+                {option}
+              </Text>
+              {shouldShowCorrect && (
+                <Ionicons name="checkmark-circle" size={20} color="#4CAF50" style={styles.optionIcon} />
+              )}
+              {isWrong && (
+                <Ionicons name="close-circle" size={20} color="#F44336" style={styles.optionIcon} />
+              )}
+            </TouchableOpacity>
+          );
+        })}
       </View>
     );
   };
@@ -203,17 +306,24 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>{quiz.title}</Text>
+          <Text style={styles.headerTitle}>
+            {quiz.title} {isRetake && '(Retake)'}
+          </Text>
           <Text style={styles.headerProgress}>
             Question {currentQuestionIndex + 1} of {quiz.questions.length}
           </Text>
         </View>
-        {quiz.timeLimit && (
-          <View style={styles.timerContainer}>
-            <Ionicons name="time-outline" size={20} color="white" />
-            <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-          </View>
-        )}
+        <View style={styles.scoreContainer}>
+          <Text style={styles.scoreText}>
+            {totalPointsEarned} pts
+          </Text>
+          {quiz.timeLimit && (
+            <View style={styles.timerContainer}>
+              <Ionicons name="time-outline" size={16} color="white" />
+              <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+            </View>
+          )}
+        </View>
       </View>
 
       {/* Progress Bar */}
@@ -231,6 +341,33 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
       {/* Question Content */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {renderQuestion()}
+        
+        {/* Points Animation Overlay */}
+        {showPointsGained && (
+          <View style={styles.pointsOverlay}>
+            <View style={[
+              styles.pointsAnimation,
+              showPointsGained.isCorrect ? styles.correctPointsAnimation : styles.wrongPointsAnimation
+            ]}>
+              {showPointsGained.isCorrect ? (
+                <>
+                  <Text style={styles.pointsGainedText}>
+                    +{showPointsGained.points} points!
+                  </Text>
+                  {showPointsGained.timeBonus > 0 && (
+                    <Text style={styles.timeBonusText}>
+                      ⚡ Speed bonus: +{showPointsGained.timeBonus}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <Text style={styles.wrongAnswerText}>
+                  ❌ Wrong answer
+                </Text>
+              )}
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* Navigation */}
@@ -370,6 +507,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: 'transparent',
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   selectedOption: {
     backgroundColor: '#e8f5e8',
@@ -423,5 +564,91 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'white',
     marginRight: 4,
+  },
+  scoreContainer: {
+    alignItems: 'flex-end',
+  },
+  scoreText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  pointsOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    zIndex: 1000,
+  },
+  pointsAnimation: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    transform: [{ scale: 1.1 }],
+  },
+  pointsGainedText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  timeBonusText: {
+    color: '#FFD700',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  // New styles for correct/wrong answers
+  correctOption: {
+    backgroundColor: '#e8f5e8',
+    borderColor: '#4CAF50',
+    borderWidth: 2,
+  },
+  wrongOption: {
+    backgroundColor: '#ffebee',
+    borderColor: '#F44336',
+    borderWidth: 2,
+  },
+  correctOptionText: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+  },
+  wrongOptionText: {
+    color: '#F44336',
+    fontWeight: 'bold',
+  },
+  optionIcon: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -10 }],
+  },
+  correctPointsAnimation: {
+    backgroundColor: '#4CAF50',
+  },
+  wrongPointsAnimation: {
+    backgroundColor: '#F44336',
+  },
+  wrongAnswerText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 4,
   },
 });
