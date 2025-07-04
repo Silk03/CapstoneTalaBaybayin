@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#8B4513',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 15,
     paddingVertical: 12,
   },
   backButton: {
@@ -437,13 +437,13 @@ const styles = StyleSheet.create({
   },
   timerText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     marginLeft: 4,
   },
   progressContainer: {
     backgroundColor: 'white',
-    paddingHorizontal: 16,
+    paddingHorizontal: 15,
     paddingVertical: 8,
   },
   progressBar: {
@@ -458,11 +458,11 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: 15,
   },
   questionContainer: {
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 15,
     padding: 24,
     shadowColor: '#000',
     shadowOffset: {
@@ -503,7 +503,7 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     backgroundColor: '#f0f0f0',
-    padding: 16,
+    padding: 15,
     borderRadius: 12,
     borderWidth: 2,
     borderColor: 'transparent',
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
     borderColor: '#4CAF50',
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#333',
     textAlign: 'center',
     fontWeight: '500',
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
   },
   navigation: {
     flexDirection: 'row',
-    padding: 16,
+    padding: 15,
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 15,
     borderRadius: 8,
     marginHorizontal: 4,
   },
@@ -554,14 +554,14 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   navButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '500',
     color: '#8B4513',
     marginLeft: 4,
   },
   nextButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '500',
     color: 'white',
     marginRight: 4,
   },
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     marginBottom: 4,
   },
@@ -588,8 +588,8 @@ const styles = StyleSheet.create({
   pointsAnimation: {
     backgroundColor: '#4CAF50',
     paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderRadius: 16,
+    paddingVertical: 15,
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
   },
   timeBonusText: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     textAlign: 'center',
   },
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
   },
   wrongAnswerText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     textAlign: 'center',
     marginTop: 4,

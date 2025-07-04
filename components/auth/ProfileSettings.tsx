@@ -87,7 +87,7 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
             onChangeText={setUsername}
             placeholder="Enter your username"
             autoCapitalize="none"
-            placeholderTextColor="#666"
+            placeholderTextColor="#777"
           />
           <Text style={styles.hint}>This will be displayed on the leaderboard</Text>
         </View>
@@ -150,12 +150,12 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
-    fontSize: 16,
+    fontSize: 15,
     backgroundColor: '#fff',
   },
   emailText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: '#777',
     padding: 12,
     backgroundColor: '#f9f9f9',
     borderRadius: 8,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   hint: {
     fontSize: 12,
-    color: '#666',
+    color: '#777',
     marginTop: 5,
   },
   updateButton: {
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
   updateButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '500',
   },
 });

@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
   },
   practiceInstruction: {
     fontSize: 14,
-    color: '#666',
+    color: '#777',
     textAlign: 'center',
   },
   navigation: {

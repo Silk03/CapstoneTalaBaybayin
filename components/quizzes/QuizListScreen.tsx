@@ -104,13 +104,13 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
         
         <View style={styles.quizDetails}>
           <View style={styles.detailItem}>
-            <Ionicons name="help-circle-outline" size={16} color="#666" />
+            <Ionicons name="help-circle-outline" size={15} color="#777" />
             <Text style={styles.detailText}>{item.questions.length} questions</Text>
           </View>
           
           {item.timeLimit && (
             <View style={styles.detailItem}>
-              <Ionicons name="time-outline" size={16} color="#666" />
+              <Ionicons name="time-outline" size={15} color="#777" />
               <Text style={styles.detailText}>
                 {Math.floor(item.timeLimit / 60)}:{(item.timeLimit % 60).toString().padStart(2, '0')} min
               </Text>
@@ -118,7 +118,7 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
           )}
           
           <View style={styles.detailItem}>
-            <Ionicons name="checkmark-circle-outline" size={16} color="#666" />
+            <Ionicons name="checkmark-circle-outline" size={15} color="#777" />
             <Text style={styles.detailText}>{item.passingScore}% to pass</Text>
           </View>
         </View>
@@ -168,16 +168,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#f0d0b4',
   },
   listContainer: {
-    padding: 16,
+    padding: 15,
   },
   quizCard: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 16,
+    padding: 15,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   quizDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#777',
     lineHeight: 20,
   },
   lockedText: {
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 12,
-    color: '#666',
+    color: '#777',
     marginLeft: 4,
     fontWeight: '500',
   },

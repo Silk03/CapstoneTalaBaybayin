@@ -121,7 +121,7 @@ export default function LeaderboardScreen() {
       case 3:
         return '#CD7F32';
       default:
-        return '#666';
+        return '#777';
     }
   };
 
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#777',
     textAlign: 'center',
     marginTop: 5,
   },
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 12,
-    color: '#666',
+    color: '#777',
   },
   activeFilterText: {
     color: '#fff',
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   statText: {
     fontSize: 12,
-    color: '#666',
+    color: '#777',
   },
   scoreContainer: {
     alignItems: 'flex-end',
@@ -399,13 +399,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#666',
+    fontWeight: '500',
+    color: '#777',
     marginTop: 10,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
+    color: '#777',
     textAlign: 'center',
     marginTop: 5,
   },

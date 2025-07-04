@@ -146,8 +146,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: '#777',
   },
   header: {
     padding: 20,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 12,
-    color: '#666',
+    color: '#777',
     marginTop: 5,
     textAlign: 'center',
   },
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
+    color: '#777',
     textAlign: 'center',
     marginTop: 5,
   },
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   noAchievementsText: {
-    color: '#666',
+    color: '#777',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -280,13 +280,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   achievementTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: '#333',
   },
   achievementDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#777',
     marginTop: 2,
   },
   lessonProgressSection: {
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   noProgressText: {
-    color: '#666',
+    color: '#777',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   lessonId: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#333',
     fontWeight: '500',
   },
@@ -336,12 +336,12 @@ const styles = StyleSheet.create({
   },
   scoreLabel: {
     fontSize: 12,
-    color: '#666',
+    color: '#777',
     marginLeft: 3,
   },
   errorText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: '#777',
     textAlign: 'center',
   },
 });

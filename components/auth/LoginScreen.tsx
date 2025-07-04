@@ -60,7 +60,7 @@ export default function LoginScreen({ onSwitchToSignup }: LoginScreenProps) {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            placeholderTextColor="#666"
+            placeholderTextColor="#777"
           />
 
           <TextInput
@@ -69,7 +69,7 @@ export default function LoginScreen({ onSwitchToSignup }: LoginScreenProps) {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholderTextColor="#666"
+            placeholderTextColor="#777"
           />
 
           <TouchableOpacity 
@@ -115,8 +115,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: '#777',
     textAlign: 'center',
   },
   formContainer: {
@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   signupText: {
-    color: '#666',
-    fontSize: 16,
+    color: '#777',
+    fontSize: 15,
   },
   signupLink: {
     color: '#8B4513',

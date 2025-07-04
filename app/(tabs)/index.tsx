@@ -90,8 +90,8 @@ const styles = StyleSheet.create({
     color: '#8B4513',
   },
   welcomeText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: '#777',
     marginTop: 10,
   },
   separator: {
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   },
   debugText: {
     fontSize: 12,
-    color: '#666',
+    color: '#777',
     marginBottom: 5,
     fontFamily: 'monospace',
   },

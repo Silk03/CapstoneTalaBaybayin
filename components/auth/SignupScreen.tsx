@@ -86,7 +86,7 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            placeholderTextColor="#666"
+            placeholderTextColor="#700"
           />
 
           <TextInput
@@ -95,7 +95,7 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholderTextColor="#666"
+            placeholderTextColor="#777"
           />
 
           <TextInput
@@ -104,7 +104,7 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
-            placeholderTextColor="#666"
+            placeholderTextColor="#777"
           />
 
           <TouchableOpacity 
@@ -150,8 +150,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: '#777',
     textAlign: 'center',
   },
   formContainer: {
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
-    fontSize: 16,
+    fontSize: 15,
     backgroundColor: '#f9f9f9',
   },
   button: {
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   loginContainer: {
@@ -204,12 +204,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   loginText: {
-    color: '#666',
-    fontSize: 16,
+    color: '#777',
+    fontSize: 15,
   },
   loginLink: {
     color: '#8B4513',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
   },
 });

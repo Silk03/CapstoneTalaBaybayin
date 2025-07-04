@@ -138,16 +138,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#f0d0b4',
   },
   listContainer: {
-    padding: 16,
+    padding: 15,
   },
   lessonCard: {
     backgroundColor: 'white',
     borderRadius: 12,
-    padding: 16,
+    padding: 15,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: {
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   lessonDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#777',
     lineHeight: 20,
   },
   scoreText: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   },
   characterCount: {
     fontSize: 14,
-    color: '#666',
+    color: '#777',
     fontWeight: '500',
   },
 });
