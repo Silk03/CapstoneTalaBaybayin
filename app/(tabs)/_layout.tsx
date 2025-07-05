@@ -75,6 +75,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="trophy" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="translation"
+        options={{
+          title: 'Translate',
+          tabBarIcon: ({ color }) => <TabBarIcon name="language" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

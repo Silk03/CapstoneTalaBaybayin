@@ -34,7 +34,8 @@
     "react-native-screens": "~4.4.0",
     "react-native-svg": "15.8.0",
     "react-native-web": "~0.19.13",
-    "@shopify/react-native-skia": "1.5.0"
+    "@shopify/react-native-skia": "1.5.0",
+    "expo-speech": "~13.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

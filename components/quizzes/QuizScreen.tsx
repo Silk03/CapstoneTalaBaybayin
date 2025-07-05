@@ -313,16 +313,18 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
             Question {currentQuestionIndex + 1} of {quiz.questions.length}
           </Text>
         </View>
-        <View style={styles.scoreContainer}>
-          <Text style={styles.scoreText}>
-            {totalPointsEarned} pts
-          </Text>
-          {quiz.timeLimit && (
-            <View style={styles.timerContainer}>
-              <Ionicons name="time-outline" size={16} color="white" />
-              <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-            </View>
-          )}
+        <View style={styles.headerActions}>
+          <View style={styles.scoreContainer}>
+            <Text style={styles.scoreText}>
+              {totalPointsEarned} pts
+            </Text>
+            {quiz.timeLimit && (
+              <View style={styles.timerContainer}>
+                <Ionicons name="time-outline" size={16} color="white" />
+                <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+              </View>
+            )}
+          </View>
         </View>
       </View>
 
@@ -419,6 +421,11 @@ const styles = StyleSheet.create({
   backButton: {
     marginRight: 12,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   headerInfo: {
     flex: 1,
   },
@@ -478,7 +485,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     textAlign: 'center',
-    marginBottom: 24,
+    flex: 1,
     lineHeight: 26,
   },
   characterDisplay: {
