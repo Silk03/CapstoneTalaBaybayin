@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: 7,
     paddingBottom: 8,
     backgroundColor: '#d4d4d4',
     borderBottomWidth: 1,
