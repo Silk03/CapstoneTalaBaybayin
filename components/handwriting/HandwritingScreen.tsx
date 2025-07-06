@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  Alert,
   SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,38 +19,27 @@ export default function HandwritingScreen() {
   const [selectedCharacter, setSelectedCharacter] = useState<HandwritingCharacter>(handwritingCharacters[0]);
   const [userStrokes, setUserStrokes] = useState<HandwritingStroke[]>([]);
   const [showGuide, setShowGuide] = useState(true);
-  const [currentStrokeIndex, setCurrentStrokeIndex] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [showCharacterMenu, setShowCharacterMenu] = useState(false);
 
   const handleStrokeComplete = (stroke: HandwritingStroke) => {
     const newStrokes = [...userStrokes, stroke];
     setUserStrokes(newStrokes);
-    setCurrentStrokeIndex(newStrokes.length);
-
-    // Check if character is completed (based on expected number of strokes)
-    if (newStrokes.length >= (selectedCharacter.guideStrokes?.length || 1)) {
-      setIsCompleted(true);
-      Alert.alert(
-        'Character Completed!',
-        `Great job practicing "${selectedCharacter.character}" (${selectedCharacter.romanized})`,
-        [
-          { text: 'Practice Again', onPress: handleClearCanvas },
-          { text: 'Next Character', onPress: handleNextCharacter }
-        ]
-      );
-    }
   };
 
   const handleClearCanvas = () => {
     setUserStrokes([]);
-    setCurrentStrokeIndex(0);
-    setIsCompleted(false);
   };
 
   const handleNextCharacter = () => {
     const currentIndex = handwritingCharacters.findIndex(char => char.id === selectedCharacter.id);
     const nextIndex = (currentIndex + 1) % handwritingCharacters.length;
     setSelectedCharacter(handwritingCharacters[nextIndex]);
+    handleClearCanvas();
+  };
+
+  const handleSelectCharacter = (character: HandwritingCharacter) => {
+    setSelectedCharacter(character);
+    setShowCharacterMenu(false);
     handleClearCanvas();
   };
 
@@ -77,9 +65,19 @@ export default function HandwritingScreen() {
 
             <View style={styles.headerCenter}>
               <Text style={styles.title}>Handwriting Practice</Text>
-              <Text style={styles.counterText}>
-                {handwritingCharacters.findIndex(char => char.id === selectedCharacter.id) + 1} / {handwritingCharacters.length}
-              </Text>
+              <TouchableOpacity 
+                style={styles.menuButton}
+                onPress={() => setShowCharacterMenu(!showCharacterMenu)}
+              >
+                <Text style={styles.menuButtonText}>
+                  Choose Character
+                </Text>
+                <Ionicons 
+                  name={showCharacterMenu ? "chevron-up" : "chevron-down"} 
+                  size={16} 
+                  color="#2196F3" 
+                />
+              </TouchableOpacity>
             </View>
 
             <TouchableOpacity 
@@ -90,6 +88,38 @@ export default function HandwritingScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Character Selection Menu */}
+          {showCharacterMenu && (
+            <View style={styles.characterMenu}>
+              <Text style={styles.menuTitle}>Select a Character to Practice:</Text>
+              <View style={styles.characterGrid}>
+                {handwritingCharacters.map((character) => (
+                  <TouchableOpacity
+                    key={character.id}
+                    style={[
+                      styles.characterOption,
+                      selectedCharacter.id === character.id && styles.selectedCharacter
+                    ]}
+                    onPress={() => handleSelectCharacter(character)}
+                  >
+                    <Text style={[
+                      styles.characterText,
+                      selectedCharacter.id === character.id && styles.selectedCharacterText
+                    ]}>
+                      {character.character}
+                    </Text>
+                    <Text style={[
+                      styles.characterLabel,
+                      selectedCharacter.id === character.id && styles.selectedLabel
+                    ]}>
+                      {character.romanized}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
           {/* Character Info */}
           <View style={styles.characterInfo}>
             <View style={styles.characterRow}>
@@ -97,10 +127,7 @@ export default function HandwritingScreen() {
               <View style={styles.characterDetails}>
                 <Text style={styles.romanized}>"{selectedCharacter.romanized}"</Text>
                 <Text style={styles.instruction}>
-                  {isCompleted 
-                    ? 'Completed!'
-                    : `${userStrokes.length}/${selectedCharacter.guideStrokes?.length || 1} strokes`
-                  }
+                  Practice freely
                 </Text>
               </View>
             </View>
@@ -119,7 +146,7 @@ export default function HandwritingScreen() {
               onStrokeComplete={handleStrokeComplete}
               showGuide={showGuide}
               guideStrokes={selectedCharacter.guideStrokes}
-              disabled={isCompleted}
+              disabled={false}
               completedStrokes={userStrokes}
               backgroundImage={selectedCharacter.imageUri}
             />
@@ -268,6 +295,83 @@ const styles = StyleSheet.create({
   },
   activeButton: {
     backgroundColor: '#2196F3'
+  },
+  menuButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    marginTop: 5
+  },
+  menuButtonText: {
+    fontSize: 12,
+    color: '#2196F3',
+    fontWeight: '500',
+    marginRight: 5
+  },
+  characterMenu: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3
+  },
+  menuTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#8B4513',
+    marginBottom: 15,
+    textAlign: 'center'
+  },
+  characterGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 8
+  },
+  characterOption: {
+    width: '30%',
+    aspectRatio: 1,
+    backgroundColor: '#F8F8F8',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    borderWidth: 2,
+    borderColor: 'transparent'
+  },
+  selectedCharacter: {
+    backgroundColor: '#E3F2FD',
+    borderColor: '#2196F3'
+  },
+  characterText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#8B4513',
+    marginBottom: 4
+  },
+  selectedCharacterText: {
+    color: '#2196F3'
+  },
+  characterLabel: {
+    fontSize: 10,
+    color: '#777',
+    fontWeight: '500'
+  },
+  selectedLabel: {
+    color: '#2196F3',
+    fontWeight: 'bold'
   },
   controlText: {
     fontSize: 12,
