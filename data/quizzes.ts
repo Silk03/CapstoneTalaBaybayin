@@ -92,6 +92,83 @@ const intermediateQuestions: QuizQuestion[] = [
   }
 ];
 
+const advancedQuestions: QuizQuestion[] = [
+  {
+    id: 'q9',
+    type: QuestionType.ROMANIZED_TO_BAYBAYIN,
+    question: 'How would you write "BAYBAYIN" in traditional Baybayin script?',
+    romanizedCharacter: 'BAYBAYIN',
+    options: ['ᜊᜌ᜔ᜊᜌᜒᜈ᜔', 'ᜊᜌᜊᜌᜒᜈ', 'ᜊᜌ᜔ᜊᜌᜈ᜔', 'ᜊᜌᜊᜌᜈ'],
+    correctAnswer: 'ᜊᜌ᜔ᜊᜌᜒᜈ᜔',
+    explanation: 'BAYBAYIN uses the virama (᜔) to cancel the inherent "A" sound and kudlit (ᜒ) for "I" sound.',
+    difficulty: DifficultyLevel.ADVANCED,
+    points: 25
+  },
+  {
+    id: 'q10',
+    type: QuestionType.CHARACTER_RECOGNITION,
+    question: 'What does this character with a kudlit represent?',
+    baybayinCharacter: 'ᜃᜓ',
+    options: ['KA', 'KI', 'KU', 'KO'],
+    correctAnswer: 'KU',
+    explanation: 'The kudlit above (ᜓ) changes the inherent "A" sound to "U/O", making this "KU".',
+    difficulty: DifficultyLevel.ADVANCED,
+    points: 20
+  },
+  {
+    id: 'q11',
+    type: QuestionType.MULTIPLE_CHOICE,
+    question: 'Which Spanish colonial period policy significantly impacted the use of Baybayin?',
+    options: ['Doctrina Christiana', 'Polo y servicios', 'Reduccion policy', 'All of the above'],
+    correctAnswer: 'All of the above',
+    explanation: 'Multiple Spanish policies affected Baybayin: Doctrina Christiana introduced Latin script, Polo y servicios disrupted education, and Reduccion centralized communities away from traditional practices.',
+    difficulty: DifficultyLevel.ADVANCED,
+    points: 30
+  },
+  {
+    id: 'q12',
+    type: QuestionType.TRUE_FALSE,
+    question: 'The virama (᜔) symbol in Baybayin was introduced during the Spanish period.',
+    options: ['True', 'False'],
+    correctAnswer: 'True',
+    explanation: 'The virama (᜔) was adopted from the Indian scripts during Spanish colonization to help transcribe Spanish words that ended in consonants.',
+    difficulty: DifficultyLevel.ADVANCED,
+    points: 20
+  },
+  {
+    id: 'q13',
+    type: QuestionType.ROMANIZED_TO_BAYBAYIN,
+    question: 'How would you write "PILIPINAS" using traditional Baybayin?',
+    romanizedCharacter: 'PILIPINAS',
+    options: ['ᜉᜒᜎᜒᜉᜒᜈᜐ᜔', 'ᜉᜒᜎᜒᜉᜒᜈᜐ', 'ᜉᜎᜉᜈᜐ', 'ᜉᜒᜎᜉᜒᜈᜐ'],
+    correctAnswer: 'ᜉᜒᜎᜒᜉᜒᜈᜐ᜔',
+    explanation: 'PILIPINAS requires kudlit (ᜒ) for "I" sounds and virama (᜔) to end with the "S" consonant.',
+    difficulty: DifficultyLevel.ADVANCED,
+    points: 25
+  },
+  {
+    id: 'q14',
+    type: QuestionType.MULTIPLE_CHOICE,
+    question: 'In pre-colonial Philippines, Baybayin was primarily written on what material?',
+    options: ['Bamboo', 'Tree bark', 'Palm leaves', 'All of the above'],
+    correctAnswer: 'All of the above',
+    explanation: 'Pre-colonial Filipinos wrote Baybayin on various organic materials including bamboo, tree bark, and palm leaves using pointed tools.',
+    difficulty: DifficultyLevel.ADVANCED,
+    points: 20
+  },
+  {
+    id: 'q15',
+    type: QuestionType.CHARACTER_RECOGNITION,
+    question: 'What sound does this character combination make?',
+    baybayinCharacter: 'ᜈ᜔ᜌ',
+    options: ['NA-YA', 'NYA', 'N-YA', 'NAYA'],
+    correctAnswer: 'NYA',
+    explanation: 'When consonants are combined with virama (᜔), they can form consonant clusters like "NYA".',
+    difficulty: DifficultyLevel.ADVANCED,
+    points: 25
+  }
+];
+
 // Sample quizzes
 export const quizzes: Quiz[] = [
   {
@@ -126,6 +203,17 @@ export const quizzes: Quiz[] = [
     category: QuizCategory.CHARACTER_RECOGNITION,
     difficulty: DifficultyLevel.BEGINNER,
     prerequisiteLessons: ['lesson_1']
+  },
+  {
+    id: 'quiz_4',
+    title: 'Advanced Baybayin Mastery',
+    description: 'Master-level quiz covering complex writing, historical context, and advanced character combinations',
+    questions: advancedQuestions,
+    timeLimit: 480, // 8 minutes
+    passingScore: 85, // 85% to pass
+    category: QuizCategory.COMPREHENSIVE,
+    difficulty: DifficultyLevel.ADVANCED,
+    prerequisiteLessons: ['lesson_1', 'lesson_2', 'lesson_3', 'lesson_4']
   }
 ];
 

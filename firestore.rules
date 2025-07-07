@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow users to read/write their own progress data
+    match /userProgress/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to read ALL user progress for leaderboard
+    match /userProgress/{userId} {
+      allow read: if request.auth != null;
+    }
+    
+    // Allow users to read/write their own handwriting progress
+    match /handwritingProgress/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow users to read/write individual character progress
+    match /handwritingProgress/{userId}/characters/{characterId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow users to read/write their own quiz attempts
+    match /quizAttempts/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow users to read quiz attempt subcollections
+    match /quizAttempts/{userId}/attempts/{attemptId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to read quiz data
+    match /quizzes/{document=**} {
+      allow read: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read lesson data
+    match /lessons/{document=**} {
+      allow read: if request.auth != null;
+    }
+    
+    // Allow users to read/write their own user profile data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

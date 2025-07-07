@@ -12,6 +12,7 @@ interface DrawingCanvasProps {
   disabled?: boolean;
   completedStrokes?: HandwritingStroke[];
   backgroundImage?: any;
+  strokeWidth?: number;
 }
 
 export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
@@ -22,7 +23,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   guideStrokes = [],
   disabled = false,
   completedStrokes = [],
-  backgroundImage
+  backgroundImage,
+  strokeWidth = 5
 }) => {
   const [currentStroke, setCurrentStroke] = useState<{ x: number; y: number }[]>([]);
   const [paths, setPaths] = useState<{ path: string; color: string }[]>([]);
@@ -102,8 +104,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           key={`completed-${stroke.id}`}
           path={strokePath}
           style="stroke"
-          strokeWidth={4}
-          color="#4CAF50"
+          strokeWidth={strokeWidth}
+          color="#000000"
           strokeCap="round"
           strokeJoin="round"
         />
@@ -124,8 +126,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       <Path
         path={currentPath}
         style="stroke"
-        strokeWidth={4}
-        color="#2196F3"
+        strokeWidth={strokeWidth}
+        color="#000000"
         strokeCap="round"
         strokeJoin="round"
       />
