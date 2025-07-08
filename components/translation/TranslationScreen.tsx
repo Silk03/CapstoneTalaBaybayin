@@ -13,6 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Speech from 'expo-speech';
 import {
   tagalogToBaybayin,
   baybayinToTagalog,
@@ -33,6 +34,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<{ type: 'warning' | 'info' | 'error'; message: string }>>([]);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   // Translate when input changes
   useEffect(() => {
@@ -104,6 +106,61 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
       });
     } catch (error) {
       Alert.alert('Error', 'Could not share translation');
+    }
+  };
+
+  // TTS functionality
+  const speakText = async (text: string, isTagalog: boolean = true) => {
+    if (!text.trim()) {
+      Alert.alert('No Text', 'Please enter some text to speak');
+      return;
+    }
+
+    try {
+      setIsSpeaking(true);
+      
+      // Stop any ongoing speech
+      await Speech.stop();
+      
+      // For Baybayin text, we need to convert it back to Tagalog for pronunciation
+      let textToSpeak = text;
+      if (!isTagalog && translationMode === 'baybayin-to-tagalog') {
+        // If it's Baybayin text, use the translated Tagalog for pronunciation
+        textToSpeak = outputText || text;
+      }
+      
+      await Speech.speak(textToSpeak, {
+        language: isTagalog ? 'tl-PH' : 'en-US', // Use Filipino if available, fallback to English
+        pitch: 1.0,
+        rate: 0.8, // Slightly slower for learning
+        onDone: () => setIsSpeaking(false),
+        onError: (error) => {
+          console.log('TTS Error:', error);
+          setIsSpeaking(false);
+          // Fallback to English if Filipino is not available
+          if (isTagalog) {
+            Speech.speak(textToSpeak, {
+              language: 'en-US',
+              pitch: 1.0,
+              rate: 0.8,
+              onDone: () => setIsSpeaking(false),
+              onError: () => setIsSpeaking(false)
+            });
+          }
+        }
+      });
+    } catch (error) {
+      console.log('Speech error:', error);
+      setIsSpeaking(false);
+    }
+  };
+
+  const stopSpeech = async () => {
+    try {
+      await Speech.stop();
+      setIsSpeaking(false);
+    } catch (error) {
+      console.log('Error stopping speech:', error);
     }
   };
 
@@ -291,6 +348,20 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               <Ionicons name="copy-outline" size={16} color={inputText ? "#666" : "#ccc"} />
               <Text style={[styles.actionButtonText, !inputText && styles.disabledText]}>Copy</Text>
             </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => speakText(inputText, translationMode === 'tagalog-to-baybayin')} 
+              style={styles.actionButton}
+              disabled={!inputText || isSpeaking}
+            >
+              <Ionicons 
+                name={isSpeaking ? "volume-high" : "volume-medium-outline"} 
+                size={16} 
+                color={!inputText || isSpeaking ? "#ccc" : "#666"} 
+              />
+              <Text style={[styles.actionButtonText, (!inputText || isSpeaking) && styles.disabledText]}>
+                {isSpeaking ? "Speaking..." : "Listen"}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -313,6 +384,29 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               <Ionicons name="copy-outline" size={16} color={outputText ? "#666" : "#ccc"} />
               <Text style={[styles.actionButtonText, !outputText && styles.disabledText]}>Copy</Text>
             </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => speakText(outputText, translationMode === 'baybayin-to-tagalog')} 
+              style={styles.actionButton}
+              disabled={!outputText || isSpeaking}
+            >
+              <Ionicons 
+                name={isSpeaking ? "volume-high" : "volume-medium-outline"} 
+                size={16} 
+                color={!outputText || isSpeaking ? "#ccc" : "#666"} 
+              />
+              <Text style={[styles.actionButtonText, (!outputText || isSpeaking) && styles.disabledText]}>
+                {isSpeaking ? "Speaking..." : "Listen"}
+              </Text>
+            </TouchableOpacity>
+            {isSpeaking && (
+              <TouchableOpacity 
+                onPress={stopSpeech} 
+                style={[styles.actionButton, styles.stopButton]}
+              >
+                <Ionicons name="stop" size={16} color="#ff6b6b" />
+                <Text style={[styles.actionButtonText, { color: "#ff6b6b" }]}>Stop</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -326,7 +420,8 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
             • Traditional Baybayin uses 17 characters for common Filipino sounds{'\n'}
             • Letters like F, C, J, V, X, Z are adapted to similar Baybayin sounds{'\n'}
             • Use the Baybayin keyboard for accurate character input{'\n'}
-            • Enable word mappings for better translation of common words
+            • Enable word mappings for better translation of common words{'\n'}
+            • Tap "Listen" buttons to hear pronunciation of text (requires internet for best quality)
           </Text>
         </View>
       </ScrollView>
@@ -575,6 +670,10 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 6,
     paddingHorizontal: 8,
+  },
+  stopButton: {
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    borderRadius: 4,
   },
   actionButtonText: {
     fontSize: 14,

@@ -8,6 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Speech from 'expo-speech';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -102,6 +103,30 @@ export default function BaybayinKeyboard({
   const [romanizedText, setRomanizedText] = useState('');
   const [showVowelModifiers, setShowVowelModifiers] = useState(false);
   const [selectedConsonant, setSelectedConsonant] = useState<string | null>(null);
+
+  // Simple TTS for character pronunciation
+  const speakCharacter = async (key: string) => {
+    try {
+      // Convert key to a more pronounceable form
+      let pronunciation = key;
+      if (key.length === 2) {
+        // For consonant+vowel combinations like 'ka', 'ga', etc.
+        pronunciation = key;
+      } else if (key === 'nga') {
+        pronunciation = 'nga';
+      } else if (key === 'virama') {
+        pronunciation = 'virama';
+      }
+      
+      await Speech.speak(pronunciation, {
+        language: 'en-US',
+        pitch: 1.0,
+        rate: 0.7,
+      });
+    } catch (error) {
+      console.log('TTS error in keyboard:', error);
+    }
+  };
 
   const handleKeyPress = (key: string, baybayin: string) => {
     if (key === 'backspace') {
@@ -210,6 +235,9 @@ export default function BaybayinKeyboard({
           {!showVowelModifiers ? (
             <>
               <Text style={styles.sectionTitle}>Baybayin Characters</Text>
+              <Text style={styles.instructionText}>
+                Tap to type • Long press to hear pronunciation
+              </Text>
               {KEYBOARD_LAYOUT.map((row, rowIndex) => (
                 <View key={rowIndex} style={styles.keyboardRow}>
                   {row.map((char) => (
@@ -221,6 +249,12 @@ export default function BaybayinKeyboard({
                         char.key === 'backspace' && styles.backspaceKey,
                       ]}
                       onPress={() => handleKeyPress(char.key, char.baybayin)}
+                      onLongPress={() => {
+                        if (char.key !== 'space' && char.key !== 'backspace') {
+                          speakCharacter(char.key);
+                        }
+                      }}
+                      delayLongPress={500}
                     >
                       <Text style={styles.keyBaybayin}>{char.baybayin}</Text>
                       <Text style={styles.keyLabel}>{char.label}</Text>
