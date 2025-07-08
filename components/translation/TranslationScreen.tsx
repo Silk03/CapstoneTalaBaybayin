@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#8B4513',
+    backgroundColor: '#8B4512',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
