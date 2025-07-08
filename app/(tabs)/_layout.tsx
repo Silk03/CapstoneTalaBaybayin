@@ -89,6 +89,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="language" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="nativewind"
+        options={{
+          title: 'Styles',
+          tabBarIcon: ({ color }) => <TabBarIcon name="paint-brush" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }
