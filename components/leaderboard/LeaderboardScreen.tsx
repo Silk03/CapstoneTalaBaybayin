@@ -130,7 +130,7 @@ export default function LeaderboardScreen() {
     
     return (
       <View className={`flex-row items-center bg-white p-4 mx-3 my-1 rounded-xl shadow-sm ${
-        isCurrentUser ? 'bg-blue-50 border-2 border-secondary' : ''
+        isCurrentUser ? 'bg-secondary/10 border-2 border-secondary' : ''
       } ${index < 3 ? 'border-l-4 border-l-yellow-400' : ''}`}>
         <View className="w-12 items-center">
           <Text className="text-lg font-bold" style={{ color: getRankColor(item.rank) }}>

@@ -61,13 +61,13 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
     
     return (
       <TouchableOpacity
-        className={`bg-white rounded-xl p-4 mb-3 shadow-sm ${isCompleted ? 'border-l-4 border-green-500' : ''}`}
+        className={`bg-white rounded-xl p-4 mb-3 shadow-sm border ${isCompleted ? 'border-l-4 border-green-500 bg-green-50' : 'border-secondary-200'}`}
         onPress={() => onSelectLesson(item)}
       >
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1 mr-3">
-            <Text className="text-lg font-bold text-gray-800 mb-1">{item.title}</Text>
-            <Text className="text-sm text-gray-600 leading-5">{item.description}</Text>
+            <Text className="text-lg font-bold text-secondary-700 mb-1">{item.title}</Text>
+            <Text className="text-sm text-secondary-600 leading-5">{item.description}</Text>
             {isCompleted && lessonProgress && (
               <Text className="text-xs text-green-600 font-semibold mt-1">
                 Score: {Math.round(lessonProgress.score)} points
@@ -93,11 +93,11 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
           </View>
         </View>
         
-        <View className="flex-row justify-between items-center pt-3 border-t border-gray-100">
-          <Text className="text-sm text-gray-600 font-medium">
+        <View className="flex-row justify-between items-center pt-3 border-t border-secondary-200">
+          <Text className="text-sm text-secondary-600 font-medium">
             {item.characters.length} characters
           </Text>
-          <Ionicons name="chevron-forward" size={20} color="#C67C4E" />
+          <Ionicons name="chevron-forward" size={20} color="#0B4CA7" />
         </View>
       </TouchableOpacity>
     );

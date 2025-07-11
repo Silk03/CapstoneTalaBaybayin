@@ -217,10 +217,10 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
           <Ionicons 
             name="chevron-back" 
             size={20} 
-            color={currentCharacterIndex === 0 ? '#D1D5DB' : '#0B4CA7'} 
+            color={currentCharacterIndex === 0 ? '#D1D5DB' : '#C67C4E'} 
           />
           <Text className={`text-lg font-semibold ml-1 ${
-            currentCharacterIndex === 0 ? 'text-gray-400' : 'text-secondary'
+            currentCharacterIndex === 0 ? 'text-gray-400' : 'text-primary'
           }`}>
             Previous
           </Text>

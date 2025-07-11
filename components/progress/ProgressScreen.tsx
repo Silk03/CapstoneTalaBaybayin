@@ -41,7 +41,7 @@ export default function ProgressScreen() {
         <View>
           <View className="bg-gray-200 rounded-full h-3 mb-2">
             <View 
-              className="bg-gradient-to-r from-primary to-secondary rounded-full h-3" 
+              className="bg-primary rounded-full h-3" 
               style={{ width: `${progressPercentage}%` }}
             />
           </View>
@@ -61,9 +61,9 @@ export default function ProgressScreen() {
         </View>
         
         <View className="w-1/2 p-2">
-          <View className="bg-white p-4 rounded-lg shadow-sm items-center border-l-4 border-secondary">
+          <View className="bg-secondary-50 p-4 rounded-lg shadow-sm items-center border-l-4 border-secondary">
             <Text className="text-2xl font-bold text-secondary">{userProgress.streak}</Text>
-            <Text className="text-sm text-gray-600 text-center">Day Streak</Text>
+            <Text className="text-sm text-secondary-600 text-center">Day Streak</Text>
           </View>
         </View>
         
@@ -75,9 +75,9 @@ export default function ProgressScreen() {
         </View>
         
         <View className="w-1/2 p-2">
-          <View className="bg-white p-4 rounded-lg shadow-sm items-center border-l-4 border-secondary">
+          <View className="bg-secondary-50 p-4 rounded-lg shadow-sm items-center border-l-4 border-secondary">
             <Text className="text-2xl font-bold text-secondary">{userProgress.totalTimeSpent}</Text>
-            <Text className="text-sm text-gray-600 text-center">Minutes Learned</Text>
+            <Text className="text-sm text-secondary-600 text-center">Minutes Learned</Text>
           </View>
         </View>
       </View>
@@ -126,11 +126,11 @@ export default function ProgressScreen() {
               .sort(([,a], [,b]) => b - a)
               .slice(0, 5)
               .map(([lessonId, score]) => (
-                <View key={lessonId} className="bg-white p-4 rounded-lg shadow-sm mb-3 flex-row justify-between items-center border-l-2 border-secondary">
-                  <Text className="text-base font-medium text-gray-800">Lesson {lessonId}</Text>
+                <View key={lessonId} className="bg-secondary-50 p-4 rounded-lg shadow-sm mb-3 flex-row justify-between items-center border-l-4 border-secondary">
+                  <Text className="text-base font-medium text-secondary-700">Lesson {lessonId}</Text>
                   <View className="items-end">
                     <Text className="text-xl font-bold text-primary">{Math.round(score)}</Text>
-                    <Text className="text-sm text-gray-500">points</Text>
+                    <Text className="text-sm text-secondary-500">points</Text>
                   </View>
                 </View>
               ))}

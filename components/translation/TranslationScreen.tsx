@@ -197,14 +197,14 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
         <Text className="text-lg font-semibold text-primary mb-2">Suggestions:</Text>
         {suggestions.map((suggestion, index) => (
           <View key={index} className={`flex-row items-start gap-2 p-2 rounded-lg mb-1 ${
-            suggestion.type === 'info' ? 'bg-blue-50' : 
+            suggestion.type === 'info' ? 'bg-secondary/10 border-secondary/20' : 
             suggestion.type === 'warning' ? 'bg-orange-50' : 
             'bg-red-50'
           }`}>
             <Ionicons 
               name={suggestion.type === 'error' ? 'alert-circle' : suggestion.type === 'warning' ? 'warning' : 'information-circle'} 
               size={16} 
-              color={suggestion.type === 'error' ? '#f44336' : suggestion.type === 'warning' ? '#ff9800' : '#2196f3'} 
+              color={suggestion.type === 'error' ? '#f44336' : suggestion.type === 'warning' ? '#ff9800' : '#0B4CA7'} 
             />
             <Text className="text-sm text-gray-700 flex-1 leading-5">{suggestion.message}</Text>
           </View>
@@ -241,12 +241,12 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
         >
         {/* Translation Mode Toggle */}
         <View className="mb-5">
-          <View className="bg-white rounded-xl p-4 shadow-sm flex-row items-center justify-center">
-            <Text className="text-lg font-semibold text-primary flex-1 text-center">{inputLabel}</Text>
-            <TouchableOpacity onPress={handleSwapMode} className="bg-primary/10 rounded-full p-2 mx-4">
-              <Ionicons name="swap-horizontal" size={24} color="#C67C4E" />
+          <View className="bg-white rounded-xl p-4 shadow-sm flex-row items-center justify-center border border-secondary-200">
+            <Text className="text-lg font-semibold text-secondary-700 flex-1 text-center">{inputLabel}</Text>
+            <TouchableOpacity onPress={handleSwapMode} className="bg-secondary-100 rounded-full p-2 mx-4">
+              <Ionicons name="swap-horizontal" size={24} color="#0B4CA7" />
             </TouchableOpacity>
-            <Text className="text-lg font-semibold text-primary flex-1 text-center">{outputLabel}</Text>
+            <Text className="text-lg font-semibold text-secondary-700 flex-1 text-center">{outputLabel}</Text>
           </View>
         </View>
 
@@ -371,7 +371,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
             <Text className="text-lg font-semibold text-primary">{outputLabel} Text</Text>
           </View>
           <View className={`rounded-lg p-3 min-h-[100px] justify-center ${
-            translationMode === 'tagalog-to-baybayin' ? 'bg-blue-50' : 'bg-gray-50'
+            translationMode === 'tagalog-to-baybayin' ? 'bg-secondary/10' : 'bg-gray-50'
           }`}>
             <Text className={`leading-6 ${
               translationMode === 'tagalog-to-baybayin' 

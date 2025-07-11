@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, PanResponder, ImageBackground } from 'react-native';
+import { View, PanResponder, ImageBackground } from 'react-native';
 import { Canvas, Path, Skia } from '@shopify/react-native-skia';
 import { HandwritingStroke } from '../../types/handwriting';
+import '../../global.css';
 
 interface DrawingCanvasProps {
   width: number;
@@ -135,15 +136,15 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   };
 
   return (
-    <View style={[styles.container, { width, height }]} {...panResponder.panHandlers}>
+    <View className="bg-gray-50 rounded-xl border-2 border-gray-200 overflow-hidden" style={{ width, height }} {...panResponder.panHandlers}>
       {backgroundImage ? (
         <ImageBackground 
           source={backgroundImage} 
-          style={[styles.canvas, { width, height }]}
+          style={{ width, height }}
           resizeMode="contain"
-          imageStyle={styles.backgroundImage}
+          imageStyle={{ opacity: 0.3, borderRadius: 8 }}
         >
-          <Canvas style={[styles.canvas, { width, height }]}>
+          <Canvas style={{ width, height, backgroundColor: 'transparent' }}>
             {/* Guide strokes (less opacity when image is present) */}
             {showGuide && !backgroundImage && renderGuideStrokes()}
             
@@ -155,7 +156,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           </Canvas>
         </ImageBackground>
       ) : (
-        <Canvas style={[styles.canvas, { width, height }]}>
+        <Canvas style={{ width, height, backgroundColor: 'transparent' }}>
           {/* Guide strokes */}
           {showGuide && renderGuideStrokes()}
           
@@ -169,20 +170,3 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#FAFAFA',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    overflow: 'hidden'
-  },
-  canvas: {
-    backgroundColor: 'transparent'
-  },
-  backgroundImage: {
-    opacity: 0.3,
-    borderRadius: 8
-  }
-});

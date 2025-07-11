@@ -6,6 +6,7 @@ import { Pressable } from 'react-native';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import HamburgerMenu from '@/components/common/HamburgerMenu';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
@@ -21,11 +22,12 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#C67C4E',
+        tabBarActiveTintColor: '#0B4CA7',
         tabBarInactiveTintColor: '#6B7280',
         tabBarStyle: {
           backgroundColor: '#ffffff',
-          borderTopColor: '#E5E7EB',
+          borderTopColor: '#0B4CA7',
+          borderTopWidth: 1,
         },
         headerStyle: {
           backgroundColor: '#C67C4E',
@@ -41,8 +43,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Dashboard',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          headerLeft: () => <HamburgerMenu currentTab="index" />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable>
@@ -64,6 +67,7 @@ export default function TabLayout() {
         options={{
           title: 'Lessons',
           tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
+          headerLeft: () => <HamburgerMenu currentTab="two" />,
         }}
       />
       <Tabs.Screen
@@ -71,6 +75,7 @@ export default function TabLayout() {
         options={{
           title: 'Progress',
           tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart" color={color} />,
+          headerLeft: () => <HamburgerMenu currentTab="progress" />,
         }}
       />
       <Tabs.Screen
@@ -78,6 +83,7 @@ export default function TabLayout() {
         options={{
           title: 'Quizzes',
           tabBarIcon: ({ color }) => <TabBarIcon name="question-circle" color={color} />,
+          headerLeft: () => <HamburgerMenu currentTab="quizzes" />,
         }}
       />
       <Tabs.Screen
@@ -85,6 +91,7 @@ export default function TabLayout() {
         options={{
           title: 'Handwriting',
           tabBarIcon: ({ color }) => <TabBarIcon name="edit" color={color} />,
+          headerLeft: () => <HamburgerMenu currentTab="handwriting" />,
         }}
       />
       <Tabs.Screen
@@ -92,6 +99,7 @@ export default function TabLayout() {
         options={{
           title: 'Leaderboard',
           tabBarIcon: ({ color }) => <TabBarIcon name="trophy" color={color} />,
+          headerLeft: () => <HamburgerMenu currentTab="leaderboard" />,
         }}
       />
       <Tabs.Screen
@@ -99,6 +107,7 @@ export default function TabLayout() {
         options={{
           title: 'Translate',
           tabBarIcon: ({ color }) => <TabBarIcon name="language" color={color} />,
+          headerLeft: () => <HamburgerMenu currentTab="translation" />,
         }}
       />
       <Tabs.Screen
@@ -106,6 +115,7 @@ export default function TabLayout() {
         options={{
           title: 'Styles',
           tabBarIcon: ({ color }) => <TabBarIcon name="paint-brush" color={color} />,
+          headerLeft: () => <HamburgerMenu currentTab="nativewind" />,
         }}
       />
     </Tabs>

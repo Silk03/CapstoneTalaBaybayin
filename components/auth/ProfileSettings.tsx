@@ -4,9 +4,9 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   ScrollView,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { updateProfile } from 'firebase/auth';
@@ -14,16 +14,28 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProgress } from '../../contexts/ProgressContext';
 import { db } from '../../config/firebase';
+import '../../global.css';
 
 interface ProfileSettingsProps {
   onBack: () => void;
 }
 
 export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { userProgress } = useProgress();
   const [username, setUsername] = useState(user?.displayName || '');
   const [loading, setLoading] = useState(false);
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', style: 'destructive', onPress: logout }
+      ]
+    );
+  };
 
   const handleUpdateProfile = async () => {
     if (!username.trim()) {
@@ -70,116 +82,65 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="flex-row items-center p-5 bg-white border-b border-secondary-200">
+        <TouchableOpacity onPress={onBack} className="mr-4">
+          <Ionicons name="arrow-back" size={24} color="#0B4CA7" />
         </TouchableOpacity>
-        <Text style={styles.title}>Profile Settings</Text>
+        <Text className="text-xl font-bold text-secondary-700">Profile Settings</Text>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.section}>
-          <Text style={styles.label}>Username</Text>
-          <TextInput
-            style={styles.input}
-            value={username}
-            onChangeText={setUsername}
-            placeholder="Enter your username"
-            autoCapitalize="none"
-            placeholderTextColor="#777"
-          />
-          <Text style={styles.hint}>This will be displayed on the leaderboard</Text>
-        </View>
+      <ScrollView className="flex-1">
+        <View className="p-5">
+          <View className="mb-6">
+            <Text className="text-base font-semibold text-secondary-700 mb-2">Username</Text>
+            <TextInput
+              className="border border-secondary-300 rounded-lg p-3 text-base bg-white focus:border-secondary-500"
+              value={username}
+              onChangeText={setUsername}
+              placeholder="Enter your username"
+              autoCapitalize="none"
+              placeholderTextColor="#777"
+            />
+            <Text className="text-xs text-secondary-500 mt-1">This will be displayed on the leaderboard</Text>
+          </View>
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Email</Text>
-          <Text style={styles.emailText}>{user?.email}</Text>
-          <Text style={styles.hint}>Email cannot be changed</Text>
-        </View>
+          <View className="mb-6">
+            <Text className="text-base font-semibold text-secondary-700 mb-2">Email</Text>
+            <Text className="text-base text-secondary-600 p-3 bg-secondary-50 rounded-lg border border-secondary-200">
+              {user?.email}
+            </Text>
+            <Text className="text-xs text-secondary-500 mt-1">Email cannot be changed</Text>
+          </View>
 
-        <TouchableOpacity
-          style={[styles.updateButton, loading && styles.buttonDisabled]}
-          onPress={handleUpdateProfile}
-          disabled={loading}
-        >
-          <Text style={styles.updateButtonText}>
-            {loading ? 'Updating...' : 'Update Profile'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity
+            className={`rounded-lg p-4 items-center mt-5 ${
+              loading ? 'bg-gray-300' : 'bg-primary'
+            }`}
+            onPress={handleUpdateProfile}
+            disabled={loading}
+          >
+            <Text className="text-white text-base font-medium">
+              {loading ? 'Updating...' : 'Update Profile'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Logout Section */}
+          <View className="mt-8 pt-6 border-t border-gray-200">
+            <TouchableOpacity
+              className="bg-red-500 rounded-lg p-4 items-center"
+              onPress={handleLogout}
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="log-out-outline" size={20} color="white" />
+                <Text className="text-white text-base font-medium ml-2">
+                  Logout
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  backButton: {
-    marginRight: 15,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  content: {
-    padding: 20,
-  },
-  section: {
-    marginBottom: 25,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
-    backgroundColor: '#fff',
-  },
-  emailText: {
-    fontSize: 15,
-    color: '#777',
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  hint: {
-    fontSize: 12,
-    color: '#777',
-    marginTop: 5,
-  },
-  updateButton: {
-    backgroundColor: '#2196F3',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  updateButtonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '500',
-  },
-});

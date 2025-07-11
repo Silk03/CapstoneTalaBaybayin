@@ -91,28 +91,28 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
         
         <View className="flex-row justify-between items-center mb-2">
           <View className="flex-row items-center">
-            <Ionicons name="help-circle-outline" size={16} color="#777" />
-            <Text className="text-sm text-gray-600 ml-1">{item.questions.length} questions</Text>
+            <Ionicons name="help-circle-outline" size={16} color="#0B4CA7" />
+            <Text className="text-sm text-secondary-600 ml-1">{item.questions.length} questions</Text>
           </View>
           
           {item.timeLimit && (
             <View className="flex-row items-center">
-              <Ionicons name="time-outline" size={16} color="#777" />
-              <Text className="text-sm text-gray-600 ml-1">
+              <Ionicons name="time-outline" size={16} color="#0B4CA7" />
+              <Text className="text-sm text-secondary-600 ml-1">
                 {Math.floor(item.timeLimit / 60)}:{(item.timeLimit % 60).toString().padStart(2, '0')} min
               </Text>
             </View>
           )}
           
           <View className="flex-row items-center">
-            <Ionicons name="checkmark-circle-outline" size={16} color="#777" />
-            <Text className="text-sm text-gray-600 ml-1">{item.passingScore}% to pass</Text>
+            <Ionicons name="checkmark-circle-outline" size={16} color="#0B4CA7" />
+            <Text className="text-sm text-secondary-600 ml-1">{item.passingScore}% to pass</Text>
           </View>
         </View>
 
         {!isUnlocked && item.prerequisiteLessons && (
-          <View className="bg-orange-50 p-3 rounded-lg mt-2">
-            <Text className="text-sm text-orange-600 text-center">
+          <View className="bg-secondary-50 p-3 rounded-lg mt-2 border border-secondary-200">
+            <Text className="text-sm text-secondary-600 text-center">
               Complete lessons {item.prerequisiteLessons.join(', ')} to unlock
             </Text>
           </View>

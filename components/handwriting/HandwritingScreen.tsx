@@ -260,7 +260,7 @@ export default function HandwritingScreen() {
               className="w-11 h-11 rounded-full bg-white shadow-sm items-center justify-center"
               onPress={handlePreviousCharacter}
             >
-              <Ionicons name="chevron-back" size={24} color="#0B4CA7" />
+              <Ionicons name="chevron-back" size={24} color="#C67C4E" />
             </TouchableOpacity>
 
             <View className="flex-1 items-center">
@@ -284,7 +284,7 @@ export default function HandwritingScreen() {
               className="w-11 h-11 rounded-full bg-white shadow-sm items-center justify-center"
               onPress={handleNextCharacter}
             >
-              <Ionicons name="chevron-forward" size={24} color="#0B4CA7" />
+              <Ionicons name="chevron-forward" size={24} color="#C67C4E" />
             </TouchableOpacity>
           </View>
 
@@ -298,7 +298,7 @@ export default function HandwritingScreen() {
                     key={character.id}
                     className={`w-[30%] aspect-square rounded-xl items-center justify-center p-2 border-2 ${
                       selectedCharacter.id === character.id 
-                        ? 'bg-blue-50 border-secondary' 
+                        ? 'bg-secondary/10 border-secondary' 
                         : charactersWithProgress.has(character.id)
                           ? 'bg-gray-50 border-green-500'
                           : 'bg-gray-50 border-transparent'

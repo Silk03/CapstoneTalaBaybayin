@@ -21,7 +21,7 @@ export default function NativeWindExamples() {
           </Text>
           
           {/* Simple Test with className */}
-          <View className="bg-blue-500 p-4 rounded-lg mb-4">
+          <View className="bg-secondary p-4 rounded-lg mb-4">
             <Text className="text-white text-center font-bold">
               ✅ This should be BLUE with white text
             </Text>

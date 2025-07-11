@@ -44,6 +44,16 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   const selectedAnswer = answers[currentQuestion?.id || ''];
   const isRetake = isQuizCompleted(quiz.id);
 
+  // Calculate progress percentage for debugging
+  const progressPercentage = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
+  
+  // Debug log
+  console.log('Quiz Progress:', {
+    currentQuestionIndex,
+    totalQuestions: quiz.questions.length,
+    progressPercentage: progressPercentage.toFixed(1) + '%'
+  });
+
   // Show retake warning on mount
   useEffect(() => {
     if (isRetake) {
@@ -344,13 +354,16 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
       </View>
 
       {/* Progress Bar */}
-      <View className="bg-white px-4 py-2">
-        <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
+      <View className="bg-secondary-50 px-4 py-2 border-b border-secondary-200">
+        <View className="h-2 bg-secondary-200 rounded-full overflow-hidden">
           <View 
-            className="h-full bg-primary rounded-full"
-            style={{ width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }}
+            className="h-full bg-secondary rounded-full"
+            style={{ width: `${progressPercentage}%` }}
           />
         </View>
+        <Text className="text-xs text-secondary-600 text-center mt-1">
+          Question {currentQuestionIndex + 1} of {quiz.questions.length}
+        </Text>
       </View>
 
       {/* Question Content */}

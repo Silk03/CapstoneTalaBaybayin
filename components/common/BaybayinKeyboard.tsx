@@ -208,22 +208,22 @@ export default function BaybayinKeyboard({
   }
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 bg-gray-200 border-t border-gray-300 shadow-lg max-h-[40vh]">
+    <View className="absolute bottom-0 left-0 right-0 bg-secondary-100 border-t border-secondary-300 shadow-lg max-h-[40vh]">
       {/* Compact Header */}
-      <View className="flex-row justify-between items-center px-4 pt-2 pb-2 bg-gray-300 border-b border-gray-400">
-        <Text className="text-lg font-semibold text-primary">Baybayin Keyboard</Text>
-        <TouchableOpacity onPress={onClose} className="bg-primary/10 rounded-full p-2">
-          <Ionicons name="keypad-outline" size={20} color="#C67C4E" />
+      <View className="flex-row justify-between items-center px-4 pt-2 pb-2 bg-secondary-200 border-b border-secondary-400">
+        <Text className="text-lg font-semibold text-secondary-700">Baybayin Keyboard</Text>
+        <TouchableOpacity onPress={onClose} className="bg-secondary-50 rounded-full p-2">
+          <Ionicons name="keypad-outline" size={20} color="#0B4CA7" />
         </TouchableOpacity>
       </View>
 
       {/* Text Preview */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-gray-100 border-b border-gray-200">
-        <Text className="flex-1 text-lg text-primary font-bold mr-3" numberOfLines={2}>
+      <View className="flex-row items-center justify-between px-4 py-3 bg-secondary-50 border-b border-secondary-200">
+        <Text className="flex-1 text-lg text-secondary-700 font-bold mr-3" numberOfLines={2}>
           {text || placeholder}
         </Text>
         {text && (
-          <TouchableOpacity onPress={handleDone} className="flex-row items-center bg-primary rounded-full px-3 py-2 gap-1">
+          <TouchableOpacity onPress={handleDone} className="flex-row items-center bg-secondary rounded-full px-3 py-2 gap-1">
             <Ionicons name="checkmark" size={16} color="white" />
             <Text className="text-white text-sm font-semibold">Done</Text>
           </TouchableOpacity>
@@ -234,8 +234,8 @@ export default function BaybayinKeyboard({
       <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
         {!showVowelModifiers ? (
           <>
-            <Text className="text-lg font-bold text-primary mb-4 mt-2 text-center">Baybayin Characters</Text>
-            <Text className="text-sm text-gray-600 text-center mb-5">
+            <Text className="text-lg font-bold text-secondary-700 mb-4 mt-2 text-center">Baybayin Characters</Text>
+            <Text className="text-sm text-secondary-600 text-center mb-5">
               Tap to type • Long press to hear pronunciation
             </Text>
             {KEYBOARD_LAYOUT.map((row, rowIndex) => (
