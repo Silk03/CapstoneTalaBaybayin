@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView,
   ScrollView,
   Alert,
@@ -21,6 +20,7 @@ import {
   getConversionSuggestions,
 } from '../../utils/translationUtils';
 import BaybayinKeyboard from '../common/BaybayinKeyboard';
+import '../../global.css';
 
 interface TranslationScreenProps {
   onBack: () => void;
@@ -193,21 +193,20 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
     if (suggestions.length === 0) return null;
 
     return (
-      <View style={styles.suggestionsContainer}>
-        <Text style={styles.suggestionsTitle}>Suggestions:</Text>
+      <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+        <Text className="text-lg font-semibold text-primary mb-2">Suggestions:</Text>
         {suggestions.map((suggestion, index) => (
-          <View key={index} style={[
-            styles.suggestion, 
-            suggestion.type === 'info' && styles.suggestionInfo,
-            suggestion.type === 'warning' && styles.suggestionWarning,
-            suggestion.type === 'error' && styles.suggestionError,
-          ]}>
+          <View key={index} className={`flex-row items-start gap-2 p-2 rounded-lg mb-1 ${
+            suggestion.type === 'info' ? 'bg-blue-50' : 
+            suggestion.type === 'warning' ? 'bg-orange-50' : 
+            'bg-red-50'
+          }`}>
             <Ionicons 
               name={suggestion.type === 'error' ? 'alert-circle' : suggestion.type === 'warning' ? 'warning' : 'information-circle'} 
               size={16} 
               color={suggestion.type === 'error' ? '#f44336' : suggestion.type === 'warning' ? '#ff9800' : '#2196f3'} 
             />
-            <Text style={styles.suggestionText}>{suggestion.message}</Text>
+            <Text className="text-sm text-gray-700 flex-1 leading-5">{suggestion.message}</Text>
           </View>
         ))}
       </View>
@@ -222,49 +221,51 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
   const inputLabel = translationMode === 'tagalog-to-baybayin' ? 'Tagalog' : 'Baybayin';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+      <View className="bg-primary flex-row items-center px-4 py-3">
+        <TouchableOpacity onPress={onBack} className="mr-3">
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Tagalog ⇄ Baybayin</Text>
-        <TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+        <Text className="flex-1 text-lg font-bold text-white text-center">Tagalog ⇄ Baybayin</Text>
+        <TouchableOpacity onPress={handleShare} className="ml-3">
           <Ionicons name="share-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.mainContent}>
+      <View className="flex-1">
         <ScrollView 
-          style={[styles.content, showKeyboard && styles.contentWithKeyboard]} 
+          className={`flex-1 p-4 ${showKeyboard ? 'mb-2' : ''}`}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ paddingBottom: 20 }}
         >
         {/* Translation Mode Toggle */}
-        <View style={styles.modeContainer}>
-          <View style={styles.modeToggle}>
-            <Text style={styles.modeLabel}>{inputLabel}</Text>
-            <TouchableOpacity onPress={handleSwapMode} style={styles.swapButton}>
-              <Ionicons name="swap-horizontal" size={24} color="#8B4513" />
+        <View className="mb-5">
+          <View className="bg-white rounded-xl p-4 shadow-sm flex-row items-center justify-center">
+            <Text className="text-lg font-semibold text-primary flex-1 text-center">{inputLabel}</Text>
+            <TouchableOpacity onPress={handleSwapMode} className="bg-primary/10 rounded-full p-2 mx-4">
+              <Ionicons name="swap-horizontal" size={24} color="#C67C4E" />
             </TouchableOpacity>
-            <Text style={styles.modeLabel}>{outputLabel}</Text>
+            <Text className="text-lg font-semibold text-primary flex-1 text-center">{outputLabel}</Text>
           </View>
         </View>
 
         {/* Options */}
         {translationMode === 'tagalog-to-baybayin' && (
-          <View style={styles.optionsContainer}>
+          <View className="mb-5">
             <TouchableOpacity
-              style={styles.option}
+              className="bg-white rounded-xl p-4 shadow-sm flex-row items-center"
               onPress={() => setUseWordMapping(!useWordMapping)}
             >
-              <View style={styles.optionContent}>
-                <Text style={styles.optionLabel}>Use common word mappings</Text>
-                <Text style={styles.optionDescription}>
+              <View className="flex-1">
+                <Text className="text-lg font-semibold text-gray-800 mb-1">Use common word mappings</Text>
+                <Text className="text-sm text-gray-600">
                   Uses pre-defined Baybayin for common Tagalog words
                 </Text>
               </View>
-              <View style={[styles.toggle, useWordMapping && styles.toggleActive]}>
+              <View className={`w-6 h-6 rounded-full items-center justify-center ${
+                useWordMapping ? 'bg-primary' : 'bg-gray-300'
+              }`}>
                 {useWordMapping && <Ionicons name="checkmark" size={16} color="white" />}
               </View>
             </TouchableOpacity>
@@ -272,19 +273,21 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
         )}
 
         {/* Input Section */}
-        <View style={styles.textContainer}>
-          <View style={styles.textHeader}>
-            <Text style={styles.textLabel}>{inputLabel} Text</Text>
-            <View style={styles.textActions}>
+        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-lg font-semibold text-primary">{inputLabel} Text</Text>
+            <View className="flex-row gap-2">
               {translationMode === 'baybayin-to-tagalog' && (
                 <TouchableOpacity
                   onPress={toggleBaybayinKeyboard}
-                  style={[styles.keyboardButton, showKeyboard && styles.keyboardButtonActive]}
+                  className={`rounded-full p-2 ${
+                    showKeyboard ? 'bg-primary' : 'bg-primary/10'
+                  }`}
                 >
                   <Ionicons 
                     name={showKeyboard ? "keypad" : "keypad-outline"} 
                     size={18} 
-                    color={showKeyboard ? "white" : "#8B4513"} 
+                    color={showKeyboard ? "white" : "#C67C4E"} 
                   />
                 </TouchableOpacity>
               )}
@@ -293,9 +296,9 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
           
           {/* Input Method Info */}
           {translationMode === 'baybayin-to-tagalog' && (
-            <View style={styles.inputMethodInfo}>
-              <Ionicons name="information-circle-outline" size={16} color="#777" />
-              <Text style={styles.inputMethodText}>
+            <View className="flex-row items-center gap-1 mb-2 px-1">
+              <Ionicons name="information-circle-outline" size={16} color="#9CA3AF" />
+              <Text className="text-xs text-gray-500 italic">
                 Tap the input area below to use the Baybayin keyboard
               </Text>
             </View>
@@ -304,61 +307,58 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
           {translationMode === 'baybayin-to-tagalog' ? (
             // Baybayin input mode - use TouchableOpacity instead of TextInput
             <TouchableOpacity
-              style={[
-                styles.textInput, 
-                showKeyboard && styles.textInputWithKeyboard,
-                styles.touchableInput
-              ]}
+              className={`border border-gray-300 rounded-lg p-3 min-h-[100px] justify-start items-start ${
+                showKeyboard ? 'bg-gray-50 border-secondary border-2' : ''
+              }`}
               onPress={() => {
                 setShowKeyboard(true);
               }}
               activeOpacity={0.7}
             >
-              <Text style={[
-                styles.inputText,
-                !inputText && styles.placeholderStyle
-              ]}>
+              <Text className={`text-xl font-mono leading-7 ${
+                inputText ? 'text-primary font-bold' : 'text-gray-400 italic font-normal'
+              }`}>
                 {inputText || 'Tap here to type in Baybayin...'}
               </Text>
             </TouchableOpacity>
           ) : (
             // Regular text input for Tagalog mode
             <TextInput
-              style={[styles.textInput]}
+              className="border border-gray-300 rounded-lg p-3 text-lg min-h-[100px] text-top"
               value={inputText}
               onChangeText={handleTextInputChange}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
               placeholder={placeholderText}
-              placeholderTextColor="#999"
+              placeholderTextColor="#9CA3AF"
               multiline
               textAlignVertical="top"
             />
           )}
-          <View style={styles.inputActions}>
-            <TouchableOpacity onPress={handleClear} style={styles.actionButton}>
-              <Ionicons name="trash-outline" size={16} color="#666" />
-              <Text style={styles.actionButtonText}>Clear</Text>
+          <View className="flex-row justify-end gap-3 mt-2">
+            <TouchableOpacity onPress={handleClear} className="flex-row items-center gap-1 py-2 px-2">
+              <Ionicons name="trash-outline" size={16} color="#6B7280" />
+              <Text className="text-sm text-gray-600">Clear</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => handleCopy(inputText, inputLabel)} 
-              style={styles.actionButton}
+              className="flex-row items-center gap-1 py-2 px-2"
               disabled={!inputText}
             >
-              <Ionicons name="copy-outline" size={16} color={inputText ? "#666" : "#ccc"} />
-              <Text style={[styles.actionButtonText, !inputText && styles.disabledText]}>Copy</Text>
+              <Ionicons name="copy-outline" size={16} color={inputText ? "#6B7280" : "#D1D5DB"} />
+              <Text className={`text-sm ${inputText ? 'text-gray-600' : 'text-gray-400'}`}>Copy</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => speakText(inputText, translationMode === 'tagalog-to-baybayin')} 
-              style={styles.actionButton}
+              className="flex-row items-center gap-1 py-2 px-2"
               disabled={!inputText || isSpeaking}
             >
               <Ionicons 
                 name={isSpeaking ? "volume-high" : "volume-medium-outline"} 
                 size={16} 
-                color={!inputText || isSpeaking ? "#ccc" : "#666"} 
+                color={!inputText || isSpeaking ? "#D1D5DB" : "#6B7280"} 
               />
-              <Text style={[styles.actionButtonText, (!inputText || isSpeaking) && styles.disabledText]}>
+              <Text className={`text-sm ${!inputText || isSpeaking ? 'text-gray-400' : 'text-gray-600'}`}>
                 {isSpeaking ? "Speaking..." : "Listen"}
               </Text>
             </TouchableOpacity>
@@ -366,45 +366,51 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
         </View>
 
         {/* Output Section */}
-        <View style={styles.textContainer}>
-          <View style={styles.textHeader}>
-            <Text style={styles.textLabel}>{outputLabel} Text</Text>
+        <View className="bg-white rounded-xl p-4 mb-4 shadow-sm">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-lg font-semibold text-primary">{outputLabel} Text</Text>
           </View>
-          <View style={[styles.outputDisplay, translationMode === 'tagalog-to-baybayin' && styles.baybayinOutput]}>
-            <Text style={[styles.outputText, translationMode === 'tagalog-to-baybayin' && styles.baybayinText]}>
+          <View className={`rounded-lg p-3 min-h-[100px] justify-center ${
+            translationMode === 'tagalog-to-baybayin' ? 'bg-blue-50' : 'bg-gray-50'
+          }`}>
+            <Text className={`leading-6 ${
+              translationMode === 'tagalog-to-baybayin' 
+                ? 'text-2xl font-bold text-primary text-center leading-8' 
+                : 'text-lg text-gray-800'
+            }`}>
               {outputText || `${outputLabel} translation will appear here...`}
             </Text>
           </View>
-          <View style={styles.inputActions}>
+          <View className="flex-row justify-end gap-3 mt-2">
             <TouchableOpacity 
               onPress={() => handleCopy(outputText, outputLabel)} 
-              style={styles.actionButton}
+              className="flex-row items-center gap-1 py-2 px-2"
               disabled={!outputText}
             >
-              <Ionicons name="copy-outline" size={16} color={outputText ? "#666" : "#ccc"} />
-              <Text style={[styles.actionButtonText, !outputText && styles.disabledText]}>Copy</Text>
+              <Ionicons name="copy-outline" size={16} color={outputText ? "#6B7280" : "#D1D5DB"} />
+              <Text className={`text-sm ${outputText ? 'text-gray-600' : 'text-gray-400'}`}>Copy</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => speakText(outputText, translationMode === 'baybayin-to-tagalog')} 
-              style={styles.actionButton}
+              className="flex-row items-center gap-1 py-2 px-2"
               disabled={!outputText || isSpeaking}
             >
               <Ionicons 
                 name={isSpeaking ? "volume-high" : "volume-medium-outline"} 
                 size={16} 
-                color={!outputText || isSpeaking ? "#ccc" : "#666"} 
+                color={!outputText || isSpeaking ? "#D1D5DB" : "#6B7280"} 
               />
-              <Text style={[styles.actionButtonText, (!outputText || isSpeaking) && styles.disabledText]}>
+              <Text className={`text-sm ${!outputText || isSpeaking ? 'text-gray-400' : 'text-gray-600'}`}>
                 {isSpeaking ? "Speaking..." : "Listen"}
               </Text>
             </TouchableOpacity>
             {isSpeaking && (
               <TouchableOpacity 
                 onPress={stopSpeech} 
-                style={[styles.actionButton, styles.stopButton]}
+                className="flex-row items-center gap-1 py-2 px-2 bg-red-50 rounded"
               >
-                <Ionicons name="stop" size={16} color="#ff6b6b" />
-                <Text style={[styles.actionButtonText, { color: "#ff6b6b" }]}>Stop</Text>
+                <Ionicons name="stop" size={16} color="#EF4444" />
+                <Text className="text-sm text-red-500">Stop</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -414,9 +420,9 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
         {renderSuggestions()}
 
         {/* Usage Tips */}
-        <View style={styles.tipsContainer}>
-          <Text style={styles.tipsTitle}>Tips:</Text>
-          <Text style={styles.tipText}>
+        <View className="bg-white rounded-xl p-4 shadow-sm">
+          <Text className="text-lg font-semibold text-primary mb-2">Tips:</Text>
+          <Text className="text-sm text-gray-600 leading-5">
             • Traditional Baybayin uses 17 characters for common Filipino sounds{'\n'}
             • Letters like F, C, J, V, X, Z are adapted to similar Baybayin sounds{'\n'}
             • Use the Baybayin keyboard for accurate character input{'\n'}
@@ -441,313 +447,4 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#8B4512',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backButton: {
-    marginRight: 12,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'center',
-  },
-  shareButton: {
-    marginLeft: 12,
-  },
-  mainContent: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  contentWithKeyboard: {
-    marginBottom: 10, // Add space when keyboard is visible
-  },
-  scrollContent: {
-    paddingBottom: 20,
-  },
-  modeContainer: {
-    marginBottom: 20,
-  },
-  modeToggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modeLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#8B4513',
-    flex: 1,
-    textAlign: 'center',
-  },
-  swapButton: {
-    backgroundColor: 'rgba(139, 69, 19, 0.1)',
-    borderRadius: 20,
-    padding: 8,
-    marginHorizontal: 16,
-  },
-  optionsContainer: {
-    marginBottom: 20,
-  },
-  option: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  optionContent: {
-    flex: 1,
-  },
-  optionLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  optionDescription: {
-    fontSize: 14,
-    color: '#777',
-  },
-  toggle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#ddd',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  toggleActive: {
-    backgroundColor: '#8B4513',
-  },
-  textContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  textHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  textLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#8B4513',
-  },
-  textActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  keyboardButton: {
-    backgroundColor: 'rgba(139, 69, 19, 0.1)',
-    borderRadius: 15,
-    padding: 6,
-  },
-  keyboardButtonActive: {
-    backgroundColor: '#8B4513',
-  },
-  inputMethodInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 8,
-    paddingHorizontal: 4,
-  },
-  inputMethodText: {
-    fontSize: 12,
-    color: '#777',
-    fontStyle: 'italic',
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  textInputWithKeyboard: {
-    backgroundColor: '#f8f8f8',
-    borderColor: '#8B4513',
-    borderWidth: 2,
-  },
-  touchableInput: {
-    justifyContent: 'flex-start',
-    alignItems: 'flex-start',
-  },
-  inputText: {
-    fontSize: 20,
-    fontFamily: 'monospace',
-    color: '#8B4513',
-    fontWeight: 'bold',
-    lineHeight: 28,
-  },
-  placeholderStyle: {
-    color: '#999',
-    fontStyle: 'italic',
-    fontWeight: 'normal',
-  },
-  baybayinInput: {
-    fontSize: 20,
-    fontFamily: 'monospace',
-  },
-  outputDisplay: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    padding: 12,
-    minHeight: 100,
-    justifyContent: 'center',
-  },
-  baybayinOutput: {
-    backgroundColor: '#f0f8ff',
-  },
-  outputText: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24,
-  },
-  baybayinText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#8B4513',
-    textAlign: 'center',
-    lineHeight: 32,
-  },
-  inputActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 8,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-  },
-  stopButton: {
-    backgroundColor: 'rgba(255, 107, 107, 0.1)',
-    borderRadius: 4,
-  },
-  actionButtonText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  disabledText: {
-    color: '#ccc',
-  },
-  suggestionsContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  suggestionsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#8B4513',
-    marginBottom: 8,
-  },
-  suggestion: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    padding: 8,
-    borderRadius: 6,
-    marginBottom: 4,
-  },
-  suggestionInfo: {
-    backgroundColor: '#e3f2fd',
-  },
-  suggestionWarning: {
-    backgroundColor: '#fff3e0',
-  },
-  suggestionError: {
-    backgroundColor: '#ffebee',
-  },
-  suggestionText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
-  },
-  tipsContainer: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  tipsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#8B4513',
-    marginBottom: 8,
-  },
-  tipText: {
-    fontSize: 14,
-    color: '#555',
-    lineHeight: 20,
-  },
-});
+

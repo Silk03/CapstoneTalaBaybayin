@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView,
   Dimensions,
   Alert,
@@ -12,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Lesson, BaybayinCharacter } from '../../types/lesson';
 import { useProgress } from '../../contexts/ProgressContext';
+import '../../global.css';
 
 interface LessonScreenProps {
   lesson: Lesson;
@@ -126,15 +126,17 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
 
   const renderCharacterDots = () => {
     return (
-      <View style={styles.dotsContainer}>
+      <View className="flex-row justify-center py-4 bg-white">
         {lesson.characters.map((_, index) => (
           <TouchableOpacity
             key={index}
-            style={[
-              styles.dot,
-              index === currentCharacterIndex && styles.activeDot,
-              completedCharacters.has(index) && styles.completedDot,
-            ]}
+            className={`w-6 h-6 rounded-full mx-1 justify-center items-center ${
+              index === currentCharacterIndex 
+                ? 'bg-primary' 
+                : completedCharacters.has(index)
+                  ? 'bg-green-500'
+                  : 'bg-gray-300'
+            }`}
             onPress={() => goToCharacter(index)}
           >
             {completedCharacters.has(index) && (
@@ -147,15 +149,15 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+      <View className="bg-primary flex-row items-center px-4 py-3">
+        <TouchableOpacity onPress={onBack} className="mr-3">
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>{lesson.title}</Text>
-          <Text style={styles.headerProgress}>
+        <View className="flex-1">
+          <Text className="text-lg font-bold text-white">{lesson.title}</Text>
+          <Text className="text-sm text-orange-100">
             {currentCharacterIndex + 1} of {lesson.characters.length}
           </Text>
         </View>
@@ -165,37 +167,37 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
       {renderCharacterDots()}
 
       {/* Character Display */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.characterCard}>
-          <View style={styles.characterDisplay}>
-            <Text style={styles.baybayinCharacter}>{currentCharacter.character}</Text>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        <View className="m-4 bg-white rounded-2xl p-6 shadow-sm">
+          <View className="items-center mb-8 p-8 bg-gray-50 rounded-xl">
+            <Text className="text-8xl text-primary font-bold">{currentCharacter.character}</Text>
           </View>
           
-          <View style={styles.characterInfo}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Romanized:</Text>
-              <Text style={styles.infoValue}>{currentCharacter.romanized}</Text>
+          <View className="mb-8">
+            <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+              <Text className="text-lg font-semibold text-gray-800">Romanized:</Text>
+              <Text className="text-lg text-primary font-bold">{currentCharacter.romanized}</Text>
             </View>
             
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Pronunciation:</Text>
-              <Text style={styles.infoValue}>{currentCharacter.pronunciation}</Text>
+            <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+              <Text className="text-lg font-semibold text-gray-800">Pronunciation:</Text>
+              <Text className="text-lg text-primary font-bold">{currentCharacter.pronunciation}</Text>
             </View>
             
             {currentCharacter.meaning && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>Meaning:</Text>
-                <Text style={styles.infoValue}>{currentCharacter.meaning}</Text>
+              <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
+                <Text className="text-lg font-semibold text-gray-800">Meaning:</Text>
+                <Text className="text-lg text-primary font-bold">{currentCharacter.meaning}</Text>
               </View>
             )}
           </View>
 
           {/* Practice Section */}
-          <View style={styles.practiceSection}>
-            <Text style={styles.practiceTitle}>Practice Writing</Text>
-            <View style={styles.practiceArea}>
-              <Text style={styles.practiceCharacter}>{currentCharacter.character}</Text>
-              <Text style={styles.practiceInstruction}>
+          <View className="mt-4">
+            <Text className="text-xl font-bold text-gray-800 mb-4 text-center">Practice Writing</Text>
+            <View className="bg-gray-50 rounded-xl p-6 items-center">
+              <Text className="text-6xl text-gray-300 mb-3">{currentCharacter.character}</Text>
+              <Text className="text-sm text-gray-600 text-center">
                 Trace this character to practice writing it
               </Text>
             </View>
@@ -204,30 +206,31 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
       </ScrollView>
 
       {/* Navigation */}
-      <View style={styles.navigation}>
+      <View className="flex-row p-4 bg-white border-t border-gray-200">
         <TouchableOpacity
-          style={[styles.navButton, styles.previousButton]}
+          className={`flex-1 flex-row items-center justify-center py-3 px-4 rounded-lg mx-1 ${
+            currentCharacterIndex === 0 ? 'bg-gray-100' : 'bg-gray-100'
+          }`}
           onPress={handlePrevious}
           disabled={currentCharacterIndex === 0}
         >
           <Ionicons 
             name="chevron-back" 
             size={20} 
-            color={currentCharacterIndex === 0 ? '#ccc' : '#8B4513'} 
+            color={currentCharacterIndex === 0 ? '#D1D5DB' : '#0B4CA7'} 
           />
-          <Text style={[
-            styles.navButtonText,
-            currentCharacterIndex === 0 && styles.disabledText
-          ]}>
+          <Text className={`text-lg font-semibold ml-1 ${
+            currentCharacterIndex === 0 ? 'text-gray-400' : 'text-secondary'
+          }`}>
             Previous
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.navButton, styles.nextButton]}
+          className="flex-1 flex-row items-center justify-center py-3 px-4 rounded-lg mx-1 bg-primary"
           onPress={handleNext}
         >
-          <Text style={styles.nextButtonText}>
+          <Text className="text-lg font-semibold text-white mr-1">
             {isLastCharacter ? 'Complete Lesson' : 'Next'}
           </Text>
           <Ionicons name="chevron-forward" size={20} color="white" />
@@ -237,166 +240,4 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#8B4513',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backButton: {
-    marginRight: 12,
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  headerProgress: {
-    fontSize: 14,
-    color: '#f0d0b4',
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    backgroundColor: 'white',
-  },
-  dot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  activeDot: {
-    backgroundColor: '#8B4513',
-  },
-  completedDot: {
-    backgroundColor: '#4CAF50',
-  },
-  content: {
-    flex: 1,
-  },
-  characterCard: {
-    margin: 16,
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  characterDisplay: {
-    alignItems: 'center',
-    marginBottom: 32,
-    padding: 32,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-  },
-  baybayinCharacter: {
-    fontSize: 120,
-    color: '#8B4513',
-    fontWeight: 'bold',
-  },
-  characterInfo: {
-    marginBottom: 32,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  infoLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  infoValue: {
-    fontSize: 16,
-    color: '#8B4513',
-    fontWeight: 'bold',
-  },
-  practiceSection: {
-    marginTop: 16,
-  },
-  practiceTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  practiceArea: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-    padding: 24,
-    alignItems: 'center',
-  },
-  practiceCharacter: {
-    fontSize: 80,
-    color: '#ccc',
-    marginBottom: 12,
-  },
-  practiceInstruction: {
-    fontSize: 14,
-    color: '#777',
-    textAlign: 'center',
-  },
-  navigation: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  navButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  previousButton: {
-    backgroundColor: '#f0f0f0',
-  },
-  nextButton: {
-    backgroundColor: '#8B4513',
-  },
-  navButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#8B4513',
-    marginLeft: 4,
-  },
-  nextButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'white',
-    marginRight: 4,
-  },
-  disabledText: {
-    color: '#ccc',
-  },
-});
+

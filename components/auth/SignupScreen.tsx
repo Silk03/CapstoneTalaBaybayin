@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -58,20 +57,20 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.container} 
+      className="flex-1 bg-gray-50" 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.logoContainer}>
-          <Text style={styles.appTitle}>TalaBaybayin</Text>
-          <Text style={styles.subtitle}>Join the Journey of Learning</Text>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 20 }}>
+        <View className="items-center mb-10">
+          <Text className="text-4xl font-bold text-primary mb-2">TalaBaybayin</Text>
+          <Text className="text-base text-gray-600 text-center">Join the Journey of Learning</Text>
         </View>
 
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Create Account</Text>
+        <View className="bg-white p-8 rounded-2xl shadow-sm">
+          <Text className="text-2xl font-bold text-center mb-8 text-gray-800">Create Account</Text>
           
           <TextInput
-            style={styles.input}
+            className="border border-gray-300 p-4 rounded-lg mb-4 text-base bg-gray-50"
             placeholder="Username"
             value={username}
             onChangeText={setUsername}
@@ -80,7 +79,7 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
           />
           
           <TextInput
-            style={styles.input}
+            className="border border-gray-300 p-4 rounded-lg mb-4 text-base bg-gray-50"
             placeholder="Email"
             value={email}
             onChangeText={setEmail}
@@ -90,7 +89,7 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
           />
 
           <TextInput
-            style={styles.input}
+            className="border border-gray-300 p-4 rounded-lg mb-4 text-base bg-gray-50"
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
@@ -99,7 +98,7 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
           />
 
           <TextInput
-            style={styles.input}
+            className="border border-gray-300 p-4 rounded-lg mb-4 text-base bg-gray-50"
             placeholder="Confirm Password"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -108,19 +107,19 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
           />
 
           <TouchableOpacity 
-            style={[styles.button, loading && styles.buttonDisabled]} 
+            className={`p-4 rounded-lg items-center mt-3 ${loading ? 'bg-gray-300' : 'bg-primary'}`}
             onPress={handleSignup}
             disabled={loading}
           >
-            <Text style={styles.buttonText}>
+            <Text className="text-white text-lg font-bold">
               {loading ? 'Creating Account...' : 'Sign Up'}
             </Text>
           </TouchableOpacity>
 
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Already have an account? </Text>
+          <View className="flex-row justify-center mt-5">
+            <Text className="text-gray-600 text-base">Already have an account? </Text>
             <TouchableOpacity onPress={onSwitchToLogin}>
-              <Text style={styles.loginLink}>Sign In</Text>
+              <Text className="text-primary text-lg font-bold">Sign In</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -128,88 +127,3 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  appTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#8B4513',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 15,
-    color: '#777',
-    textAlign: 'center',
-  },
-  formContainer: {
-    backgroundColor: 'white',
-    padding: 30,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    fontSize: 15,
-    backgroundColor: '#f9f9f9',
-  },
-  button: {
-    backgroundColor: '#8B4513',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  buttonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  loginContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
-  loginText: {
-    color: '#777',
-    fontSize: 15,
-  },
-  loginLink: {
-    color: '#8B4513',
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-});

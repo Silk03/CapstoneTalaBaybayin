@@ -1,17 +1,12 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import LeaderboardScreen from './LeaderboardScreen';
+import '../../global.css';
 
 export default function LeaderboardContainer() {
   return (
-    <View style={styles.container}>
+    <View className="flex-1">
       <LeaderboardScreen />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});

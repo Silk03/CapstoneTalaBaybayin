@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView,
   Alert,
   ScrollView,
@@ -11,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Quiz, QuizQuestion, QuestionType } from '../../types/quiz';
 import { useProgress } from '../../contexts/ProgressContext';
+import '../../global.css';
 
 interface QuizScreenProps {
   quiz: Quiz;
@@ -30,9 +30,18 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
   const { addExperience, isQuizCompleted } = useProgress();
 
+  // Add null checks for quiz and questions
+  if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+        <Text className="text-lg text-gray-600">Loading quiz...</Text>
+      </SafeAreaView>
+    );
+  }
+
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
-  const selectedAnswer = answers[currentQuestion.id];
+  const selectedAnswer = answers[currentQuestion?.id || ''];
   const isRetake = isQuizCompleted(quiz.id);
 
   // Show retake warning on mount
@@ -94,6 +103,8 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   };
 
   const handleAnswerSelect = (answer: string) => {
+    if (!currentQuestion) return;
+    
     // Prevent re-answering the same question
     if (answeredQuestions.has(currentQuestion.id)) {
       return;
@@ -215,13 +226,21 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   };
 
   const renderQuestion = () => {
+    if (!currentQuestion) {
+      return (
+        <View className="bg-white rounded-2xl p-6 shadow-sm">
+          <Text className="text-lg font-semibold text-gray-600 text-center">Loading question...</Text>
+        </View>
+      );
+    }
+
     switch (currentQuestion.type) {
       case QuestionType.CHARACTER_RECOGNITION:
         return (
-          <View style={styles.questionContainer}>
-            <Text style={styles.questionText}>{currentQuestion.question}</Text>
-            <View style={styles.characterDisplay}>
-              <Text style={styles.baybayinCharacter}>
+          <View className="bg-white rounded-2xl p-6 shadow-sm">
+            <Text className="text-lg font-semibold text-gray-800 text-center mb-8 leading-7">{currentQuestion.question}</Text>
+            <View className="items-center mb-8 p-8 bg-gray-50 rounded-xl">
+              <Text className="text-6xl text-primary font-bold">
                 {currentQuestion.baybayinCharacter}
               </Text>
             </View>
@@ -231,10 +250,10 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
 
       case QuestionType.ROMANIZED_TO_BAYBAYIN:
         return (
-          <View style={styles.questionContainer}>
-            <Text style={styles.questionText}>{currentQuestion.question}</Text>
-            <View style={styles.characterDisplay}>
-              <Text style={styles.romanizedCharacter}>
+          <View className="bg-white rounded-2xl p-6 shadow-sm">
+            <Text className="text-lg font-semibold text-gray-800 text-center mb-8 leading-7">{currentQuestion.question}</Text>
+            <View className="items-center mb-8 p-8 bg-gray-50 rounded-xl">
+              <Text className="text-5xl text-primary font-bold">
                 {currentQuestion.romanizedCharacter}
               </Text>
             </View>
@@ -244,8 +263,8 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
 
       default:
         return (
-          <View style={styles.questionContainer}>
-            <Text style={styles.questionText}>{currentQuestion.question}</Text>
+          <View className="bg-white rounded-2xl p-6 shadow-sm">
+            <Text className="text-lg font-semibold text-gray-800 text-center mb-8 leading-7">{currentQuestion.question}</Text>
             {renderOptions()}
           </View>
         );
@@ -253,12 +272,12 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   };
 
   const renderOptions = () => {
-    if (!currentQuestion.options) return null;
+    if (!currentQuestion || !currentQuestion.options) return null;
 
     const isQuestionAnswered = answeredQuestions.has(currentQuestion.id);
 
     return (
-      <View style={styles.optionsContainer}>
+      <View className="gap-3">
         {currentQuestion.options.map((option, index) => {
           const isSelected = selectedAnswer === option;
           const isCorrect = option === currentQuestion.correctAnswer;
@@ -268,28 +287,26 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
           return (
             <TouchableOpacity
               key={index}
-              style={[
-                styles.optionButton,
-                isSelected && styles.selectedOption,
-                isWrong && styles.wrongOption,
-                shouldShowCorrect && styles.correctOption,
-              ]}
+              className={`bg-gray-100 p-4 rounded-xl border-2 flex-row items-center justify-center ${
+                isSelected ? 'bg-green-50 border-green-500' : 'border-transparent'
+              } ${isWrong ? 'bg-red-50 border-red-500' : ''} ${
+                shouldShowCorrect ? 'bg-green-50 border-green-500' : ''
+              }`}
               onPress={() => handleAnswerSelect(option)}
               disabled={isQuestionAnswered}
             >
-              <Text style={[
-                styles.optionText,
-                isSelected && styles.selectedOptionText,
-                isWrong && styles.wrongOptionText,
-                shouldShowCorrect && styles.correctOptionText,
-              ]}>
+              <Text className={`text-base text-gray-800 text-center font-medium ${
+                isSelected ? 'text-green-600 font-bold' : ''
+              } ${isWrong ? 'text-red-600 font-bold' : ''} ${
+                shouldShowCorrect ? 'text-green-600 font-bold' : ''
+              }`}>
                 {option}
               </Text>
               {shouldShowCorrect && (
-                <Ionicons name="checkmark-circle" size={20} color="#4CAF50" style={styles.optionIcon} />
+                <Ionicons name="checkmark-circle" size={20} color="#10B981" className="absolute right-4" />
               )}
               {isWrong && (
-                <Ionicons name="close-circle" size={20} color="#F44336" style={styles.optionIcon} />
+                <Ionicons name="close-circle" size={20} color="#EF4444" className="absolute right-4" />
               )}
             </TouchableOpacity>
           );
@@ -299,71 +316,66 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+      <View className="bg-primary flex-row items-center px-4 py-3">
+        <TouchableOpacity onPress={onBack} className="mr-3">
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <View style={styles.headerInfo}>
-          <Text style={styles.headerTitle}>
+        <View className="flex-1">
+          <Text className="text-lg font-bold text-white">
             {quiz.title} {isRetake && '(Retake)'}
           </Text>
-          <Text style={styles.headerProgress}>
+          <Text className="text-sm text-orange-100">
             Question {currentQuestionIndex + 1} of {quiz.questions.length}
           </Text>
         </View>
-        <View style={styles.headerActions}>
-          <View style={styles.scoreContainer}>
-            <Text style={styles.scoreText}>
-              {totalPointsEarned} pts
-            </Text>
-            {quiz.timeLimit && (
-              <View style={styles.timerContainer}>
-                <Ionicons name="time-outline" size={16} color="white" />
-                <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-              </View>
-            )}
-          </View>
+        <View className="items-end">
+          <Text className="text-white text-base font-bold mb-1">
+            {totalPointsEarned} pts
+          </Text>
+          {quiz.timeLimit && (
+            <View className="flex-row items-center">
+              <Ionicons name="time-outline" size={16} color="white" />
+              <Text className="text-white text-base font-bold ml-1">{formatTime(timeLeft)}</Text>
+            </View>
+          )}
         </View>
       </View>
 
       {/* Progress Bar */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressBar}>
+      <View className="bg-white px-4 py-2">
+        <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
           <View 
-            style={[
-              styles.progressFill,
-              { width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }
-            ]}
+            className="h-full bg-primary rounded-full"
+            style={{ width: `${((currentQuestionIndex + 1) / quiz.questions.length) * 100}%` }}
           />
         </View>
       </View>
 
       {/* Question Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
         {renderQuestion()}
         
         {/* Points Animation Overlay */}
         {showPointsGained && (
-          <View style={styles.pointsOverlay}>
-            <View style={[
-              styles.pointsAnimation,
-              showPointsGained.isCorrect ? styles.correctPointsAnimation : styles.wrongPointsAnimation
-            ]}>
+          <View className="absolute inset-0 justify-center items-center bg-black/30 z-50">
+            <View className={`px-6 py-4 rounded-2xl shadow-lg ${
+              showPointsGained.isCorrect ? 'bg-green-500' : 'bg-red-500'
+            }`}>
               {showPointsGained.isCorrect ? (
                 <>
-                  <Text style={styles.pointsGainedText}>
+                  <Text className="text-white text-xl font-bold text-center mb-1">
                     +{showPointsGained.points} points!
                   </Text>
                   {showPointsGained.timeBonus > 0 && (
-                    <Text style={styles.timeBonusText}>
+                    <Text className="text-yellow-300 text-base font-semibold text-center">
                       ⚡ Speed bonus: +{showPointsGained.timeBonus}
                     </Text>
                   )}
                 </>
               ) : (
-                <Text style={styles.wrongAnswerText}>
+                <Text className="text-white text-base font-semibold text-center mt-1">
                   ❌ Wrong answer
                 </Text>
               )}
@@ -373,30 +385,26 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
       </ScrollView>
 
       {/* Navigation */}
-      <View style={styles.navigation}>
+      <View className="flex-row p-4 bg-white border-t border-gray-200">
         <TouchableOpacity
-          style={[
-            styles.navButton,
-            styles.previousButton,
-            currentQuestionIndex === 0 && styles.disabledButton
-          ]}
+          className={`flex-1 flex-row items-center justify-center py-3 px-4 rounded-lg mx-1 ${
+            currentQuestionIndex === 0 ? 'bg-gray-300 opacity-50' : 'bg-gray-100'
+          }`}
           onPress={handlePrevious}
           disabled={currentQuestionIndex === 0}
         >
-          <Ionicons name="chevron-back" size={20} color="#8B4513" />
-          <Text style={styles.navButtonText}>Previous</Text>
+          <Ionicons name="chevron-back" size={20} color="#C67C4E" />
+          <Text className="text-primary text-base font-medium ml-1">Previous</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.navButton,
-            styles.nextButton,
-            !selectedAnswer && styles.disabledButton
-          ]}
+          className={`flex-1 flex-row items-center justify-center py-3 px-4 rounded-lg mx-1 ${
+            !selectedAnswer ? 'bg-gray-300 opacity-50' : 'bg-primary'
+          }`}
           onPress={handleNext}
           disabled={!selectedAnswer}
         >
-          <Text style={styles.nextButtonText}>
+          <Text className="text-white text-base font-medium mr-1">
             {isLastQuestion ? 'Submit' : 'Next'}
           </Text>
           <Ionicons name="chevron-forward" size={20} color="white" />
@@ -406,256 +414,4 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#8B4513',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-  },
-  backButton: {
-    marginRight: 12,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  headerProgress: {
-    fontSize: 14,
-    color: '#f0d0b4',
-  },
-  timerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  timerText: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
-  progressContainer: {
-    backgroundColor: 'white',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#8B4513',
-  },
-  content: {
-    flex: 1,
-    padding: 15,
-  },
-  questionContainer: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  questionText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
-    flex: 1,
-    lineHeight: 26,
-  },
-  characterDisplay: {
-    alignItems: 'center',
-    marginBottom: 32,
-    padding: 32,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-  },
-  baybayinCharacter: {
-    fontSize: 80,
-    color: '#8B4513',
-    fontWeight: 'bold',
-  },
-  romanizedCharacter: {
-    fontSize: 48,
-    color: '#8B4513',
-    fontWeight: 'bold',
-  },
-  optionsContainer: {
-    gap: 12,
-  },
-  optionButton: {
-    backgroundColor: '#f0f0f0',
-    padding: 15,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectedOption: {
-    backgroundColor: '#e8f5e8',
-    borderColor: '#4CAF50',
-  },
-  optionText: {
-    fontSize: 15,
-    color: '#333',
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  selectedOptionText: {
-    color: '#4CAF50',
-    fontWeight: 'bold',
-  },
-  navigation: {
-    flexDirection: 'row',
-    padding: 15,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  navButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  previousButton: {
-    backgroundColor: '#f0f0f0',
-  },
-  nextButton: {
-    backgroundColor: '#8B4513',
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-    opacity: 0.5,
-  },
-  navButtonText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#8B4513',
-    marginLeft: 4,
-  },
-  nextButtonText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: 'white',
-    marginRight: 4,
-  },
-  scoreContainer: {
-    alignItems: 'flex-end',
-  },
-  scoreText: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  pointsOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    zIndex: 1000,
-  },
-  pointsAnimation: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 24,
-    paddingVertical: 15,
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    transform: [{ scale: 1.1 }],
-  },
-  pointsGainedText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  timeBonusText: {
-    color: '#FFD700',
-    fontSize: 15,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  // New styles for correct/wrong answers
-  correctOption: {
-    backgroundColor: '#e8f5e8',
-    borderColor: '#4CAF50',
-    borderWidth: 2,
-  },
-  wrongOption: {
-    backgroundColor: '#ffebee',
-    borderColor: '#F44336',
-    borderWidth: 2,
-  },
-  correctOptionText: {
-    color: '#4CAF50',
-    fontWeight: 'bold',
-  },
-  wrongOptionText: {
-    color: '#F44336',
-    fontWeight: 'bold',
-  },
-  optionIcon: {
-    position: 'absolute',
-    right: 16,
-    top: '50%',
-    transform: [{ translateY: -10 }],
-  },
-  correctPointsAnimation: {
-    backgroundColor: '#4CAF50',
-  },
-  wrongPointsAnimation: {
-    backgroundColor: '#F44336',
-  },
-  wrongAnswerText: {
-    color: 'white',
-    fontSize: 15,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-});
+

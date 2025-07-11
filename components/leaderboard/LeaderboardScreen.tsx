@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
   RefreshControl,
@@ -14,6 +13,7 @@ import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { LeaderboardEntry, LeaderboardFilter } from '../../types/leaderboard';
+import '../../global.css';
 
 export default function LeaderboardScreen() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -129,48 +129,37 @@ export default function LeaderboardScreen() {
     const isCurrentUser = item.userId === user?.uid;
     
     return (
-      <View style={[
-        styles.leaderboardItem,
-        isCurrentUser && styles.currentUserItem,
-        index < 3 && styles.topThreeItem
-      ]}>
-        <View style={styles.rankContainer}>
-          <Text style={[
-            styles.rankText,
-            { color: getRankColor(item.rank) }
-          ]}>
+      <View className={`flex-row items-center bg-white p-4 mx-3 my-1 rounded-xl shadow-sm ${
+        isCurrentUser ? 'bg-blue-50 border-2 border-secondary' : ''
+      } ${index < 3 ? 'border-l-4 border-l-yellow-400' : ''}`}>
+        <View className="w-12 items-center">
+          <Text className="text-lg font-bold" style={{ color: getRankColor(item.rank) }}>
             {getRankIcon(item.rank)}
           </Text>
         </View>
         
-        <View style={styles.userInfo}>
-          <Text style={[
-            styles.displayName,
-            isCurrentUser && styles.currentUserText
-          ]}>
+        <View className="flex-1 ml-3">
+          <Text className={`text-lg font-semibold ${isCurrentUser ? 'text-secondary' : 'text-gray-800'}`}>
             {item.displayName}
           </Text>
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
+          <View className="flex-row mt-1 gap-3">
+            <View className="flex-row items-center gap-1">
               <Ionicons name="star" size={14} color="#FFD700" />
-              <Text style={styles.statText}>{item.totalScore}</Text>
+              <Text className="text-xs text-gray-600">{item.totalScore}</Text>
             </View>
-            <View style={styles.statItem}>
+            <View className="flex-row items-center gap-1">
               <Ionicons name="trending-up" size={14} color="#4CAF50" />
-              <Text style={styles.statText}>Lvl {item.level}</Text>
+              <Text className="text-xs text-gray-600">Lvl {item.level}</Text>
             </View>
-            <View style={styles.statItem}>
-              <Ionicons name="flame" size={14} color="#FF5722" />
-              <Text style={styles.statText}>{item.streak}</Text>
+            <View className="flex-row items-center gap-1">
+              <Ionicons name="flame" size={14} color="#EF4444" />
+              <Text className="text-xs text-gray-600">{item.streak}</Text>
             </View>
           </View>
         </View>
         
-        <View style={styles.scoreContainer}>
-          <Text style={[
-            styles.scoreText,
-            isCurrentUser && styles.currentUserText
-          ]}>
+        <View className="items-end">
+          <Text className={`text-lg font-bold ${isCurrentUser ? 'text-secondary' : 'text-gray-800'}`}>
             {item.totalScore.toLocaleString()}
           </Text>
         </View>
@@ -179,55 +168,49 @@ export default function LeaderboardScreen() {
   };
 
   const renderHeader = () => (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>Leaderboard</Text>
-      <Text style={styles.headerSubtitle}>
+    <View className="bg-white p-5 border-b border-gray-200">
+      <Text className="text-2xl font-bold text-gray-800 text-center">Leaderboard</Text>
+      <Text className="text-sm text-gray-600 text-center mt-1">
         {userRank ? `Your rank: #${userRank}` : 'Keep learning to get ranked!'}
       </Text>
       
       {/* Filter Options */}
-      <View style={styles.filterContainer}>
+      <View className="flex-row justify-center mt-4 gap-3">
         <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter.category === 'total-score' && styles.activeFilter
-          ]}
+          className={`px-3 py-2 rounded-full ${
+            filter.category === 'total-score' ? 'bg-primary' : 'bg-gray-100'
+          }`}
           onPress={() => setFilter({ ...filter, category: 'total-score' })}
         >
-          <Text style={[
-            styles.filterText,
-            filter.category === 'total-score' && styles.activeFilterText
-          ]}>
+          <Text className={`text-xs ${
+            filter.category === 'total-score' ? 'text-white' : 'text-gray-600'
+          }`}>
             Total Score
           </Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter.category === 'level' && styles.activeFilter
-          ]}
+          className={`px-3 py-2 rounded-full ${
+            filter.category === 'level' ? 'bg-primary' : 'bg-gray-100'
+          }`}
           onPress={() => setFilter({ ...filter, category: 'level' })}
         >
-          <Text style={[
-            styles.filterText,
-            filter.category === 'level' && styles.activeFilterText
-          ]}>
+          <Text className={`text-xs ${
+            filter.category === 'level' ? 'text-white' : 'text-gray-600'
+          }`}>
             Level
           </Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={[
-            styles.filterButton,
-            filter.category === 'streak' && styles.activeFilter
-          ]}
+          className={`px-3 py-2 rounded-full ${
+            filter.category === 'streak' ? 'bg-primary' : 'bg-gray-100'
+          }`}
           onPress={() => setFilter({ ...filter, category: 'streak' })}
         >
-          <Text style={[
-            styles.filterText,
-            filter.category === 'streak' && styles.activeFilterText
-          ]}>
+          <Text className={`text-xs ${
+            filter.category === 'streak' ? 'text-white' : 'text-gray-600'
+          }`}>
             Streak
           </Text>
         </TouchableOpacity>
@@ -236,23 +219,23 @@ export default function LeaderboardScreen() {
   );
 
   const renderEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <Ionicons name="trophy-outline" size={64} color="#ccc" />
-      <Text style={styles.emptyText}>No rankings yet</Text>
-      <Text style={styles.emptySubtext}>Complete lessons and quizzes to appear on the leaderboard!</Text>
+    <View className="flex-1 justify-center items-center p-10">
+      <Ionicons name="trophy-outline" size={64} color="#D1D5DB" />
+      <Text className="text-lg font-medium text-gray-600 mt-3">No rankings yet</Text>
+      <Text className="text-sm text-gray-600 text-center mt-1">Complete lessons and quizzes to appear on the leaderboard!</Text>
     </View>
   );
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading leaderboard...</Text>
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-lg text-gray-600">Loading leaderboard...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-gray-50">
       <FlatList
         data={leaderboard}
         renderItem={renderLeaderboardItem}
@@ -263,150 +246,14 @@ export default function LeaderboardScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#2196F3']}
+            colors={['#C67C4E']}
           />
         }
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={{ paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#777',
-    textAlign: 'center',
-    marginTop: 5,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 15,
-    gap: 10,
-  },
-  filterButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    backgroundColor: '#f0f0f0',
-  },
-  activeFilter: {
-    backgroundColor: '#2196F3',
-  },
-  filterText: {
-    fontSize: 12,
-    color: '#777',
-  },
-  activeFilterText: {
-    color: '#fff',
-  },
-  leaderboardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 15,
-    marginHorizontal: 10,
-    marginVertical: 5,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  currentUserItem: {
-    backgroundColor: '#E3F2FD',
-    borderWidth: 2,
-    borderColor: '#2196F3',
-  },
-  topThreeItem: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#FFD700',
-  },
-  rankContainer: {
-    width: 50,
-    alignItems: 'center',
-  },
-  rankText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  userInfo: {
-    flex: 1,
-    marginLeft: 10,
-  },
-  displayName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  currentUserText: {
-    color: '#2196F3',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    marginTop: 5,
-    gap: 10,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-  },
-  statText: {
-    fontSize: 12,
-    color: '#777',
-  },
-  scoreContainer: {
-    alignItems: 'flex-end',
-  },
-  scoreText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#777',
-    marginTop: 10,
-  },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#777',
-    textAlign: 'center',
-    marginTop: 5,
-  },
-});
+

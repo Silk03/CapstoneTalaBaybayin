@@ -3,12 +3,12 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   ScrollView,
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
+import '../../global.css';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -208,365 +208,123 @@ export default function BaybayinKeyboard({
   }
 
   return (
-    <View style={styles.keyboardContainer}>
+    <View className="absolute bottom-0 left-0 right-0 bg-gray-200 border-t border-gray-300 shadow-lg max-h-[40vh]">
       {/* Compact Header */}
-      <View style={styles.compactHeader}>
-        <Text style={styles.keyboardTitle}>Baybayin Keyboard</Text>
-        <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <Ionicons name="keypad-outline" size={20} color="#8B4513" />
+      <View className="flex-row justify-between items-center px-4 pt-2 pb-2 bg-gray-300 border-b border-gray-400">
+        <Text className="text-lg font-semibold text-primary">Baybayin Keyboard</Text>
+        <TouchableOpacity onPress={onClose} className="bg-primary/10 rounded-full p-2">
+          <Ionicons name="keypad-outline" size={20} color="#C67C4E" />
         </TouchableOpacity>
       </View>
 
       {/* Text Preview */}
-      <View style={styles.textPreview}>
-          <Text style={styles.previewText} numberOfLines={2}>
-            {text || placeholder}
-          </Text>
-          {text && (
-            <TouchableOpacity onPress={handleDone} style={styles.doneButtonCompact}>
-              <Ionicons name="checkmark" size={16} color="white" />
-              <Text style={styles.doneTextCompact}>Done</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+      <View className="flex-row items-center justify-between px-4 py-3 bg-gray-100 border-b border-gray-200">
+        <Text className="flex-1 text-lg text-primary font-bold mr-3" numberOfLines={2}>
+          {text || placeholder}
+        </Text>
+        {text && (
+          <TouchableOpacity onPress={handleDone} className="flex-row items-center bg-primary rounded-full px-3 py-2 gap-1">
+            <Ionicons name="checkmark" size={16} color="white" />
+            <Text className="text-white text-sm font-semibold">Done</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
-        {/* Keyboard */}
-        <ScrollView style={styles.keyboardContent} showsVerticalScrollIndicator={false}>
-          {!showVowelModifiers ? (
-            <>
-              <Text style={styles.sectionTitle}>Baybayin Characters</Text>
-              <Text style={styles.instructionText}>
-                Tap to type • Long press to hear pronunciation
-              </Text>
-              {KEYBOARD_LAYOUT.map((row, rowIndex) => (
-                <View key={rowIndex} style={styles.keyboardRow}>
-                  {row.map((char) => (
-                    <TouchableOpacity
-                      key={char.key}
-                      style={[
-                        styles.key,
-                        char.key === 'space' && styles.spaceKey,
-                        char.key === 'backspace' && styles.backspaceKey,
-                      ]}
-                      onPress={() => handleKeyPress(char.key, char.baybayin)}
-                      onLongPress={() => {
-                        if (char.key !== 'space' && char.key !== 'backspace') {
-                          speakCharacter(char.key);
-                        }
-                      }}
-                      delayLongPress={500}
-                    >
-                      <Text style={styles.keyBaybayin}>{char.baybayin}</Text>
-                      <Text style={styles.keyLabel}>{char.label}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              ))}
-            </>
-          ) : (
-            <View style={styles.vowelModifierContainer}>
-              <Text style={styles.sectionTitle}>
-                Select vowel for "{selectedConsonant}"
-              </Text>
-              <Text style={styles.instructionText}>
-                Choose how to pronounce the consonant:
-              </Text>
-              
-              <View style={styles.modifierRow}>
-                {/* Default 'a' sound */}
-                <TouchableOpacity
-                  style={styles.modifierKey}
-                  onPress={() => {
-                    setText(text + BAYBAYIN_CHARACTERS[selectedConsonant!]);
-                    setShowVowelModifiers(false);
-                    setSelectedConsonant(null);
-                  }}
-                >
-                  <Text style={styles.keyBaybayin}>
-                    {BAYBAYIN_CHARACTERS[selectedConsonant!]}
-                  </Text>
-                  <Text style={styles.keyLabel}>{selectedConsonant} (default)</Text>
-                </TouchableOpacity>
-
-                {/* Vowel modifiers */}
-                {VOWEL_MODIFIERS.map((modifier) => (
+      {/* Keyboard */}
+      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+        {!showVowelModifiers ? (
+          <>
+            <Text className="text-lg font-bold text-primary mb-4 mt-2 text-center">Baybayin Characters</Text>
+            <Text className="text-sm text-gray-600 text-center mb-5">
+              Tap to type • Long press to hear pronunciation
+            </Text>
+            {KEYBOARD_LAYOUT.map((row, rowIndex) => (
+              <View key={rowIndex} className="flex-row justify-center mb-2 gap-1">
+                {row.map((char) => (
                   <TouchableOpacity
-                    key={modifier.key}
-                    style={styles.modifierKey}
-                    onPress={() => handleVowelModifier(modifier.key, modifier.symbol)}
+                    key={char.key}
+                    className={`bg-white rounded-lg p-3 items-center justify-center shadow-sm ${
+                      char.key === 'space' ? 'min-w-[100px]' : 
+                      char.key === 'backspace' ? 'bg-red-400' : 
+                      'min-w-[50px]'
+                    }`}
+                    onPress={() => handleKeyPress(char.key, char.baybayin)}
+                    onLongPress={() => {
+                      if (char.key !== 'space' && char.key !== 'backspace') {
+                        speakCharacter(char.key);
+                      }
+                    }}
+                    delayLongPress={500}
                   >
-                    <Text style={styles.keyBaybayin}>
-                      {modifier.key === 'virama' 
-                        ? BAYBAYIN_CHARACTERS[selectedConsonant!.charAt(0)] + modifier.symbol
-                        : BAYBAYIN_CHARACTERS[selectedConsonant!.charAt(0) + modifier.key]
-                      }
-                    </Text>
-                    <Text style={styles.keyLabel}>
-                      {modifier.key === 'virama' 
-                        ? `${selectedConsonant!.charAt(0)} (ending)`
-                        : `${selectedConsonant!.charAt(0)}${modifier.key}`
-                      }
-                    </Text>
+                    <Text className="text-xl font-bold text-primary mb-1">{char.baybayin}</Text>
+                    <Text className="text-xs text-gray-600 text-center">{char.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
-
+            ))}
+          </>
+        ) : (
+          <View className="items-center py-5">
+            <Text className="text-lg font-bold text-primary mb-4">
+              Select vowel for "{selectedConsonant}"
+            </Text>
+            <Text className="text-sm text-gray-600 text-center mb-5">
+              Choose how to pronounce the consonant:
+            </Text>
+            
+            <View className="flex-row flex-wrap justify-center gap-2 mb-5">
+              {/* Default 'a' sound */}
               <TouchableOpacity
-                style={styles.cancelModifierButton}
+                className="bg-white rounded-lg p-4 min-w-[80px] items-center justify-center shadow-sm"
                 onPress={() => {
+                  setText(text + BAYBAYIN_CHARACTERS[selectedConsonant!]);
                   setShowVowelModifiers(false);
                   setSelectedConsonant(null);
                 }}
               >
-                <Text style={styles.cancelModifierText}>Cancel</Text>
+                <Text className="text-xl font-bold text-primary mb-1">
+                  {BAYBAYIN_CHARACTERS[selectedConsonant!]}
+                </Text>
+                <Text className="text-xs text-gray-600 text-center">{selectedConsonant} (default)</Text>
               </TouchableOpacity>
+
+              {/* Vowel modifiers */}
+              {VOWEL_MODIFIERS.map((modifier) => (
+                <TouchableOpacity
+                  key={modifier.key}
+                  className="bg-white rounded-lg p-4 min-w-[80px] items-center justify-center shadow-sm"
+                  onPress={() => handleVowelModifier(modifier.key, modifier.symbol)}
+                >
+                  <Text className="text-xl font-bold text-primary mb-1">
+                    {modifier.key === 'virama' 
+                      ? BAYBAYIN_CHARACTERS[selectedConsonant!.charAt(0)] + modifier.symbol
+                      : BAYBAYIN_CHARACTERS[selectedConsonant!.charAt(0) + modifier.key]
+                    }
+                  </Text>
+                  <Text className="text-xs text-gray-600 text-center">
+                    {modifier.key === 'virama' 
+                      ? `${selectedConsonant!.charAt(0)} (ending)`
+                      : `${selectedConsonant!.charAt(0)}${modifier.key}`
+                    }
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          )}
-        </ScrollView>
+
+            <TouchableOpacity
+              className="bg-red-400 rounded-lg py-3 px-6"
+              onPress={() => {
+                setShowVowelModifiers(false);
+                setSelectedConsonant(null);
+              }}
+            >
+              <Text className="text-white font-bold">Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  keyboardContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#e8e8e8',
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-    maxHeight: screenHeight * 0.4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -3,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-  compactHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 7,
-    paddingBottom: 8,
-    backgroundColor: '#d4d4d4',
-    borderBottomWidth: 1,
-    borderBottomColor: '#bbb',
-  },
-  keyboardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#8B4513',
-  },
-  closeButton: {
-    backgroundColor: 'rgba(139, 69, 19, 0.1)',
-    borderRadius: 15,
-    padding: 6,
-  },
-  textPreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#f0f0f0',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  previewText: {
-    flex: 1,
-    fontSize: 18,
-    color: '#8B4513',
-    fontWeight: 'bold',
-    marginRight: 12,
-  },
-  doneButtonCompact: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#8B4513',
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    gap: 4,
-  },
-  doneTextCompact: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: '#8B4513',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  headerButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  cancelText: {
-    fontSize: 16,
-    color: '#f0d0b4',
-  },
-  doneText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  textContainer: {
-    backgroundColor: 'white',
-    margin: 15,
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  textDisplay: {
-    minHeight: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 12,
-  },
-  baybayinText: {
-    fontSize: 24,
-    color: '#8B4513',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    lineHeight: 32,
-  },
-  romanizedDisplay: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  romanizedLabel: {
-    fontSize: 14,
-    color: '#777',
-    fontWeight: '600',
-  },
-  romanizedText: {
-    fontSize: 14,
-    color: '#8B4513',
-    fontStyle: 'italic',
-  },
-  keyboardContent: {
-    flex: 1,
-    paddingHorizontal: 15,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#8B4513',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  instructionText: {
-    fontSize: 14,
-    color: '#777',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  keyboardRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 8,
-    gap: 4,
-  },
-  key: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 12,
-    minWidth: 50,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  spaceKey: {
-    minWidth: 100,
-  },
-  backspaceKey: {
-    backgroundColor: '#ff6b6b',
-  },
-  keyBaybayin: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#8B4513',
-    marginBottom: 2,
-  },
-  keyLabel: {
-    fontSize: 10,
-    color: '#777',
-    textAlign: 'center',
-  },
-  vowelModifierContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  modifierRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 10,
-    marginBottom: 20,
-  },
-  modifierKey: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 15,
-    minWidth: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  cancelModifierButton: {
-    backgroundColor: '#ff6b6b',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  cancelModifierText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-});
+

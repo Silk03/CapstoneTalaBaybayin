@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   Dimensions,
   TouchableOpacity,
   SafeAreaView
@@ -14,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { DrawingCanvas } from './DrawingCanvas';
 import { handwritingCharacters } from '../../data/handwriting';
 import { HandwritingStroke, HandwritingCharacter } from '../../types/handwriting';
+import '../../global.css';
 
 const { width: screenWidth } = Dimensions.get('window');
 const canvasSize = Math.min(screenWidth - 30, 350);
@@ -33,9 +33,9 @@ export default function HandwritingScreen() {
   // Early return if no user authenticated
   if (!user) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={[styles.content, styles.centeredContent]}>
-          <Text style={styles.noAuthText}>Please log in to save your handwriting progress</Text>
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-lg text-gray-600 text-center mx-5">Please log in to save your handwriting progress</Text>
         </View>
       </SafeAreaView>
     );
@@ -251,73 +251,75 @@ export default function HandwritingScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="flex-1 px-4 py-2">
         {/* Header with Navigation */}
-        <View style={styles.topSection}>
-          <View style={styles.headerWithNav}>
+        <View className="mb-3">
+          <View className="flex-row items-center justify-between mb-4">
             <TouchableOpacity 
-              style={styles.navButton}
+              className="w-11 h-11 rounded-full bg-white shadow-sm items-center justify-center"
               onPress={handlePreviousCharacter}
             >
-              <Ionicons name="chevron-back" size={24} color="#2196F3" />
+              <Ionicons name="chevron-back" size={24} color="#0B4CA7" />
             </TouchableOpacity>
 
-            <View style={styles.headerCenter}>
-              <Text style={styles.title}>Handwriting Practice</Text>
+            <View className="flex-1 items-center">
+              <Text className="text-xl font-bold text-primary mb-1">Handwriting Practice</Text>
               <TouchableOpacity 
-                style={styles.menuButton}
+                className="bg-white rounded-full px-3 py-2 shadow-sm flex-row items-center"
                 onPress={() => setShowCharacterMenu(!showCharacterMenu)}
               >
-                <Text style={styles.menuButtonText}>
+                <Text className="text-xs text-secondary font-medium mr-1">
                   Choose Character
                 </Text>
                 <Ionicons 
                   name={showCharacterMenu ? "chevron-up" : "chevron-down"} 
                   size={16} 
-                  color="#2196F3" 
+                  color="#0B4CA7" 
                 />
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity 
-              style={styles.navButton}
+              className="w-11 h-11 rounded-full bg-white shadow-sm items-center justify-center"
               onPress={handleNextCharacter}
             >
-              <Ionicons name="chevron-forward" size={24} color="#2196F3" />
+              <Ionicons name="chevron-forward" size={24} color="#0B4CA7" />
             </TouchableOpacity>
           </View>
 
           {/* Character Selection Menu */}
           {showCharacterMenu && (
-            <View style={styles.characterMenu}>
-              <Text style={styles.menuTitle}>Select a Character to Practice:</Text>
-              <View style={styles.characterGrid}>
+            <View className="bg-white rounded-2xl p-4 shadow-sm">
+              <Text className="text-sm font-bold text-primary mb-4 text-center">Select a Character to Practice:</Text>
+              <View className="flex-row flex-wrap justify-between gap-2">
                 {handwritingCharacters.map((character) => (
                   <TouchableOpacity
                     key={character.id}
-                    style={[
-                      styles.characterOption,
-                      selectedCharacter.id === character.id && styles.selectedCharacter,
-                      charactersWithProgress.has(character.id) && styles.characterWithProgress
-                    ]}
+                    className={`w-[30%] aspect-square rounded-xl items-center justify-center p-2 border-2 ${
+                      selectedCharacter.id === character.id 
+                        ? 'bg-blue-50 border-secondary' 
+                        : charactersWithProgress.has(character.id)
+                          ? 'bg-gray-50 border-green-500'
+                          : 'bg-gray-50 border-transparent'
+                    }`}
                     onPress={() => handleSelectCharacter(character)}
                   >
                     {charactersWithProgress.has(character.id) && (
-                      <View style={styles.progressIndicator}>
+                      <View className="absolute top-0.5 right-0.5 z-10">
                         <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
                       </View>
                     )}
-                    <Text style={[
-                      styles.characterText,
-                      selectedCharacter.id === character.id && styles.selectedCharacterText
-                    ]}>
+                    <Text className={`text-3xl font-bold mb-1 ${
+                      selectedCharacter.id === character.id ? 'text-secondary' : 'text-primary'
+                    }`}>
                       {character.character}
                     </Text>
-                    <Text style={[
-                      styles.characterLabel,
-                      selectedCharacter.id === character.id && styles.selectedLabel
-                    ]}>
+                    <Text className={`text-xs font-medium ${
+                      selectedCharacter.id === character.id 
+                        ? 'text-secondary font-bold' 
+                        : 'text-gray-600'
+                    }`}>
                       {character.romanized}
                     </Text>
                   </TouchableOpacity>
@@ -327,15 +329,15 @@ export default function HandwritingScreen() {
           )}
 
           {/* Character Info */}
-          <View style={styles.characterInfo}>
-            <View style={styles.characterRow}>
-              <Text style={styles.currentCharacter}>{selectedCharacter.character}</Text>
-              <View style={styles.characterDetails}>
-                <Text style={styles.romanized}>"{selectedCharacter.romanized}"</Text>
-                <Text style={styles.instruction}>
+          <View className="bg-white rounded-xl p-4 shadow-sm">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-5xl font-bold text-primary">{selectedCharacter.character}</Text>
+              <View className="flex-1 ml-5 items-end">
+                <Text className="text-lg text-gray-800 mb-1">"{selectedCharacter.romanized}"</Text>
+                <Text className="text-xs text-gray-600 text-right">
                   {charactersWithProgress.has(selectedCharacter.id) 
                     ? 'Continue your saved progress' 
-                    : 'Practice freely - progress saved automatically'}
+                    : 'Practice freely - progress saved manually'}
                 </Text>
               </View>
             </View>
@@ -343,14 +345,14 @@ export default function HandwritingScreen() {
         </View>
 
         {/* Drawing Canvas - Centered */}
-        <View style={styles.canvasSection}>
-          <Text style={styles.canvasTitle}>
+        <View className="flex-1 justify-center items-center my-4 min-h-[300px]">
+          <Text className="text-sm font-semibold text-primary mb-4 text-center">
             {selectedCharacter.imageUri ? 'Trace over the character image' : 'Follow the guide strokes'}
           </Text>
-          <View style={styles.canvasWrapper}>
+          <View className="items-center justify-center">
             {isLoading ? (
-              <View style={[styles.loadingContainer, { width: canvasSize, height: canvasSize }]}>
-                <Text style={styles.loadingText}>Loading progress...</Text>
+              <View className="bg-gray-100 rounded-xl border-2 border-gray-300 justify-center items-center" style={{ width: canvasSize, height: canvasSize }}>
+                <Text className="text-sm text-gray-600 font-medium">Loading progress...</Text>
               </View>
             ) : (
               <DrawingCanvas
@@ -369,34 +371,38 @@ export default function HandwritingScreen() {
         </View>
 
         {/* Bottom Controls */}
-        <View style={styles.bottomSection}>
+        <View className="pb-3">
           {/* Stroke Width Controls */}
-          <View style={styles.sizeControls}>
-            <Text style={styles.sizeLabel}>Stroke Width</Text>
-            <View style={styles.sizeButtonsRow}>
+          <View className="items-center pt-3 border-t border-gray-200">
+            <Text className="text-sm font-semibold text-gray-600 mb-3">Stroke Width</Text>
+            <View className="flex-row items-center justify-center">
               <TouchableOpacity 
-                style={[styles.sizeButton, strokeWidth <= minStrokeWidth && styles.disabledButton]}
+                className={`w-9 h-9 rounded-full items-center justify-center mx-3 shadow-sm ${
+                  strokeWidth <= minStrokeWidth ? 'bg-gray-100' : 'bg-white'
+                }`}
                 onPress={handleDecreaseStrokeWidth}
                 disabled={strokeWidth <= minStrokeWidth}
               >
-                <Ionicons name="remove" size={18} color={strokeWidth <= minStrokeWidth ? "#CCC" : "#2196F3"} />
+                <Ionicons name="remove" size={18} color={strokeWidth <= minStrokeWidth ? "#CCC" : "#0B4CA7"} />
               </TouchableOpacity>
               
-              <Text style={styles.sizeText}>{strokeWidth}px</Text>
+              <Text className="text-sm font-semibold text-gray-800 min-w-[40px] text-center">{strokeWidth}px</Text>
               
               <TouchableOpacity 
-                style={[styles.sizeButton, strokeWidth >= maxStrokeWidth && styles.disabledButton]}
+                className={`w-9 h-9 rounded-full items-center justify-center mx-3 shadow-sm ${
+                  strokeWidth >= maxStrokeWidth ? 'bg-gray-100' : 'bg-white'
+                }`}
                 onPress={handleIncreaseStrokeWidth}
                 disabled={strokeWidth >= maxStrokeWidth}
               >
-                <Ionicons name="add" size={18} color={strokeWidth >= maxStrokeWidth ? "#CCC" : "#2196F3"} />
+                <Ionicons name="add" size={18} color={strokeWidth >= maxStrokeWidth ? "#CCC" : "#0B4CA7"} />
               </TouchableOpacity>
             </View>
 
             {/* Action Buttons */}
-            <View style={styles.actionButtonsContainer}>
+            <View className="flex-row justify-center gap-4 mt-4">
               <TouchableOpacity 
-                style={[styles.actionButton, styles.saveButton]}
+                className="flex-row items-center justify-center px-5 py-3 rounded-full bg-white shadow-sm min-w-[80px]"
                 onPress={handleManualSave}
                 disabled={userStrokes.length === 0}
               >
@@ -405,21 +411,19 @@ export default function HandwritingScreen() {
                   size={18} 
                   color={userStrokes.length === 0 ? "#CCC" : "#4CAF50"} 
                 />
-                <Text style={[
-                  styles.actionButtonText, 
-                  styles.saveButtonText,
-                  userStrokes.length === 0 && styles.disabledButtonText
-                ]}>
+                <Text className={`text-sm ml-1 font-semibold ${
+                  userStrokes.length === 0 ? 'text-gray-400' : 'text-green-600'
+                }`}>
                   Save
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity 
-                style={[styles.actionButton, styles.clearButton]}
+                className="flex-row items-center justify-center px-5 py-3 rounded-full bg-white shadow-sm min-w-[80px]"
                 onPress={handleClearCanvas}
               >
-                <Ionicons name="refresh" size={18} color="#FF5722" />
-                <Text style={[styles.actionButtonText, styles.clearButtonText]}>Clear</Text>
+                <Ionicons name="refresh" size={18} color="#EF4444" />
+                <Text className="text-sm ml-1 font-semibold text-red-500">Clear</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -429,331 +433,4 @@ export default function HandwritingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5'
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 15,
-    paddingVertical: 8
-  },
-  topSection: {
-    marginBottom: 10
-  },
-  headerWithNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 15
-  },
-  headerCenter: {
-    flex: 1,
-    alignItems: 'center'
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#8B4513',
-    marginBottom: 5
-  },
-  counterText: {
-    fontSize: 12,
-    color: '#777',
-    fontWeight: '500'
-  },
-  characterInfo: {
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3
-  },
-  characterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  currentCharacter: {
-    fontSize: 50,
-    fontWeight: 'bold',
-    color: '#8B4513'
-  },
-  characterDetails: {
-    flex: 1,
-    marginLeft: 20,
-    alignItems: 'flex-end'
-  },
-  romanized: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 5
-  },
-  instruction: {
-    fontSize: 12,
-    color: '#777',
-    textAlign: 'right'
-  },
-  canvasSection: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 15,
-    minHeight: 300
-  },
-  canvasTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#8B4513',
-    marginBottom: 15,
-    textAlign: 'center'
-  },
-  canvasWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  bottomSection: {
-    paddingBottom: 10
-  },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 10
-  },
-  controlButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    minWidth: 80,
-    flexDirection: 'row'
-  },
-  activeButton: {
-    backgroundColor: '#2196F3'
-  },
-  menuButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-    marginTop: 5
-  },
-  menuButtonText: {
-    fontSize: 12,
-    color: '#2196F3',
-    fontWeight: '500',
-    marginRight: 5
-  },
-  characterMenu: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    padding: 15,
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3
-  },
-  menuTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#8B4513',
-    marginBottom: 15,
-    textAlign: 'center'
-  },
-  characterGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 8
-  },
-  characterOption: {
-    width: '30%',
-    aspectRatio: 1,
-    backgroundColor: '#F8F8F8',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 8,
-    borderWidth: 2,
-    borderColor: 'transparent'
-  },
-  selectedCharacter: {
-    backgroundColor: '#E3F2FD',
-    borderColor: '#2196F3'
-  },
-  characterWithProgress: {
-    borderColor: '#4CAF50',
-    borderWidth: 2
-  },
-  progressIndicator: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    zIndex: 1
-  },
-  characterText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#8B4513',
-    marginBottom: 4
-  },
-  selectedCharacterText: {
-    color: '#2196F3'
-  },
-  characterLabel: {
-    fontSize: 10,
-    color: '#777',
-    fontWeight: '500'
-  },
-  selectedLabel: {
-    color: '#2196F3',
-    fontWeight: 'bold'
-  },
-  controlText: {
-    fontSize: 12,
-    color: '#333',
-    marginLeft: 5,
-    fontWeight: '500'
-  },
-  activeText: {
-    color: '#FFF'
-  },
-  navButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    width: 45,
-    height: 45,
-    borderRadius: 22.5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3
-  },
-  sizeControls: {
-    alignItems: 'center',
-    marginTop: 10,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#E0E0E0'
-  },
-  sizeLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#555',
-    marginBottom: 10
-  },
-  sizeButtonsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  sizeButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    marginHorizontal: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2
-  },
-  disabledButton: {
-    backgroundColor: '#F5F5F5'
-  },
-  sizeText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#333',
-    minWidth: 40,
-    textAlign: 'center'
-  },
-  clearButton: {
-    backgroundColor: 'white'
-  },
-  clearButtonText: {
-    color: '#FF5722'
-  },
-  centeredContent: {
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  noAuthText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginHorizontal: 20
-  },
-  loadingContainer: {
-    backgroundColor: '#FAFAFA',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  loadingText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500'
-  },
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 15,
-    marginTop: 15
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    minWidth: 80
-  },
-  saveButton: {
-    backgroundColor: 'white'
-  },
-  actionButtonText: {
-    fontSize: 13,
-    marginLeft: 5,
-    fontWeight: '600'
-  },
-  saveButtonText: {
-    color: '#4CAF50'
-  },
-  disabledButtonText: {
-    color: '#CCC'
-  }
-});
+

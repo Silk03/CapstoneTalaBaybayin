@@ -4,7 +4,6 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  StyleSheet,
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -58,43 +57,31 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
     
     return (
       <TouchableOpacity
-        style={[
-          styles.quizCard,
-          !isUnlocked && styles.lockedCard
-        ]}
+        className={`bg-white rounded-xl p-4 mb-4 shadow-sm ${!isUnlocked ? 'opacity-50' : ''}`}
         onPress={() => isUnlocked && onSelectQuiz(item)}
         disabled={!isUnlocked}
       >
-        <View style={styles.quizHeader}>
-          <View style={styles.quizInfo}>
-            <Text style={[
-              styles.quizTitle,
-              !isUnlocked && styles.lockedText
-            ]}>
+        <View className="flex-row justify-between items-start mb-3">
+          <View className="flex-1 mr-3">
+            <Text className={`text-lg font-bold mb-1 ${!isUnlocked ? 'text-gray-400' : 'text-gray-800'}`}>
               {item.title}
             </Text>
-            <Text style={[
-              styles.quizDescription,
-              !isUnlocked && styles.lockedText
-            ]}>
+            <Text className={`text-sm leading-5 ${!isUnlocked ? 'text-gray-400' : 'text-gray-600'}`}>
               {item.description}
             </Text>
           </View>
           
-          <View style={styles.quizMeta}>
+          <View className="items-end">
             {!isUnlocked ? (
               <Ionicons name="lock-closed" size={24} color="#ccc" />
             ) : (
-              <View style={[
-                styles.difficultyBadge,
-                { backgroundColor: getDifficultyColor(item.difficulty) }
-              ]}>
+              <View className="flex-row items-center px-2 py-1 rounded-full" style={{ backgroundColor: getDifficultyColor(item.difficulty) }}>
                 <Ionicons 
                   name={getDifficultyIcon(item.difficulty) as any} 
                   size={16} 
                   color="white" 
                 />
-                <Text style={styles.difficultyText}>
+                <Text className="text-white text-xs font-bold ml-1">
                   {item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}
                 </Text>
               </View>
@@ -102,30 +89,30 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
           </View>
         </View>
         
-        <View style={styles.quizDetails}>
-          <View style={styles.detailItem}>
-            <Ionicons name="help-circle-outline" size={15} color="#777" />
-            <Text style={styles.detailText}>{item.questions.length} questions</Text>
+        <View className="flex-row justify-between items-center mb-2">
+          <View className="flex-row items-center">
+            <Ionicons name="help-circle-outline" size={16} color="#777" />
+            <Text className="text-sm text-gray-600 ml-1">{item.questions.length} questions</Text>
           </View>
           
           {item.timeLimit && (
-            <View style={styles.detailItem}>
-              <Ionicons name="time-outline" size={15} color="#777" />
-              <Text style={styles.detailText}>
+            <View className="flex-row items-center">
+              <Ionicons name="time-outline" size={16} color="#777" />
+              <Text className="text-sm text-gray-600 ml-1">
                 {Math.floor(item.timeLimit / 60)}:{(item.timeLimit % 60).toString().padStart(2, '0')} min
               </Text>
             </View>
           )}
           
-          <View style={styles.detailItem}>
-            <Ionicons name="checkmark-circle-outline" size={15} color="#777" />
-            <Text style={styles.detailText}>{item.passingScore}% to pass</Text>
+          <View className="flex-row items-center">
+            <Ionicons name="checkmark-circle-outline" size={16} color="#777" />
+            <Text className="text-sm text-gray-600 ml-1">{item.passingScore}% to pass</Text>
           </View>
         </View>
 
         {!isUnlocked && item.prerequisiteLessons && (
-          <View style={styles.prerequisiteInfo}>
-            <Text style={styles.prerequisiteText}>
+          <View className="bg-orange-50 p-3 rounded-lg mt-2">
+            <Text className="text-sm text-orange-600 text-center">
               Complete lessons {item.prerequisiteLessons.join(', ')} to unlock
             </Text>
           </View>
@@ -135,131 +122,19 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Baybayin Quizzes</Text>
-        <Text style={styles.headerSubtitle}>Test your knowledge and earn points!</Text>
+    <SafeAreaView className="flex-1 bg-background">
+      <View className="p-5 bg-primary">
+        <Text className="text-3xl font-bold text-white mb-1">Baybayin Quizzes</Text>
+        <Text className="text-base text-orange-100">Test your knowledge and earn points!</Text>
       </View>
 
       <FlatList
         data={quizzes}
         renderItem={renderQuizItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={{ padding: 15 }}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    padding: 20,
-    backgroundColor: '#8B4513',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 15,
-    color: '#f0d0b4',
-  },
-  listContainer: {
-    padding: 15,
-  },
-  quizCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  lockedCard: {
-    backgroundColor: '#f8f8f8',
-    opacity: 0.7,
-  },
-  quizHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  quizInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  quizTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  quizDescription: {
-    fontSize: 14,
-    color: '#777',
-    lineHeight: 20,
-  },
-  lockedText: {
-    color: '#aaa',
-  },
-  quizMeta: {
-    alignItems: 'flex-end',
-  },
-  difficultyBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  difficultyText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginLeft: 4,
-  },
-  quizDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  detailText: {
-    fontSize: 12,
-    color: '#777',
-    marginLeft: 4,
-    fontWeight: '500',
-  },
-  prerequisiteInfo: {
-    marginTop: 12,
-    padding: 8,
-    backgroundColor: '#fff3cd',
-    borderRadius: 6,
-    borderLeftWidth: 3,
-    borderLeftColor: '#ffc107',
-  },
-  prerequisiteText: {
-    fontSize: 12,
-    color: '#856404',
-    fontStyle: 'italic',
-  },
-});

@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -31,41 +31,41 @@ export default function TabOneScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
+    <ScrollView className="flex-1 bg-background">
+      <View className="items-center justify-center p-5">
+        <View className="flex-row justify-between items-center w-full mb-3">
           <View>
-            <Text style={styles.title}>Welcome to TalaBaybayin!</Text>
-            <Text style={styles.welcomeText}>Hello, {user?.displayName || user?.email}</Text>
+            <Text className="text-xl font-bold text-primary">Welcome to TalaBaybayin!</Text>
+            <Text className="text-base text-gray-600 mt-2">Hello, {user?.displayName || user?.email}</Text>
           </View>
-          <TouchableOpacity onPress={() => setShowProfileSettings(true)} style={styles.profileButton}>
-            <Ionicons name="person-circle" size={32} color="#2196F3" />
+          <TouchableOpacity onPress={() => setShowProfileSettings(true)} className="p-1">
+            <Ionicons name="person-circle" size={32} color="#C67C4E" />
           </TouchableOpacity>
         </View>
-        <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+        <View className="my-8 h-px w-4/5 bg-gray-200" />
         
         {/* Debug Progress Info */}
-        <View style={styles.debugContainer}>
-          <Text style={styles.debugTitle}>Debug: User Progress</Text>
-          <Text style={styles.debugText}>
+        <View className="bg-white p-4 rounded-lg my-3 w-full border border-gray-200">
+          <Text className="text-lg font-bold mb-3 text-gray-800">Debug: User Progress</Text>
+          <Text className="text-xs text-gray-600 mb-1 font-mono">
             Completed Lessons: {userProgress?.completedLessons?.join(', ') || 'None'}
           </Text>
-          <Text style={styles.debugText}>
+          <Text className="text-xs text-gray-600 mb-1 font-mono">
             Lesson Scores: {userProgress?.lessonScores ? JSON.stringify(userProgress.lessonScores) : 'None'}
           </Text>
-          <Text style={styles.debugText}>
+          <Text className="text-xs text-gray-600 mb-1 font-mono">
             Total Score: {userProgress?.totalScore || 0}
           </Text>
-          <Text style={styles.debugText}>
+          <Text className="text-xs text-gray-600 mb-1 font-mono">
             Experience: {userProgress?.experience || 0}
           </Text>
-          <Text style={styles.debugText}>
+          <Text className="text-xs text-gray-600 mb-1 font-mono">
             Level: {userProgress?.level || 1}
           </Text>
         </View>
         
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
+        <TouchableOpacity className="bg-primary px-5 py-3 rounded-lg mb-5" onPress={handleLogout}>
+          <Text className="text-white text-lg font-bold">Logout</Text>
         </TouchableOpacity>
         
         <EditScreenInfo path="app/(tabs)/index.tsx" />
@@ -73,73 +73,3 @@ export default function TabOneScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  content: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#8B4513',
-  },
-  welcomeText: {
-    fontSize: 15,
-    color: '#777',
-    marginTop: 10,
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-  debugContainer: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    marginVertical: 10,
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  debugTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
-  },
-  debugText: {
-    fontSize: 12,
-    color: '#777',
-    marginBottom: 5,
-    fontFamily: 'monospace',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 10,
-  },
-  profileButton: {
-    padding: 5,
-  },
-  logoutButton: {
-    backgroundColor: '#8B4513',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  logoutButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});

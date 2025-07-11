@@ -126,9 +126,9 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     console.log('=== COMPLETING LESSON ===');
     console.log('Lesson ID:', lessonId);
     console.log('Current completed lessons:', userProgress.completedLessons);
-    console.log('Is already completed?', userProgress.completedLessons.includes(lessonId));
+    console.log('Is already completed?', userProgress.completedLessons?.includes(lessonId));
 
-    const isFirstCompletion = !userProgress.completedLessons.includes(lessonId);
+    const isFirstCompletion = !userProgress.completedLessons?.includes(lessonId);
     
     // If it's not the first completion and the score isn't better, skip the update
     const currentScore = userProgress.lessonScores[lessonId] || 0;
@@ -159,11 +159,11 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     const updatedProgress: UserProgress = {
       ...userProgress,
       completedLessons: isFirstCompletion 
-        ? [...userProgress.completedLessons, lessonId]
-        : userProgress.completedLessons,
+        ? [...(userProgress.completedLessons || []), lessonId]
+        : userProgress.completedLessons || [],
       lessonScores: {
-        ...userProgress.lessonScores,
-        [lessonId]: Math.max(userProgress.lessonScores[lessonId] || 0, score)
+        ...(userProgress.lessonScores || {}),
+        [lessonId]: Math.max(userProgress.lessonScores?.[lessonId] || 0, score)
       },
       totalScore: userProgress.totalScore + (isFirstCompletion ? score : 0),
       experience: userProgress.experience + experienceGained,
@@ -261,17 +261,17 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
   const completeQuiz = async (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }) => {
     if (!userProgress || !user) return;
 
-    const isFirstCompletion = !userProgress.completedQuizzes.includes(quizId);
+    const isFirstCompletion = !userProgress.completedQuizzes?.includes(quizId);
     const experienceGained = isFirstCompletion ? Math.floor(score / 2) : Math.floor(score / 4);
 
     const updatedProgress: UserProgress = {
       ...userProgress,
       completedQuizzes: isFirstCompletion 
-        ? [...userProgress.completedQuizzes, quizId]
-        : userProgress.completedQuizzes,
+        ? [...(userProgress.completedQuizzes || []), quizId]
+        : userProgress.completedQuizzes || [],
       quizScores: {
-        ...userProgress.quizScores,
-        [quizId]: Math.max(userProgress.quizScores[quizId] || 0, score)
+        ...(userProgress.quizScores || {}),
+        [quizId]: Math.max(userProgress.quizScores?.[quizId] || 0, score)
       },
       totalScore: userProgress.totalScore + (isFirstCompletion ? score : 0),
       experience: userProgress.experience + experienceGained,
@@ -349,22 +349,22 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
 
     return {
       lessonId,
-      isCompleted: userProgress.completedLessons.includes(lessonId),
-      score: userProgress.lessonScores[lessonId] || 0,
+      isCompleted: userProgress.completedLessons?.includes(lessonId) || false,
+      score: userProgress.lessonScores?.[lessonId] || 0,
       timeSpent: 0, // This would need to be tracked separately
       attempts: 1, // This would need to be tracked separately
-      completedAt: userProgress.completedLessons.includes(lessonId) 
+      completedAt: userProgress.completedLessons?.includes(lessonId) 
         ? userProgress.lastLearningDate 
         : undefined
     };
   };
 
   const isLessonCompleted = (lessonId: string): boolean => {
-    return userProgress?.completedLessons.includes(lessonId) || false;
+    return userProgress?.completedLessons?.includes(lessonId) || false;
   };
 
   const isQuizCompleted = (quizId: string): boolean => {
-    return userProgress?.completedQuizzes.includes(quizId) || false;
+    return userProgress?.completedQuizzes?.includes(quizId) || false;
   };
 
   const getQuizScore = (quizId: string): number => {
