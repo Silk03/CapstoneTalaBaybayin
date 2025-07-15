@@ -19,125 +19,84 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
   // Animation values
   const slideAnim = useRef(new Animated.Value(-300)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const contentOpacity = useRef(new Animated.Value(0)).current;
   const menuItemAnimations = useRef(
     Array.from({ length: 7 }, () => ({
       opacity: new Animated.Value(0),
-      translateX: new Animated.Value(-30),
-      scale: new Animated.Value(0.8),
+      translateX: new Animated.Value(-15),
     }))
   ).current;
-  const headerOpacity = useRef(new Animated.Value(0)).current;
-  const headerScale = useRef(new Animated.Value(0.9)).current;
-  const footerOpacity = useRef(new Animated.Value(0)).current;
-  const footerTranslateY = useRef(new Animated.Value(20)).current;
 
   useEffect(() => {
     if (isMenuOpen) {
-      // Reset animations
+      // Reset all animations to initial state
       slideAnim.setValue(-300);
       overlayOpacity.setValue(0);
+      contentOpacity.setValue(0);
       menuItemAnimations.forEach(anim => {
         anim.opacity.setValue(0);
-        anim.translateX.setValue(-30);
-        anim.scale.setValue(0.8);
+        anim.translateX.setValue(-15);
       });
-      headerOpacity.setValue(0);
-      headerScale.setValue(0.9);
-      footerOpacity.setValue(0);
-      footerTranslateY.setValue(20);
 
-      // Start animations with improved easing
+      // Start menu slide and overlay
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
-          duration: 400,
+          duration: 300,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
         Animated.timing(overlayOpacity, {
           toValue: 1,
-          duration: 300,
-          easing: Easing.ease,
+          duration: 250,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(() => {
+        // After menu appears, fade in content
+        Animated.timing(contentOpacity, {
+          toValue: 1,
+          duration: 200,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }).start();
 
-      // Header animation with scale
-      setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(headerOpacity, {
-            toValue: 1,
-            duration: 300,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: true,
-          }),
-          Animated.timing(headerScale, {
-            toValue: 1,
-            duration: 300,
-            easing: Easing.out(Easing.back(1.1)),
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }, 150);
-
-      // Staggered menu item animations with scale
-      menuItemAnimations.forEach((anim, index) => {
-        setTimeout(() => {
-          Animated.parallel([
-            Animated.timing(anim.opacity, {
-              toValue: 1,
-              duration: 250,
-              easing: Easing.out(Easing.quad),
-              useNativeDriver: true,
-            }),
-            Animated.timing(anim.translateX, {
-              toValue: 0,
-              duration: 250,
-              easing: Easing.out(Easing.cubic),
-              useNativeDriver: true,
-            }),
-            Animated.timing(anim.scale, {
-              toValue: 1,
-              duration: 250,
-              easing: Easing.out(Easing.back(1.2)),
-              useNativeDriver: true,
-            }),
-          ]).start();
-        }, 250 + index * 40);
+        // Simple menu items animation
+        menuItemAnimations.forEach((anim, index) => {
+          setTimeout(() => {
+            Animated.parallel([
+              Animated.timing(anim.opacity, {
+                toValue: 1,
+                duration: 150,
+                easing: Easing.out(Easing.quad),
+                useNativeDriver: true,
+              }),
+              Animated.timing(anim.translateX, {
+                toValue: 0,
+                duration: 150,
+                easing: Easing.out(Easing.quad),
+                useNativeDriver: true,
+              }),
+            ]).start();
+          }, index * 25);
+        });
       });
-
-      // Footer animation with slide up
-      setTimeout(() => {
-        Animated.parallel([
-          Animated.timing(footerOpacity, {
-            toValue: 1,
-            duration: 300,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: true,
-          }),
-          Animated.timing(footerTranslateY, {
-            toValue: 0,
-            duration: 300,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-        ]).start();
-      }, 700);
     }
   }, [isMenuOpen]);
 
   const closeMenu = () => {
+    // Simple and fast close
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: -300,
-        duration: 250,
-        easing: Easing.in(Easing.cubic),
+        duration: 200,
+        easing: Easing.in(Easing.quad),
         useNativeDriver: true,
       }),
       Animated.timing(overlayOpacity, {
         toValue: 0,
-        duration: 250,
-        easing: Easing.ease,
+        duration: 200,
+        easing: Easing.in(Easing.quad),
         useNativeDriver: true,
       }),
     ]).start(() => {
@@ -156,6 +115,8 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
   ];
 
   const handleMenuItemPress = (route: string) => {
+    if (!isMenuOpen) return; // Prevent action if menu is closing
+    
     closeMenu();
     setTimeout(() => {
       router.push(route as any);
@@ -163,6 +124,8 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
   };
 
   const handleProfileSettings = () => {
+    if (!isMenuOpen) return; // Prevent action if menu is closing
+    
     closeMenu();
     setTimeout(() => {
       setShowProfileSettings(true);
@@ -170,6 +133,8 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
   };
 
   const handleLogout = async () => {
+    if (!isMenuOpen) return; // Prevent action if menu is closing
+    
     closeMenu();
     setTimeout(async () => {
       await logout();
@@ -211,8 +176,7 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
                 <Animated.View 
                   className="bg-primary p-6 pb-4"
                   style={{ 
-                    opacity: headerOpacity,
-                    transform: [{ scale: headerScale }],
+                    opacity: contentOpacity,
                   }}
                 >
                   <View className="flex-row justify-between items-center">
@@ -237,7 +201,6 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
                         opacity: menuItemAnimations[index].opacity,
                         transform: [
                           { translateX: menuItemAnimations[index].translateX },
-                          { scale: menuItemAnimations[index].scale },
                         ],
                       }}
                     >
@@ -246,7 +209,7 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
                         className={`flex-row items-center p-4 rounded-lg mb-2 ${
                           currentTab === item.tab ? 'bg-secondary-50 border-l-4 border-secondary' : 'bg-transparent'
                         }`}
-                        activeOpacity={0.7}
+                        activeOpacity={0.8}
                       >
                         <Ionicons 
                           name={item.icon as any} 
@@ -267,14 +230,13 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
                 <Animated.View 
                   className="p-4 border-t border-gray-200"
                   style={{ 
-                    opacity: footerOpacity,
-                    transform: [{ translateY: footerTranslateY }],
+                    opacity: contentOpacity,
                   }}
                 >
                   <TouchableOpacity
                     onPress={handleProfileSettings}
                     className="flex-row items-center p-4 bg-secondary-50 rounded-lg mb-2"
-                    activeOpacity={0.7}
+                    activeOpacity={0.8}
                   >
                     <Ionicons name="settings-outline" size={22} color="#0B4CA7" />
                     <Text className="ml-4 text-base font-medium text-secondary">
@@ -285,7 +247,7 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
                   <TouchableOpacity
                     onPress={handleLogout}
                     className="flex-row items-center p-4 bg-red-50 rounded-lg"
-                    activeOpacity={0.7}
+                    activeOpacity={0.8}
                   >
                     <Ionicons name="log-out-outline" size={22} color="#DC2626" />
                     <Text className="ml-4 text-base font-medium text-red-600">
