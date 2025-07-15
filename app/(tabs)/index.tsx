@@ -63,7 +63,7 @@ export default function TabOneScreen() {
         <View className="flex-row justify-between items-center">
           <View className="flex-1">
             <Text className="text-2xl font-bold text-white mb-1">
-              Kumusta, {user?.displayName?.split(' ')[0] || 'Kaibigan'}! 👋
+              Kumusta ka, {user?.displayName?.split(' ')[0] || 'Kaibigan'}! 👋
             </Text>
             <Text className="text-orange-100 text-base">
               Ready to learn Baybayin today?
