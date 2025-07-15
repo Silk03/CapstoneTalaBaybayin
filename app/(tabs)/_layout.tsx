@@ -39,7 +39,8 @@ export default function TabLayout() {
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
         headerShown: useClientOnlyValue(false, true),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
@@ -108,14 +109,6 @@ export default function TabLayout() {
           title: 'Translate',
           tabBarIcon: ({ color }) => <TabBarIcon name="language" color={color} />,
           headerLeft: () => <HamburgerMenu currentTab="translation" />,
-        }}
-      />
-      <Tabs.Screen
-        name="nativewind"
-        options={{
-          title: 'Styles',
-          tabBarIcon: ({ color }) => <TabBarIcon name="paint-brush" color={color} />,
-          headerLeft: () => <HamburgerMenu currentTab="nativewind" />,
         }}
       />
     </Tabs>

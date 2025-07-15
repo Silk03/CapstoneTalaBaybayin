@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
@@ -44,44 +45,37 @@ const BAYBAYIN_CHARACTERS: Record<string, string> = {
   'w': 'ᜏ᜔', 's': 'ᜐ᜔', 'h': 'ᜑ᜔',
 };
 
-// Keyboard layout
+// Android-style keyboard layout with Baybayin characters
 const KEYBOARD_LAYOUT = [
-  // Vowels row
+  // Top row - A / E-I / O-U / B / K / D / G / H / L
   [
     { key: 'a', baybayin: 'ᜀ', label: 'a' },
     { key: 'i', baybayin: 'ᜁ', label: 'i' },
     { key: 'u', baybayin: 'ᜂ', label: 'u' },
-  ],
-  // Main consonants with 'a' sound
-  [
-    { key: 'ka', baybayin: 'ᜃ', label: 'ka' },
-    { key: 'ga', baybayin: 'ᜄ', label: 'ga' },
-    { key: 'nga', baybayin: 'ᜅ', label: 'nga' },
-    { key: 'ta', baybayin: 'ᜆ', label: 'ta' },
-    { key: 'da', baybayin: 'ᜇ', label: 'da' },
-    { key: 'na', baybayin: 'ᜈ', label: 'na' },
-  ],
-  [
-    { key: 'pa', baybayin: 'ᜉ', label: 'pa' },
     { key: 'ba', baybayin: 'ᜊ', label: 'ba' },
-    { key: 'ma', baybayin: 'ᜋ', label: 'ma' },
-    { key: 'ya', baybayin: 'ᜌ', label: 'ya' },
-    { key: 'ra', baybayin: 'ᜍ', label: 'ra' },
+    { key: 'ka', baybayin: 'ᜃ', label: 'ka' },
+    { key: 'da', baybayin: 'ᜇ', label: 'da' },
+    { key: 'ga', baybayin: 'ᜄ', label: 'ga' },
+    { key: 'ha', baybayin: 'ᜑ', label: 'ha' },
     { key: 'la', baybayin: 'ᜎ', label: 'la' },
   ],
+  // Middle row - M / N / Ng / P / (R) / S / T / W / Y
   [
-    { key: 'wa', baybayin: 'ᜏ', label: 'wa' },
+    { key: 'ma', baybayin: 'ᜋ', label: 'ma' },
+    { key: 'na', baybayin: 'ᜈ', label: 'na' },
+    { key: 'nga', baybayin: 'ᜅ', label: 'nga' },
+    { key: 'pa', baybayin: 'ᜉ', label: 'pa' },
+    { key: 'ra', baybayin: 'ᜍ', label: 'ra' },
     { key: 'sa', baybayin: 'ᜐ', label: 'sa' },
-    { key: 'ha', baybayin: 'ᜑ', label: 'ha' },
-    { key: 'space', baybayin: ' ', label: 'Space' },
-    { key: 'backspace', baybayin: '', label: '⌫' },
+    { key: 'ta', baybayin: 'ᜆ', label: 'ta' },
+    { key: 'wa', baybayin: 'ᜏ', label: 'wa' },
+    { key: 'ya', baybayin: 'ᜌ', label: 'ya' },
   ],
-];
-
-const VOWEL_MODIFIERS = [
-  { key: 'i', symbol: 'ᜒ', label: 'i' },
-  { key: 'u', symbol: 'ᜓ', label: 'u' },
-  { key: 'virama', symbol: '᜔', label: '᜔' },
+  // Bottom row - Space and backspace
+  [
+    { key: 'space', baybayin: ' ', label: 'Space' },
+    { key: 'backspace', baybayin: '⌫', label: 'Del' },
+  ],
 ];
 
 interface BaybayinKeyboardProps {
@@ -97,14 +91,121 @@ export default function BaybayinKeyboard({
   onClose,
   onTextChange,
   initialText = '',
-  placeholder = 'Type in Baybayin...',
+  placeholder = '',
 }: BaybayinKeyboardProps) {
   const [text, setText] = useState(initialText);
   const [romanizedText, setRomanizedText] = useState('');
-  const [showVowelModifiers, setShowVowelModifiers] = useState(false);
-  const [selectedConsonant, setSelectedConsonant] = useState<string | null>(null);
+  const [showVariants, setShowVariants] = useState(false);
+  const [variantKey, setVariantKey] = useState<string | null>(null);
+  const [variantPosition, setVariantPosition] = useState<{ x: number; y: number } | null>(null);
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [scaleAnim] = useState(new Animated.Value(0.8));
 
-  // Simple TTS for character pronunciation
+  // Get consonant variants (vowel modifiers + virama)
+  const getConsonantVariants = (consonantKey: string) => {
+    if (!consonantKey) return [];
+    
+    const baseConsonant = consonantKey.charAt(0); // Get first letter (k, g, ng, etc.)
+    const variants = [];
+    
+    // Add default 'a' sound
+    variants.push({
+      key: consonantKey,
+      baybayin: BAYBAYIN_CHARACTERS[consonantKey],
+      label: `${consonantKey} (default)`
+    });
+    
+    // Add 'i' variant
+    const iVariant = baseConsonant + 'i';
+    if (BAYBAYIN_CHARACTERS[iVariant]) {
+      variants.push({
+        key: iVariant,
+        baybayin: BAYBAYIN_CHARACTERS[iVariant],
+        label: iVariant
+      });
+    }
+    
+    // Add 'u' variant
+    const uVariant = baseConsonant + 'u';
+    if (BAYBAYIN_CHARACTERS[uVariant]) {
+      variants.push({
+        key: uVariant,
+        baybayin: BAYBAYIN_CHARACTERS[uVariant],
+        label: uVariant
+      });
+    }
+    
+    // Add virama variant (consonant ending)
+    if (BAYBAYIN_CHARACTERS[baseConsonant]) {
+      variants.push({
+        key: baseConsonant + '_virama',
+        baybayin: BAYBAYIN_CHARACTERS[baseConsonant] + '᜔',
+        label: `${baseConsonant} (ending)`
+      });
+    }
+    
+    return variants;
+  };
+
+  const handleLongPress = (key: string, event?: any) => {
+    if (key === 'space' || key === 'backspace') return;
+    
+    // Check if it's a consonant that has variants
+    const isConsonant = ['ka', 'ga', 'nga', 'ta', 'da', 'na', 'pa', 'ba', 'ma', 'ya', 'ra', 'la', 'wa', 'sa', 'ha'].includes(key);
+    
+    if (isConsonant) {
+      setVariantKey(key);
+      setShowVariants(true);
+      
+      // Animate popup appearance
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+    // Removed speech for vowels - no action on long press for vowels
+  };
+
+  const handleVariantSelect = (variant: any) => {
+    if (variant.key.includes('_virama')) {
+      // Handle virama variant
+      const newText = text + variant.baybayin;
+      setText(newText);
+      onTextChange(newText); // Send to parent immediately
+    } else {
+      // Handle regular variant
+      const newText = text + variant.baybayin;
+      setText(newText);
+      onTextChange(newText); // Send to parent immediately
+    }
+    
+    // Animate popup disappearance
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowVariants(false);
+      setVariantKey(null);
+      setVariantPosition(null);
+    });
+  };
   const speakCharacter = async (key: string) => {
     try {
       // Convert key to a more pronounceable form
@@ -129,51 +230,45 @@ export default function BaybayinKeyboard({
   };
 
   const handleKeyPress = (key: string, baybayin: string) => {
+    // Close variants popup if open
+    if (showVariants) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 0.8,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setShowVariants(false);
+        setVariantKey(null);
+        setVariantPosition(null);
+      });
+      return;
+    }
+
     if (key === 'backspace') {
       const newText = text.slice(0, -1);
       setText(newText);
+      onTextChange(newText); // Send to parent immediately
       return;
     }
 
     if (key === 'space') {
       const newText = text + ' ';
       setText(newText);
+      onTextChange(newText); // Send to parent immediately
       return;
     }
 
-    // Check if it's a consonant that can take vowel modifiers
-    const isConsonant = ['ka', 'ga', 'nga', 'ta', 'da', 'na', 'pa', 'ba', 'ma', 'ya', 'ra', 'la', 'wa', 'sa', 'ha'].includes(key);
-    
-    if (isConsonant) {
-      setSelectedConsonant(key);
-      setShowVowelModifiers(true);
-      // Don't add to text yet, wait for vowel modifier selection
-      return;
-    }
-
-    // For vowels and other characters, add directly
+    // For all characters, add directly (no vowel modifier screen)
     const newText = text + baybayin;
     setText(newText);
-  };
-
-  const handleVowelModifier = (modifier: string, symbol: string) => {
-    if (!selectedConsonant) return;
-
-    let newText = text;
-    if (modifier === 'virama') {
-      // Add consonant with virama (consonant ending)
-      const consonantChar = BAYBAYIN_CHARACTERS[selectedConsonant.charAt(0)] || selectedConsonant;
-      newText += consonantChar + symbol;
-    } else {
-      // Add consonant with vowel modifier
-      const consonantKey = selectedConsonant.charAt(0) + modifier;
-      const baybayinChar = BAYBAYIN_CHARACTERS[consonantKey] || selectedConsonant;
-      newText += baybayinChar;
-    }
-
-    setText(newText);
-    setShowVowelModifiers(false);
-    setSelectedConsonant(null);
+    onTextChange(newText); // Send to parent immediately
   };
 
   const handleDone = () => {
@@ -208,121 +303,73 @@ export default function BaybayinKeyboard({
   }
 
   return (
-    <View className="absolute bottom-0 left-0 right-0 bg-secondary-100 border-t border-secondary-300 shadow-lg max-h-[40vh]">
-      {/* Compact Header */}
-      <View className="flex-row justify-between items-center px-4 pt-2 pb-2 bg-secondary-200 border-b border-secondary-400">
+      <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-lg">
+        {/* Header */}
+      <View className="flex-row justify-between items-center px-4 py-3 bg-secondary-50 border-b border-gray-200">
         <Text className="text-lg font-semibold text-secondary-700">Baybayin Keyboard</Text>
-        <TouchableOpacity onPress={onClose} className="bg-secondary-50 rounded-full p-2">
-          <Ionicons name="keypad-outline" size={20} color="#0B4CA7" />
+        <TouchableOpacity onPress={onClose} className="bg-secondary-100 rounded-full p-2">
+          <Ionicons name="close" size={20} color="#0B4CA7" />
         </TouchableOpacity>
       </View>
 
-      {/* Text Preview */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-secondary-50 border-b border-secondary-200">
-        <Text className="flex-1 text-lg text-secondary-700 font-bold mr-3" numberOfLines={2}>
-          {text || placeholder}
-        </Text>
-        {text && (
-          <TouchableOpacity onPress={handleDone} className="flex-row items-center bg-secondary rounded-full px-3 py-2 gap-1">
-            <Ionicons name="checkmark" size={16} color="white" />
-            <Text className="text-white text-sm font-semibold">Done</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Keyboard */}
-      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-        {!showVowelModifiers ? (
-          <>
-            <Text className="text-lg font-bold text-secondary-700 mb-4 mt-2 text-center">Baybayin Characters</Text>
-            <Text className="text-sm text-secondary-600 text-center mb-5">
-              Tap to type • Long press to hear pronunciation
-            </Text>
-            {KEYBOARD_LAYOUT.map((row, rowIndex) => (
-              <View key={rowIndex} className="flex-row justify-center mb-2 gap-1">
-                {row.map((char) => (
-                  <TouchableOpacity
-                    key={char.key}
-                    className={`bg-white rounded-lg p-3 items-center justify-center shadow-sm ${
-                      char.key === 'space' ? 'min-w-[100px]' : 
-                      char.key === 'backspace' ? 'bg-red-400' : 
-                      'min-w-[50px]'
-                    }`}
-                    onPress={() => handleKeyPress(char.key, char.baybayin)}
-                    onLongPress={() => {
-                      if (char.key !== 'space' && char.key !== 'backspace') {
-                        speakCharacter(char.key);
-                      }
-                    }}
-                    delayLongPress={500}
-                  >
-                    <Text className="text-xl font-bold text-primary mb-1">{char.baybayin}</Text>
-                    <Text className="text-xs text-gray-600 text-center">{char.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            ))}
-          </>
-        ) : (
-          <View className="items-center py-5">
-            <Text className="text-lg font-bold text-primary mb-4">
-              Select vowel for "{selectedConsonant}"
-            </Text>
-            <Text className="text-sm text-gray-600 text-center mb-5">
-              Choose how to pronounce the consonant:
-            </Text>
-            
-            <View className="flex-row flex-wrap justify-center gap-2 mb-5">
-              {/* Default 'a' sound */}
+      {/* Keyboard Layout */}
+      <View className="bg-gray-200 px-1 py-2 relative">
+        {KEYBOARD_LAYOUT.map((row, rowIndex) => (
+          <View key={rowIndex} className={`flex-row mb-1 ${
+            rowIndex === 0 ? 'justify-center gap-1' : 
+            rowIndex === 1 ? 'justify-center gap-1 px-2' : 
+            'justify-center gap-2 px-4'
+          }`}>
+            {row.map((char) => (
               <TouchableOpacity
-                className="bg-white rounded-lg p-4 min-w-[80px] items-center justify-center shadow-sm"
-                onPress={() => {
-                  setText(text + BAYBAYIN_CHARACTERS[selectedConsonant!]);
-                  setShowVowelModifiers(false);
-                  setSelectedConsonant(null);
-                }}
+                key={char.key}
+                className={`rounded-md items-center justify-center shadow-sm border ${
+                  char.key === 'space' ? 'bg-white border-gray-300 flex-1 py-4 mx-2' : 
+                  char.key === 'backspace' ? 'bg-gray-300 border-gray-400 px-8 py-3' : 
+                  'bg-white border-gray-300 flex-1 py-3 min-w-[35px]'
+                }`}
+                onPress={() => handleKeyPress(char.key, char.baybayin)}
+                onLongPress={() => handleLongPress(char.key)}
+                delayLongPress={500}
+                activeOpacity={0.6}
               >
-                <Text className="text-xl font-bold text-primary mb-1">
-                  {BAYBAYIN_CHARACTERS[selectedConsonant!]}
+                <Text className={`text-xl font-bold mb-1 ${
+                  char.key === 'backspace' ? 'text-gray-600' : 'text-primary'
+                }`}>
+                  {char.baybayin}
                 </Text>
-                <Text className="text-xs text-gray-600 text-center">{selectedConsonant} (default)</Text>
+                <Text className="text-xs text-gray-600 text-center">{char.label}</Text>
               </TouchableOpacity>
-
-              {/* Vowel modifiers */}
-              {VOWEL_MODIFIERS.map((modifier) => (
+            ))}
+          </View>
+        ))}
+        
+        {/* Variants popup - Android style with smooth transitions */}
+        {showVariants && variantKey && (
+          <Animated.View 
+            className="absolute bottom-full left-0 right-0 bg-white border border-gray-300 rounded-lg shadow-lg mx-4 mb-2 p-2"
+            style={{
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            }}
+          >
+            <View className="flex-row justify-center flex-wrap gap-1">
+              {getConsonantVariants(variantKey).map((variant, index) => (
                 <TouchableOpacity
-                  key={modifier.key}
-                  className="bg-white rounded-lg p-4 min-w-[80px] items-center justify-center shadow-sm"
-                  onPress={() => handleVowelModifier(modifier.key, modifier.symbol)}
+                  key={index}
+                  className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2 min-w-[50px] items-center justify-center"
+                  onPress={() => handleVariantSelect(variant)}
                 >
                   <Text className="text-xl font-bold text-primary mb-1">
-                    {modifier.key === 'virama' 
-                      ? BAYBAYIN_CHARACTERS[selectedConsonant!.charAt(0)] + modifier.symbol
-                      : BAYBAYIN_CHARACTERS[selectedConsonant!.charAt(0) + modifier.key]
-                    }
+                    {variant.baybayin}
                   </Text>
-                  <Text className="text-xs text-gray-600 text-center">
-                    {modifier.key === 'virama' 
-                      ? `${selectedConsonant!.charAt(0)} (ending)`
-                      : `${selectedConsonant!.charAt(0)}${modifier.key}`
-                    }
-                  </Text>
+                  <Text className="text-xs text-gray-600 text-center">{variant.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-
-            <TouchableOpacity
-              className="bg-red-400 rounded-lg py-3 px-6"
-              onPress={() => {
-                setShowVowelModifiers(false);
-                setSelectedConsonant(null);
-              }}
-            >
-              <Text className="text-white font-bold">Cancel</Text>
-            </TouchableOpacity>
-          </View>
+          </Animated.View>
         )}
-      </ScrollView>
+      </View>  
     </View>
   );
 }
