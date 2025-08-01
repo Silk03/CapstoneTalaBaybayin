@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   Dimensions,
   Animated,
+  BackHandler,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
@@ -100,6 +101,21 @@ export default function BaybayinKeyboard({
   const [variantPosition, setVariantPosition] = useState<{ x: number; y: number } | null>(null);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(0.8));
+
+  // Handle Android back button to close keyboard
+  useEffect(() => {
+    const backAction = () => {
+      if (visible) {
+        onClose();
+        return true; // Prevent default back action
+      }
+      return false; // Allow default back action
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [visible, onClose]);
 
   // Get consonant variants (vowel modifiers + virama)
   const getConsonantVariants = (consonantKey: string) => {

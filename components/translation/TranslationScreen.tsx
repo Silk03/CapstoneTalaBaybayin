@@ -20,6 +20,7 @@ import {
   getConversionSuggestions,
 } from '../../utils/translationUtils';
 import BaybayinKeyboard from '../common/BaybayinKeyboard';
+  import RomanKeyboard from '../common/RomanKeyboard';
 import '../../global.css';
 
 interface TranslationScreenProps {
@@ -32,6 +33,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
   const [translationMode, setTranslationMode] = useState<'tagalog-to-baybayin' | 'baybayin-to-tagalog'>('tagalog-to-baybayin');
   const [useWordMapping, setUseWordMapping] = useState(true);
   const [showKeyboard, setShowKeyboard] = useState(false);
+  const [showRomanKeyboard, setShowRomanKeyboard] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<{ type: 'warning' | 'info' | 'error'; message: string }>>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -68,10 +70,9 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
     const newMode = translationMode === 'tagalog-to-baybayin' ? 'baybayin-to-tagalog' : 'tagalog-to-baybayin';
     setTranslationMode(newMode);
     
-    // Close keyboard when switching away from Baybayin mode
-    if (newMode === 'tagalog-to-baybayin') {
-      setShowKeyboard(false);
-    }
+    // Close both keyboards when switching modes
+    setShowKeyboard(false);
+    setShowRomanKeyboard(false);
     
     // Swap input and output
     const tempText = inputText;
@@ -179,14 +180,26 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
     setInputText(newText);
   };
 
+  // Handle Roman keyboard text changes
+  const handleRomanTextChange = (newText: string) => {
+    setInputText(newText);
+  };
+
   // Handle regular text input changes
   const handleTextInputChange = (newText: string) => {
     setInputText(newText);
   };
 
-  // Toggle Baybayin keyboard manually (now mainly for closing)
+  // Toggle Baybayin keyboard manually
   const toggleBaybayinKeyboard = () => {
     setShowKeyboard(!showKeyboard);
+    setShowRomanKeyboard(false); // Close Roman keyboard if open
+  };
+
+  // Toggle Roman keyboard manually
+  const toggleRomanKeyboard = () => {
+    setShowRomanKeyboard(!showRomanKeyboard);
+    setShowKeyboard(false); // Close Baybayin keyboard if open
   };
 
   const renderSuggestions = () => {
@@ -235,7 +248,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
 
       <View className="flex-1">
         <ScrollView 
-          className={`flex-1 p-4 ${showKeyboard ? 'mb-2' : ''}`}
+          className={`flex-1 p-4 ${showKeyboard || showRomanKeyboard ? 'mb-2' : ''}`}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
         >
@@ -277,6 +290,20 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
           <View className="flex-row justify-between items-center mb-3">
             <Text className="text-lg font-semibold text-primary">{inputLabel} Text</Text>
             <View className="flex-row gap-2">
+              {translationMode === 'tagalog-to-baybayin' && (
+                <TouchableOpacity
+                  onPress={toggleRomanKeyboard}
+                  className={`rounded-full p-2 ${
+                    showRomanKeyboard ? 'bg-primary' : 'bg-primary/10'
+                  }`}
+                >
+                  <Ionicons 
+                    name={showRomanKeyboard ? "keypad" : "keypad-outline"} 
+                    size={18} 
+                    color={showRomanKeyboard ? "white" : "#C67C4E"} 
+                  />
+                </TouchableOpacity>
+              )}
               {translationMode === 'baybayin-to-tagalog' && (
                 <TouchableOpacity
                   onPress={toggleBaybayinKeyboard}
@@ -303,6 +330,14 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               </Text>
             </View>
           )}
+          {translationMode === 'tagalog-to-baybayin' && (
+            <View className="flex-row items-center gap-1 mb-2 px-1">
+              <Ionicons name="information-circle-outline" size={16} color="#9CA3AF" />
+              <Text className="text-xs text-gray-500 italic">
+                Tap the input area below to use the built-in Tagalog keyboard
+              </Text>
+            </View>
+          )}
 
           {translationMode === 'baybayin-to-tagalog' ? (
             // Baybayin input mode - use TouchableOpacity instead of TextInput
@@ -312,6 +347,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               }`}
               onPress={() => {
                 setShowKeyboard(true);
+                setShowRomanKeyboard(false);
               }}
               activeOpacity={0.7}
             >
@@ -322,18 +358,23 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               </Text>
             </TouchableOpacity>
           ) : (
-            // Regular text input for Tagalog mode
-            <TextInput
-              className="border border-gray-300 rounded-lg p-3 text-lg min-h-[100px] text-top"
-              value={inputText}
-              onChangeText={handleTextInputChange}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              placeholder={placeholderText}
-              placeholderTextColor="#9CA3AF"
-              multiline
-              textAlignVertical="top"
-            />
+            // Tagalog input mode - use TouchableOpacity to trigger custom keyboard
+            <TouchableOpacity
+              className={`border border-gray-300 rounded-lg p-3 min-h-[100px] justify-start items-start ${
+                showRomanKeyboard ? 'bg-gray-50 border-primary border-2' : ''
+              }`}
+              onPress={() => {
+                setShowRomanKeyboard(true);
+                setShowKeyboard(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text className={`text-lg leading-6 ${
+                inputText ? 'text-gray-800' : 'text-gray-400 italic'
+              }`}>
+                {inputText || 'Tap here to type in Tagalog...'}
+              </Text>
+            </TouchableOpacity>
           )}
           <View className="flex-row justify-end gap-3 mt-2">
             <TouchableOpacity onPress={handleClear} className="flex-row items-center gap-1 py-2 px-2">
@@ -425,14 +466,16 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
           <Text className="text-sm text-gray-600 leading-5">
             • Traditional Baybayin uses 17 characters for common Filipino sounds{'\n'}
             • Letters like F, C, J, V, X, Z are adapted to similar Baybayin sounds{'\n'}
-            • Use the Baybayin keyboard for accurate character input{'\n'}
+            • Use the built-in keyboards for accurate character input{'\n'}
+            • Tagalog keyboard: Full QWERTY layout with shift and caps lock{'\n'}
+            • Baybayin keyboard: Traditional characters with vowel modifiers{'\n'}
             • Enable word mappings for better translation of common words{'\n'}
             • Tap "Listen" buttons to hear pronunciation of text (requires internet for best quality)
           </Text>
         </View>
       </ScrollView>
 
-      {/* Baybayin Keyboard - positioned at bottom like native keyboard */}
+      {/* Custom Keyboards - positioned at bottom like native keyboard */}
       {showKeyboard && (
         <BaybayinKeyboard
           visible={showKeyboard}
@@ -440,6 +483,16 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
           onTextChange={handleBaybayinTextChange}
           initialText={inputText}
           placeholder="Type in Baybayin..."
+        />
+      )}
+      
+      {showRomanKeyboard && (
+        <RomanKeyboard
+          visible={showRomanKeyboard}
+          onClose={() => setShowRomanKeyboard(false)}
+          onTextChange={handleRomanTextChange}
+          initialText={inputText}
+          placeholder="Type in Tagalog..."
         />
       )}
       </View>
