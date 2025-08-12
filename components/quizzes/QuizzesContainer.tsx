@@ -3,13 +3,16 @@ import QuizListScreen from './QuizListScreen';
 import QuizScreen from './QuizScreen';
 import { Quiz } from '../../types/quiz';
 import { useProgress } from '../../contexts/ProgressContext';
+import { ActivityType } from '../../types/progress';
 
 export default function QuizzesContainer() {
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
-  const { completeQuiz } = useProgress();
+  const { completeQuiz, trackActivity } = useProgress();
 
   const handleSelectQuiz = (quiz: Quiz) => {
     setSelectedQuiz(quiz);
+    // Track that user started a quiz
+    trackActivity(ActivityType.QUIZ_STARTED);
   };
 
   const handleBack = () => {

@@ -19,6 +19,8 @@ import {
   isValidBaybayin,
   getConversionSuggestions,
 } from '../../utils/translationUtils';
+import { useProgress } from '../../contexts/ProgressContext';
+import { ActivityType } from '../../types/progress';
 import BaybayinKeyboard from '../common/BaybayinKeyboard';
   import RomanKeyboard from '../common/RomanKeyboard';
 import '../../global.css';
@@ -37,6 +39,20 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<Array<{ type: 'warning' | 'info' | 'error'; message: string }>>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [hasTrackedActivity, setHasTrackedActivity] = useState(false); // Track if we've already logged activity
+  
+  const { trackActivity } = useProgress();
+
+  // Track translation activity when user starts typing
+  const handleInputTextChange = (text: string) => {
+    setInputText(text);
+    
+    // Track activity on first character input
+    if (text.length === 1 && !hasTrackedActivity) {
+      trackActivity(ActivityType.TRANSLATION_USED);
+      setHasTrackedActivity(true);
+    }
+  };
 
   // Translate when input changes
   useEffect(() => {
@@ -177,17 +193,17 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
 
   // Handle Baybayin keyboard text changes
   const handleBaybayinTextChange = (newText: string) => {
-    setInputText(newText);
+    handleInputTextChange(newText);
   };
 
   // Handle Roman keyboard text changes
   const handleRomanTextChange = (newText: string) => {
-    setInputText(newText);
+    handleInputTextChange(newText);
   };
 
   // Handle regular text input changes
   const handleTextInputChange = (newText: string) => {
-    setInputText(newText);
+    handleInputTextChange(newText);
   };
 
   // Toggle Baybayin keyboard manually

@@ -180,7 +180,16 @@ export const quizzes: Quiz[] = [
     passingScore: 70, // 70% to pass
     category: QuizCategory.CHARACTER_RECOGNITION,
     difficulty: DifficultyLevel.BEGINNER,
-    prerequisiteLessons: ['lesson_1', 'lesson_2']
+    prerequisiteLessons: ['lesson_1', 'lesson_2'],
+    badge: {
+      id: 'quiz_beginner',
+      name: 'Character Scholar',
+      description: 'Passed the beginner character recognition quiz',
+      icon: '📖',
+      color: '#4CAF50',
+      category: 'quiz',
+      requirement: 'Score 70% or higher on Baybayin Basics Quiz'
+    }
   },
   {
     id: 'quiz_2',
@@ -191,7 +200,16 @@ export const quizzes: Quiz[] = [
     passingScore: 75,
     category: QuizCategory.MIXED,
     difficulty: DifficultyLevel.INTERMEDIATE,
-    prerequisiteLessons: ['lesson_1', 'lesson_2', 'lesson_3']
+    prerequisiteLessons: ['lesson_1', 'lesson_2', 'lesson_3'],
+    badge: {
+      id: 'quiz_intermediate',
+      name: 'Script Warrior',
+      description: 'Mastered intermediate Baybayin concepts',
+      icon: '⚔️',
+      color: '#FF9800',
+      category: 'quiz',
+      requirement: 'Score 75% or higher on Intermediate Baybayin Quiz'
+    }
   },
   {
     id: 'quiz_3',
@@ -202,7 +220,16 @@ export const quizzes: Quiz[] = [
     passingScore: 80,
     category: QuizCategory.CHARACTER_RECOGNITION,
     difficulty: DifficultyLevel.BEGINNER,
-    prerequisiteLessons: ['lesson_1']
+    prerequisiteLessons: ['lesson_1'],
+    badge: {
+      id: 'quiz_speed',
+      name: 'Lightning Reader',
+      description: 'Quickly recognized Baybayin characters',
+      icon: '⚡',
+      color: '#FFEB3B',
+      category: 'quiz',
+      requirement: 'Score 80% or higher on Quick Character Recognition'
+    }
   },
   {
     id: 'quiz_4',
@@ -213,7 +240,16 @@ export const quizzes: Quiz[] = [
     passingScore: 85, // 85% to pass
     category: QuizCategory.COMPREHENSIVE,
     difficulty: DifficultyLevel.ADVANCED,
-    prerequisiteLessons: ['lesson_1', 'lesson_2', 'lesson_3', 'lesson_4']
+    prerequisiteLessons: ['lesson_1', 'lesson_2', 'lesson_3', 'lesson_4'],
+    badge: {
+      id: 'quiz_master',
+      name: 'Baybayin Master',
+      description: 'Achieved mastery of Baybayin script',
+      icon: '👑',
+      color: '#9C27B0',
+      category: 'quiz',
+      requirement: 'Score 85% or higher on Advanced Baybayin Mastery'
+    }
   }
 ];
 

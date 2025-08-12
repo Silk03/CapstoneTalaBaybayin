@@ -62,9 +62,11 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
       
       await completeLesson(lesson.id, score, timeSpent);
       
+      const badgeText = lesson.badge ? `\n\n🏆 Badge Earned: ${lesson.badge.name}\n${lesson.badge.description}` : '';
+      
       Alert.alert(
         'Lesson Completed! 🎉',
-        `Great job! You earned ${Math.round(score)} points${!wasAlreadyCompleted ? ' and gained experience!' : '!'}`,
+        `Great job! You earned ${Math.round(score)} points${!wasAlreadyCompleted ? ' and gained experience!' : '!'}${badgeText}`,
         [
           {
             text: 'Continue',

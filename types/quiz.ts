@@ -21,6 +21,18 @@ export interface Quiz {
   category: QuizCategory;
   difficulty: DifficultyLevel;
   prerequisiteLessons?: string[]; // lesson IDs that must be completed first
+  relatedLessonId?: string; // lesson this quiz is based on
+  badge?: Badge;
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  category: 'lesson' | 'quiz' | 'streak' | 'mastery' | 'cultural';
+  requirement: string;
 }
 
 export interface QuizAttempt {

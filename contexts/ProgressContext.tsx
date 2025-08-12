@@ -3,13 +3,13 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
-import { UserProgress, LessonProgress, Achievement } from '../types/progress';
+import { UserProgress, LessonProgress, Achievement, ActivityType, DailyActivity } from '../types/progress';
 
 interface ProgressContextType {
   userProgress: UserProgress | null;
   completeLesson: (lessonId: string, score: number, timeSpent: number) => Promise<void>;
   completeQuiz: (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }) => Promise<void>;
-  updateStreak: () => Promise<void>;
+  trackActivity: (activityType: ActivityType) => Promise<void>;
   addExperience: (points: number) => Promise<void>;
   unlockAchievement: (achievement: Achievement) => Promise<void>;
   getLessonProgress: (lessonId: string) => LessonProgress | null;
@@ -58,6 +58,10 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
             ...data,
             displayName: data.displayName || user.displayName || user.email?.split('@')[0] || 'Anonymous User',
             lastLearningDate: data.lastLearningDate?.toDate ? data.lastLearningDate.toDate() : new Date(data.lastLearningDate || Date.now()),
+            // Migration: Add new fields if they don't exist
+            lastActivityDate: data.lastActivityDate?.toDate ? data.lastActivityDate.toDate() : (data.lastLearningDate?.toDate ? data.lastLearningDate.toDate() : new Date()),
+            dailyActivities: data.dailyActivities || [],
+            badges: data.badges || [],
             achievements: (data.achievements || []).map((achievement: any) => ({
               ...achievement,
               unlockedAt: achievement.unlockedAt?.toDate ? achievement.unlockedAt.toDate() : new Date(achievement.unlockedAt || Date.now())
@@ -76,7 +80,10 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
             totalScore: 0,
             streak: 0,
             lastLearningDate: new Date(),
+            lastActivityDate: new Date(),
+            dailyActivities: [],
             achievements: [],
+            badges: [],
             level: 1,
             experience: 0,
             totalTimeSpent: 0,
@@ -127,6 +134,9 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     console.log('Lesson ID:', lessonId);
     console.log('Current completed lessons:', userProgress.completedLessons);
     console.log('Is already completed?', userProgress.completedLessons?.includes(lessonId));
+
+    // Track the lesson completion activity (this will also update streak if needed)
+    await trackActivity(ActivityType.LESSON_COMPLETED);
 
     const isFirstCompletion = !userProgress.completedLessons?.includes(lessonId);
     
@@ -261,6 +271,9 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
   const completeQuiz = async (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }) => {
     if (!userProgress || !user) return;
 
+    // Track the quiz completion activity (this will also update streak if needed)
+    await trackActivity(ActivityType.QUIZ_COMPLETED);
+
     const isFirstCompletion = !userProgress.completedQuizzes?.includes(quizId);
     const experienceGained = isFirstCompletion ? Math.floor(score / 2) : Math.floor(score / 4);
 
@@ -315,6 +328,101 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     // This function is now integrated into completeLesson to avoid race conditions
     // Keeping it for backward compatibility but it will just refetch the latest state
     console.log('updateStreak called - but streak is now updated within lesson completion');
+  };
+
+  // Track user activity and update daily streak
+  const trackActivity = async (activityType: ActivityType) => {
+    if (!userProgress || !user) return;
+
+    const today = new Date();
+    const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Check if this is the first activity of the day
+    const lastActivityDate = userProgress.lastActivityDate ? new Date(userProgress.lastActivityDate) : new Date(0);
+    const lastActivityString = lastActivityDate.toISOString().split('T')[0];
+    
+    const isFirstActivityToday = todayString !== lastActivityString;
+    
+    // Update or create today's activity record
+    let dailyActivities = [...(userProgress.dailyActivities || [])];
+    let todayActivity = dailyActivities.find(activity => activity.date === todayString);
+    
+    if (!todayActivity) {
+      todayActivity = {
+        date: todayString,
+        activities: [],
+        lessonsStarted: 0,
+        lessonsCompleted: 0,
+        quizzesStarted: 0,
+        quizzesCompleted: 0,
+        handwritingPracticed: false,
+        translationUsed: false,
+        totalActiveTime: 0
+      };
+      dailyActivities.push(todayActivity);
+    }
+    
+    // Update activity counts
+    if (!todayActivity.activities.includes(activityType)) {
+      todayActivity.activities.push(activityType);
+    }
+    
+    switch (activityType) {
+      case ActivityType.LESSON_STARTED:
+        todayActivity.lessonsStarted += 1;
+        break;
+      case ActivityType.LESSON_COMPLETED:
+        todayActivity.lessonsCompleted += 1;
+        break;
+      case ActivityType.QUIZ_STARTED:
+        todayActivity.quizzesStarted += 1;
+        break;
+      case ActivityType.QUIZ_COMPLETED:
+        todayActivity.quizzesCompleted += 1;
+        break;
+      case ActivityType.HANDWRITING_PRACTICED:
+        todayActivity.handwritingPracticed = true;
+        break;
+      case ActivityType.TRANSLATION_USED:
+        todayActivity.translationUsed = true;
+        break;
+    }
+    
+    // Update daily activities array
+    const activityIndex = dailyActivities.findIndex(activity => activity.date === todayString);
+    dailyActivities[activityIndex] = todayActivity;
+    
+    // Keep only last 30 days of activities
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    dailyActivities = dailyActivities.filter(activity => 
+      new Date(activity.date) >= thirtyDaysAgo
+    );
+    
+    // Calculate new streak only if this is the first activity of the day
+    let newStreak = userProgress.streak;
+    if (isFirstActivityToday) {
+      const diffTime = today.getTime() - lastActivityDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        // Continue streak - user was active yesterday and is active today
+        newStreak += 1;
+      } else if (diffDays > 1) {
+        // Reset streak - there was a gap in activity
+        newStreak = 1;
+      }
+      // If same day (diffDays === 0), keep current streak
+    }
+    
+    const updatedProgress: UserProgress = {
+      ...userProgress,
+      lastActivityDate: today,
+      dailyActivities,
+      streak: newStreak,
+    };
+    
+    await saveProgress(updatedProgress);
   };
 
   const addExperience = async (points: number) => {
@@ -379,7 +487,7 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     userProgress,
     completeLesson,
     completeQuiz,
-    updateStreak,
+    trackActivity,
     addExperience,
     unlockAchievement,
     getLessonProgress,

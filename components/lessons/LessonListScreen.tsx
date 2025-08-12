@@ -73,6 +73,12 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
                 Score: {Math.round(lessonProgress.score)} points
               </Text>
             )}
+            {item.badge && (
+              <View className="flex-row items-center mt-2 bg-yellow-50 px-2 py-1 rounded-full self-start">
+                <Text className="text-sm mr-1">{item.badge.icon}</Text>
+                <Text className="text-xs font-semibold text-yellow-700">{item.badge.name}</Text>
+              </View>
+            )}
           </View>
           
           <View className="items-end">

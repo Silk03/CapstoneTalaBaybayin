@@ -69,6 +69,12 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
             <Text className={`text-sm leading-5 ${!isUnlocked ? 'text-gray-400' : 'text-gray-600'}`}>
               {item.description}
             </Text>
+            {item.badge && (
+              <View className="flex-row items-center mt-2 bg-blue-50 px-2 py-1 rounded-full self-start">
+                <Text className="text-sm mr-1">{item.badge.icon}</Text>
+                <Text className="text-xs font-semibold text-blue-700">{item.badge.name}</Text>
+              </View>
+            )}
           </View>
           
           <View className="items-end">

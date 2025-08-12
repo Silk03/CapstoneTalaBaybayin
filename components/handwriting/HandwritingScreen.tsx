@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { doc, setDoc, getDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
+import { useProgress } from '../../contexts/ProgressContext';
+import { ActivityType } from '../../types/progress';
 import { db } from '../../config/firebase';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawingCanvas } from './DrawingCanvas';
@@ -27,8 +29,10 @@ export default function HandwritingScreen() {
   const [strokeWidth, setStrokeWidth] = useState(5);
   const [charactersWithProgress, setCharactersWithProgress] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const [hasTrackedActivity, setHasTrackedActivity] = useState(false); // Track if we've already logged activity
   
   const { user } = useAuth();
+  const { trackActivity } = useProgress();
 
   // Early return if no user authenticated
   if (!user) {
@@ -176,6 +180,12 @@ export default function HandwritingScreen() {
     const newStrokes = [...userStrokes, stroke];
     setUserStrokes(newStrokes);
     console.log(`Total strokes for ${selectedCharacter.id}: ${newStrokes.length}`);
+    
+    // Track handwriting activity on first stroke
+    if (newStrokes.length === 1 && !hasTrackedActivity) {
+      trackActivity(ActivityType.HANDWRITING_PRACTICED);
+      setHasTrackedActivity(true);
+    }
     
     // Note: Progress is NOT saved automatically - user must click "Save" button
   };

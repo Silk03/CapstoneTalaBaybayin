@@ -204,13 +204,15 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
       await addExperience(actualPointsEarned);
     }
 
+    const badgeText = quiz.badge && passed && !isRetake ? `\n\n🏆 Badge Earned: ${quiz.badge.name}\n${quiz.badge.description}` : '';
+
     Alert.alert(
       passed ? 'Quiz Passed! 🎉' : 'Quiz Complete',
       `Accuracy: ${Math.round(accuracy)}%\n` +
       `Points Earned: ${actualPointsEarned}/${totalPossiblePoints}\n` +
       `Time Bonus: +${totalTimeBonus} points\n` +
       `${isRetake ? '⚠️ No points awarded for retakes' : ''}` +
-      `${passed ? 'Congratulations on your fast answers!' : 'Keep practicing!'}`,
+      `${passed ? 'Congratulations on your fast answers!' : 'Keep practicing!'}${badgeText}`,
       [
         {
           text: 'Review Answers',
