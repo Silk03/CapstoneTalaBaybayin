@@ -24,7 +24,7 @@ export default function LoginScreen({ onSwitchToSignup }: LoginScreenProps) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Pakipunan ang lahat ng patlang');
       return;
     }
 
@@ -32,7 +32,7 @@ export default function LoginScreen({ onSwitchToSignup }: LoginScreenProps) {
       setLoading(true);
       await login(email, password);
     } catch (error: any) {
-      Alert.alert('Login Error', error.message);
+      Alert.alert('Error sa Pag-login', error.message);
     } finally {
       setLoading(false);
     }
@@ -46,11 +46,11 @@ export default function LoginScreen({ onSwitchToSignup }: LoginScreenProps) {
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 20 }}>
         <View className="items-center mb-10">
           <Text className="text-4xl font-bold text-primary mb-2">TalaBaybayin</Text>
-          <Text className="text-base text-gray-600 text-center">Learn the Ancient Filipino Script</Text>
+          <Text className="text-base text-gray-600 text-center">Matuto ng Sinaunang Sulat ng Pilipino</Text>
         </View>
 
         <View className="bg-white p-8 rounded-2xl shadow-sm">
-          <Text className="text-2xl font-bold text-center mb-8 text-gray-800">Welcome Back!</Text>
+          <Text className="text-2xl font-bold text-center mb-8 text-gray-800">Maligayang Pagbabalik!</Text>
           
           <TextInput
             className="border border-gray-300 p-4 rounded-lg mb-4 text-base bg-gray-50"
@@ -77,14 +77,14 @@ export default function LoginScreen({ onSwitchToSignup }: LoginScreenProps) {
             disabled={loading}
           >
             <Text className="text-white text-lg font-bold">
-              {loading ? 'Signing In...' : 'Sign In'}
+              {loading ? 'Pumapasok...' : 'Mag-login'}
             </Text>
           </TouchableOpacity>
 
           <View className="flex-row justify-center mt-5">
-            <Text className="text-gray-600 text-base">Don't have an account? </Text>
+            <Text className="text-gray-600 text-base">Wala pang account? </Text>
             <TouchableOpacity onPress={onSwitchToSignup}>
-              <Text className="text-primary text-lg font-bold">Sign Up</Text>
+              <Text className="text-primary text-lg font-bold">Mag-signup</Text>
             </TouchableOpacity>
           </View>
         </View>

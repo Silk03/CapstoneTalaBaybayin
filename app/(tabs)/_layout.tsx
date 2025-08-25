@@ -44,7 +44,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
+          title: 'Simula',
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           headerLeft: () => <HamburgerMenu currentTab="index" />,
           headerRight: () => (
@@ -66,7 +66,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="two"
         options={{
-          title: 'Lessons',
+          title: 'Aralin',
           tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
           headerLeft: () => <HamburgerMenu currentTab="two" />,
         }}
@@ -74,7 +74,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="progress"
         options={{
-          title: 'Progress',
+          title: 'Progreso',
           tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart" color={color} />,
           headerLeft: () => <HamburgerMenu currentTab="progress" />,
         }}
@@ -82,7 +82,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="quizzes"
         options={{
-          title: 'Quizzes',
+          title: 'Pagsusulit',
           tabBarIcon: ({ color }) => <TabBarIcon name="question-circle" color={color} />,
           headerLeft: () => <HamburgerMenu currentTab="quizzes" />,
         }}
@@ -90,7 +90,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="handwriting"
         options={{
-          title: 'Handwriting',
+          title: 'Pagsusulat',
           tabBarIcon: ({ color }) => <TabBarIcon name="edit" color={color} />,
           headerLeft: () => <HamburgerMenu currentTab="handwriting" />,
         }}
@@ -98,7 +98,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="leaderboard"
         options={{
-          title: 'Leaderboard',
+          title: 'Ranggo',
           tabBarIcon: ({ color }) => <TabBarIcon name="trophy" color={color} />,
           headerLeft: () => <HamburgerMenu currentTab="leaderboard" />,
         }}
@@ -106,7 +106,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="translation"
         options={{
-          title: 'Translate',
+          title: 'Salin',
           tabBarIcon: ({ color }) => <TabBarIcon name="language" color={color} />,
           headerLeft: () => <HamburgerMenu currentTab="translation" />,
         }}

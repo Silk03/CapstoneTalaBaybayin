@@ -7,7 +7,7 @@ import '../global.css';
 export default function ModalScreen() {
   return (
     <View className="flex-1 items-center justify-center">
-      <Text className="text-xl font-bold">Modal</Text>
+      <Text className="text-xl font-bold">Impormasyon</Text>
       <View className="my-7 h-px w-4/5 bg-gray-100" />
       <EditScreenInfo path="app/modal.tsx" />
 

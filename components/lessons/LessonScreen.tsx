@@ -62,14 +62,14 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
       
       await completeLesson(lesson.id, score, timeSpent);
       
-      const badgeText = lesson.badge ? `\n\n🏆 Badge Earned: ${lesson.badge.name}\n${lesson.badge.description}` : '';
+      const badgeText = lesson.badge ? `\n\n🏆 Nakuha ang Badge: ${lesson.badge.name}\n${lesson.badge.description}` : '';
       
       Alert.alert(
-        'Lesson Completed! 🎉',
-        `Great job! You earned ${Math.round(score)} points${!wasAlreadyCompleted ? ' and gained experience!' : '!'}${badgeText}`,
+        'Natapos ang Aralin! 🎉',
+        `Mahusay! Nakakuha kayo ng ${Math.round(score)} na puntos${!wasAlreadyCompleted ? ' at nakakuha ng experience!' : '!'}${badgeText}`,
         [
           {
-            text: 'Continue',
+            text: 'Magpatuloy',
             onPress: () => {
               // Small delay to ensure state updates propagate properly
               setTimeout(() => {
@@ -81,7 +81,7 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
       );
     } catch (error) {
       console.error('Error completing lesson:', error);
-      Alert.alert('Error', 'Failed to save progress. Please try again.');
+      Alert.alert('Error', 'Hindi ma-save ang progreso. Subukan ulit.');
     } finally {
       setIsCompleting(false);
     }
@@ -182,13 +182,13 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
             </View>
             
             <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
-              <Text className="text-lg font-semibold text-gray-800">Pronunciation:</Text>
+              <Text className="text-lg font-semibold text-gray-800">Pagbigkas:</Text>
               <Text className="text-lg text-primary font-bold">{currentCharacter.pronunciation}</Text>
             </View>
             
             {currentCharacter.meaning && (
               <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
-                <Text className="text-lg font-semibold text-gray-800">Meaning:</Text>
+                <Text className="text-lg font-semibold text-gray-800">Kahulugan:</Text>
                 <Text className="text-lg text-primary font-bold">{currentCharacter.meaning}</Text>
               </View>
             )}
@@ -196,11 +196,11 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
 
           {/* Practice Section */}
           <View className="mt-4">
-            <Text className="text-xl font-bold text-gray-800 mb-4 text-center">Practice Writing</Text>
+            <Text className="text-xl font-bold text-gray-800 mb-4 text-center">Pagsasanay sa Pagsusulat</Text>
             <View className="bg-gray-50 rounded-xl p-6 items-center">
               <Text className="text-6xl text-gray-300 mb-3">{currentCharacter.character}</Text>
               <Text className="text-sm text-gray-600 text-center">
-                Trace this character to practice writing it
+                I-trace ang titik na ito para magsanay sa pagsusulat
               </Text>
             </View>
           </View>
@@ -224,7 +224,7 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
           <Text className={`text-lg font-semibold ml-1 ${
             currentCharacterIndex === 0 ? 'text-gray-400' : 'text-primary'
           }`}>
-            Previous
+            Nauna
           </Text>
         </TouchableOpacity>
 
@@ -233,7 +233,7 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
           onPress={handleNext}
         >
           <Text className="text-lg font-semibold text-white mr-1">
-            {isLastCharacter ? 'Complete Lesson' : 'Next'}
+            {isLastCharacter ? 'Tapusin ang Aralin' : 'Susunod'}
           </Text>
           <Ionicons name="chevron-forward" size={20} color="white" />
         </TouchableOpacity>

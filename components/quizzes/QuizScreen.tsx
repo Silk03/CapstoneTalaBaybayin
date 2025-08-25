@@ -106,9 +106,9 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
 
   const handleTimeUp = () => {
     Alert.alert(
-      'Time\'s Up!',
-      'Your time has expired. The quiz will be submitted automatically.',
-      [{ text: 'OK', onPress: handleSubmitQuiz }]
+      'Naubos na ang Oras!',
+      'Naubos na ang inyong oras. Automatic na maisusumite ang quiz.',
+      [{ text: 'Sige', onPress: handleSubmitQuiz }]
     );
   };
 
@@ -154,7 +154,7 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
 
   const handleNext = () => {
     if (!selectedAnswer) {
-      Alert.alert('No Answer Selected', 'Please select an answer before proceeding.');
+      Alert.alert('Walang Napiing Sagot', 'Pakipili ang sagot bago magpatuloy.');
       return;
     }
 
@@ -204,22 +204,22 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
       await addExperience(actualPointsEarned);
     }
 
-    const badgeText = quiz.badge && passed && !isRetake ? `\n\n🏆 Badge Earned: ${quiz.badge.name}\n${quiz.badge.description}` : '';
+    const badgeText = quiz.badge && passed && !isRetake ? `\n\n🏆 Nakuha ang Badge: ${quiz.badge.name}\n${quiz.badge.description}` : '';
 
     Alert.alert(
-      passed ? 'Quiz Passed! 🎉' : 'Quiz Complete',
-      `Accuracy: ${Math.round(accuracy)}%\n` +
-      `Points Earned: ${actualPointsEarned}/${totalPossiblePoints}\n` +
-      `Time Bonus: +${totalTimeBonus} points\n` +
-      `${isRetake ? '⚠️ No points awarded for retakes' : ''}` +
-      `${passed ? 'Congratulations on your fast answers!' : 'Keep practicing!'}${badgeText}`,
+      passed ? 'Nakapasa sa Quiz! 🎉' : 'Natapos ang Quiz',
+      `Tumpak na sagot: ${Math.round(accuracy)}%\n` +
+      `Nakuhang Puntos: ${actualPointsEarned}/${totalPossiblePoints}\n` +
+      `Time Bonus: +${totalTimeBonus} na puntos\n` +
+      `${isRetake ? '⚠️ Walang puntos para sa mga retake' : ''}` +
+      `${passed ? 'Binabati kayo sa mabibiling sagot!' : 'Magpatuloy sa pagsasanay!'}${badgeText}`,
       [
         {
-          text: 'Review Answers',
+          text: 'Tingnan ang mga Sagot',
           onPress: () => showResults(accuracy, actualPointsEarned, timeSpent)
         },
         {
-          text: 'Continue',
+          text: 'Magpatuloy',
           onPress: () => onComplete(accuracy, actualPointsEarned, timeSpent)
         }
       ]
@@ -241,7 +241,7 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
     if (!currentQuestion) {
       return (
         <View className="bg-white rounded-2xl p-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-600 text-center">Loading question...</Text>
+          <Text className="text-lg font-semibold text-gray-600 text-center">Naglo-load ng tanong...</Text>
         </View>
       );
     }
@@ -339,7 +339,7 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
             {quiz.title} {isRetake && '(Retake)'}
           </Text>
           <Text className="text-sm text-orange-100">
-            Question {currentQuestionIndex + 1} of {quiz.questions.length}
+            Tanong {currentQuestionIndex + 1} ng {quiz.questions.length}
           </Text>
         </View>
         <View className="items-end">

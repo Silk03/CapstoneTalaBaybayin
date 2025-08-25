@@ -19,6 +19,7 @@ import {
   isValidBaybayin,
   getConversionSuggestions,
 } from '../../utils/translationUtils';
+import { speakWithOptimalFilipinoAccent, stopSpeech } from '../../utils/speechUtils';
 import { useProgress } from '../../contexts/ProgressContext';
 import { ActivityType } from '../../types/progress';
 import BaybayinKeyboard from '../common/BaybayinKeyboard';
@@ -110,7 +111,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
         title: `${label} Text`,
       });
     } catch (error) {
-      Alert.alert('Error', 'Could not share text');
+      Alert.alert('Error', 'Hindi maibahagi ang text');
     }
   };
 
@@ -122,63 +123,38 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
         title: 'Baybayin Translation',
       });
     } catch (error) {
-      Alert.alert('Error', 'Could not share translation');
+      Alert.alert('Error', 'Hindi maibahagi ang translation');
     }
   };
 
-  // TTS functionality
+  // Enhanced TTS functionality with Filipino voice support
   const speakText = async (text: string, isTagalog: boolean = true) => {
     if (!text.trim()) {
-      Alert.alert('No Text', 'Please enter some text to speak');
+      Alert.alert('Walang Teksto', 'Mag-lagay ng teksto para marinig');
       return;
     }
 
-    try {
-      setIsSpeaking(true);
-      
-      // Stop any ongoing speech
-      await Speech.stop();
-      
-      // For Baybayin text, we need to convert it back to Tagalog for pronunciation
-      let textToSpeak = text;
-      if (!isTagalog && translationMode === 'baybayin-to-tagalog') {
-        // If it's Baybayin text, use the translated Tagalog for pronunciation
-        textToSpeak = outputText || text;
-      }
-      
-      await Speech.speak(textToSpeak, {
-        language: isTagalog ? 'tl-PH' : 'en-US', // Use Filipino if available, fallback to English
-        pitch: 1.0,
-        rate: 0.8, // Slightly slower for learning
-        onDone: () => setIsSpeaking(false),
-        onError: (error) => {
-          console.log('TTS Error:', error);
-          setIsSpeaking(false);
-          // Fallback to English if Filipino is not available
-          if (isTagalog) {
-            Speech.speak(textToSpeak, {
-              language: 'en-US',
-              pitch: 1.0,
-              rate: 0.8,
-              onDone: () => setIsSpeaking(false),
-              onError: () => setIsSpeaking(false)
-            });
-          }
-        }
-      });
-    } catch (error) {
-      console.log('Speech error:', error);
-      setIsSpeaking(false);
+    // For Baybayin text, we need to convert it back to Tagalog for pronunciation
+    let textToSpeak = text;
+    if (!isTagalog && translationMode === 'baybayin-to-tagalog') {
+      // If it's Baybayin text, use the translated Tagalog for pronunciation
+      textToSpeak = outputText || text;
     }
+
+    await speakWithOptimalFilipinoAccent(textToSpeak, isTagalog, {
+      onStart: () => setIsSpeaking(true),
+      onDone: () => setIsSpeaking(false),
+      onError: (error: any) => {
+        console.log('Speech error:', error);
+        setIsSpeaking(false);
+        Alert.alert('Error sa Speech', 'Hindi ma-basa ang teksto. Subukan ulit.');
+      }
+    });
   };
 
-  const stopSpeech = async () => {
-    try {
-      await Speech.stop();
-      setIsSpeaking(false);
-    } catch (error) {
-      console.log('Error stopping speech:', error);
-    }
+  const stopSpeechPlayback = async () => {
+    await stopSpeech();
+    setIsSpeaking(false);
   };
 
   // Handle input field focus for Baybayin mode
@@ -287,9 +263,9 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               onPress={() => setUseWordMapping(!useWordMapping)}
             >
               <View className="flex-1">
-                <Text className="text-lg font-semibold text-gray-800 mb-1">Use common word mappings</Text>
+                <Text className="text-lg font-semibold text-gray-800 mb-1">Gamitin ang mga karaniwan na salita</Text>
                 <Text className="text-sm text-gray-600">
-                  Uses pre-defined Baybayin for common Tagalog words
+                  Gumagamit ng nakatakdang Baybayin para sa mga kilalang salitang Tagalog
                 </Text>
               </View>
               <View className={`w-6 h-6 rounded-full items-center justify-center ${
@@ -342,7 +318,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
             <View className="flex-row items-center gap-1 mb-2 px-1">
               <Ionicons name="information-circle-outline" size={16} color="#9CA3AF" />
               <Text className="text-xs text-gray-500 italic">
-                Tap the input area below to use the Baybayin keyboard
+                Pindutin ang lugar sa ibaba para gamitin ang Baybayin keyboard
               </Text>
             </View>
           )}
@@ -350,7 +326,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
             <View className="flex-row items-center gap-1 mb-2 px-1">
               <Ionicons name="information-circle-outline" size={16} color="#9CA3AF" />
               <Text className="text-xs text-gray-500 italic">
-                Tap the input area below to use the built-in Tagalog keyboard
+                Pindutin ang lugar sa ibaba para gamitin ang built-in na Tagalog keyboard
               </Text>
             </View>
           )}
@@ -370,7 +346,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               <Text className={`text-xl font-mono leading-7 ${
                 inputText ? 'text-primary font-bold' : 'text-gray-400 italic font-normal'
               }`}>
-                {inputText || 'Tap here to type in Baybayin...'}
+                {inputText || 'Pindutin dito para mag-type sa Baybayin...'}
               </Text>
             </TouchableOpacity>
           ) : (
@@ -388,14 +364,14 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               <Text className={`text-lg leading-6 ${
                 inputText ? 'text-gray-800' : 'text-gray-400 italic'
               }`}>
-                {inputText || 'Tap here to type in Tagalog...'}
+                {inputText || 'Pindutin dito para mag-type sa Tagalog...'}
               </Text>
             </TouchableOpacity>
           )}
           <View className="flex-row justify-end gap-3 mt-2">
             <TouchableOpacity onPress={handleClear} className="flex-row items-center gap-1 py-2 px-2">
               <Ionicons name="trash-outline" size={16} color="#6B7280" />
-              <Text className="text-sm text-gray-600">Clear</Text>
+              <Text className="text-sm text-gray-600">Burahin</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => handleCopy(inputText, inputLabel)} 
@@ -403,7 +379,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               disabled={!inputText}
             >
               <Ionicons name="copy-outline" size={16} color={inputText ? "#6B7280" : "#D1D5DB"} />
-              <Text className={`text-sm ${inputText ? 'text-gray-600' : 'text-gray-400'}`}>Copy</Text>
+              <Text className={`text-sm ${inputText ? 'text-gray-600' : 'text-gray-400'}`}>Kopyahin</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => speakText(inputText, translationMode === 'tagalog-to-baybayin')} 
@@ -416,7 +392,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
                 color={!inputText || isSpeaking ? "#D1D5DB" : "#6B7280"} 
               />
               <Text className={`text-sm ${!inputText || isSpeaking ? 'text-gray-400' : 'text-gray-600'}`}>
-                {isSpeaking ? "Speaking..." : "Listen"}
+                {isSpeaking ? "Nagsasalita..." : "Pakinggan"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -435,7 +411,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
                 ? 'text-2xl font-bold text-primary text-center leading-8' 
                 : 'text-lg text-gray-800'
             }`}>
-              {outputText || `${outputLabel} translation will appear here...`}
+              {outputText || `Ang ${outputLabel} na salin ay lalabas dito...`}
             </Text>
           </View>
           <View className="flex-row justify-end gap-3 mt-2">
@@ -445,7 +421,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               disabled={!outputText}
             >
               <Ionicons name="copy-outline" size={16} color={outputText ? "#6B7280" : "#D1D5DB"} />
-              <Text className={`text-sm ${outputText ? 'text-gray-600' : 'text-gray-400'}`}>Copy</Text>
+              <Text className={`text-sm ${outputText ? 'text-gray-600' : 'text-gray-400'}`}>Kopyahin</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={() => speakText(outputText, translationMode === 'baybayin-to-tagalog')} 
@@ -458,16 +434,16 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
                 color={!outputText || isSpeaking ? "#D1D5DB" : "#6B7280"} 
               />
               <Text className={`text-sm ${!outputText || isSpeaking ? 'text-gray-400' : 'text-gray-600'}`}>
-                {isSpeaking ? "Speaking..." : "Listen"}
+                {isSpeaking ? "Nagsasalita..." : "Pakinggan"}
               </Text>
             </TouchableOpacity>
             {isSpeaking && (
               <TouchableOpacity 
-                onPress={stopSpeech} 
+                onPress={stopSpeechPlayback} 
                 className="flex-row items-center gap-1 py-2 px-2 bg-red-50 rounded"
               >
                 <Ionicons name="stop" size={16} color="#EF4444" />
-                <Text className="text-sm text-red-500">Stop</Text>
+                <Text className="text-sm text-red-500">Itigil</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -478,15 +454,15 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
 
         {/* Usage Tips */}
         <View className="bg-white rounded-xl p-4 shadow-sm">
-          <Text className="text-lg font-semibold text-primary mb-2">Tips:</Text>
+          <Text className="text-lg font-semibold text-primary mb-2">Mga Paalala:</Text>
           <Text className="text-sm text-gray-600 leading-5">
-            • Traditional Baybayin uses 17 characters for common Filipino sounds{'\n'}
-            • Letters like F, C, J, V, X, Z are adapted to similar Baybayin sounds{'\n'}
-            • Use the built-in keyboards for accurate character input{'\n'}
-            • Tagalog keyboard: Full QWERTY layout with shift and caps lock{'\n'}
-            • Baybayin keyboard: Traditional characters with vowel modifiers{'\n'}
-            • Enable word mappings for better translation of common words{'\n'}
-            • Tap "Listen" buttons to hear pronunciation of text (requires internet for best quality)
+            • Ang tradisyonal na Baybayin ay gumagamit ng 17 na karakter para sa mga karaniwan na tunog ng Filipino{'\n'}
+            • Ang mga titik tulad ng F, C, J, V, X, Z ay inadapt sa mga katulad na tunog sa Baybayin{'\n'}
+            • Gamitin ang mga built-in keyboard para sa tamang paglagay ng karakter{'\n'}
+            • Tagalog keyboard: Kumpleto na QWERTY layout na may shift at caps lock{'\n'}
+            • Baybayin keyboard: Tradisyonal na mga karakter na may vowel modifier{'\n'}
+            • I-enable ang word mapping para sa mas magandang salin ng mga kilalang salita{'\n'}
+            • Pindutin ang "Pakinggan" button para marinig ang pagbigkas ng teksto (kailangan ng internet para sa pinakamahusay na kalidad)
           </Text>
         </View>
       </ScrollView>

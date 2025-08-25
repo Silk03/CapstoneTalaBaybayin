@@ -39,7 +39,7 @@ export default function HandwritingScreen() {
     return (
       <SafeAreaView className="flex-1 bg-gray-50">
         <View className="flex-1 justify-center items-center">
-          <Text className="text-lg text-gray-600 text-center mx-5">Please log in to save your handwriting progress</Text>
+          <Text className="text-lg text-gray-600 text-center mx-5">Mag-login para ma-save ang inyong progreso sa pagsusulat</Text>
         </View>
       </SafeAreaView>
     );
@@ -274,13 +274,13 @@ export default function HandwritingScreen() {
             </TouchableOpacity>
 
             <View className="flex-1 items-center">
-              <Text className="text-xl font-bold text-primary mb-1">Handwriting Practice</Text>
+              <Text className="text-xl font-bold text-primary mb-1">Pagsasanay sa Pagsusulat</Text>
               <TouchableOpacity 
                 className="bg-white rounded-full px-3 py-2 shadow-sm flex-row items-center"
                 onPress={() => setShowCharacterMenu(!showCharacterMenu)}
               >
                 <Text className="text-xs text-secondary font-medium mr-1">
-                  Choose Character
+                  Pumili ng Titik
                 </Text>
                 <Ionicons 
                   name={showCharacterMenu ? "chevron-up" : "chevron-down"} 
@@ -301,7 +301,7 @@ export default function HandwritingScreen() {
           {/* Character Selection Menu */}
           {showCharacterMenu && (
             <View className="bg-white rounded-2xl p-4 shadow-sm">
-              <Text className="text-sm font-bold text-primary mb-4 text-center">Select a Character to Practice:</Text>
+              <Text className="text-sm font-bold text-primary mb-4 text-center">Pumili ng Titik para Pagsasanay:</Text>
               <View className="flex-row flex-wrap justify-between gap-2">
                 {handwritingCharacters.map((character) => (
                   <TouchableOpacity
@@ -357,12 +357,12 @@ export default function HandwritingScreen() {
         {/* Drawing Canvas - Centered */}
         <View className="flex-1 justify-center items-center my-4 min-h-[300px]">
           <Text className="text-sm font-semibold text-primary mb-4 text-center">
-            {selectedCharacter.imageUri ? 'Trace over the character image' : 'Follow the guide strokes'}
+            {selectedCharacter.imageUri ? 'I-trace ang titik sa larawan' : 'Sundin ang mga gabay na guhit'}
           </Text>
           <View className="items-center justify-center">
             {isLoading ? (
               <View className="bg-gray-100 rounded-xl border-2 border-gray-300 justify-center items-center" style={{ width: canvasSize, height: canvasSize }}>
-                <Text className="text-sm text-gray-600 font-medium">Loading progress...</Text>
+                <Text className="text-sm text-gray-600 font-medium">Naglo-load ng progreso...</Text>
               </View>
             ) : (
               <DrawingCanvas
@@ -384,7 +384,7 @@ export default function HandwritingScreen() {
         <View className="pb-3">
           {/* Stroke Width Controls */}
           <View className="items-center pt-3 border-t border-gray-200">
-            <Text className="text-sm font-semibold text-gray-600 mb-3">Stroke Width</Text>
+            <Text className="text-sm font-semibold text-gray-600 mb-3">Laki ng Guhit</Text>
             <View className="flex-row items-center justify-center">
               <TouchableOpacity 
                 className={`w-9 h-9 rounded-full items-center justify-center mx-3 shadow-sm ${
@@ -424,7 +424,7 @@ export default function HandwritingScreen() {
                 <Text className={`text-sm ml-1 font-semibold ${
                   userStrokes.length === 0 ? 'text-gray-400' : 'text-green-600'
                 }`}>
-                  Save
+                  I-save
                 </Text>
               </TouchableOpacity>
 
@@ -433,7 +433,7 @@ export default function HandwritingScreen() {
                 onPress={handleClearCanvas}
               >
                 <Ionicons name="refresh" size={18} color="#EF4444" />
-                <Text className="text-sm ml-1 font-semibold text-red-500">Clear</Text>
+                <Text className="text-sm ml-1 font-semibold text-red-500">Burahin</Text>
               </TouchableOpacity>
             </View>
           </View>

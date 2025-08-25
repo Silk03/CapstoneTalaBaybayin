@@ -21,29 +21,29 @@ export default function TabOneScreen() {
 
   const quickActions = [
     {
-      title: 'Start Learning',
-      description: 'Continue your Baybayin journey',
+      title: 'Simulang Mag-aral',
+      description: 'Ipagpatuloy ang inyong paglalakbay sa Baybayin',
       icon: 'book-outline',
       color: '#C67C4E',
       action: () => router.push('/(tabs)/progress')
     },
     {
-      title: 'Take Quiz',
-      description: 'Test your knowledge',
+      title: 'Kumuha ng Quiz',
+      description: 'Subukan ang inyong kaalaman',
       icon: 'help-circle-outline',
       color: '#0B4CA7',
       action: () => router.push('/(tabs)/quizzes')
     },
     {
-      title: 'Practice Handwriting',
-      description: 'Improve your writing skills',
+      title: 'Magsanay sa Pagsusulat',
+      description: 'Pahusayin ang inyong kasanayan sa pagsusulat',
       icon: 'create-outline',
       color: '#059669',
       action: () => router.push('/(tabs)/handwriting')
     },
     {
-      title: 'Translate Text',
-      description: 'Convert between scripts',
+      title: 'Isalin ang Teksto',
+      description: 'Mag-convert sa pagitan ng mga sulat',
       icon: 'language-outline',
       color: '#7C3AED',
       action: () => router.push('/(tabs)/translation')
@@ -66,7 +66,7 @@ export default function TabOneScreen() {
               Kumusta ka, {user?.displayName?.split(' ')[0] || 'Kaibigan'}! 👋
             </Text>
             <Text className="text-orange-100 text-base">
-              Ready to learn Baybayin today?
+              Handa na ba kayong matuto ng Baybayin ngayon?
             </Text>
           </View>
           <TouchableOpacity 
@@ -88,15 +88,15 @@ export default function TabOneScreen() {
             </View>
             <View className="items-center">
               <Text className="text-2xl font-bold text-primary">{completedLessons}</Text>
-              <Text className="text-sm text-gray-600">Lessons</Text>
+              <Text className="text-sm text-gray-600">Aralin</Text>
             </View>
             <View className="items-center">
               <Text className="text-2xl font-bold text-green-600">{completedQuizzes}</Text>
-              <Text className="text-sm text-gray-600">Quizzes</Text>
+              <Text className="text-sm text-gray-600">Quiz</Text>
             </View>
             <View className="items-center">
               <Text className="text-2xl font-bold text-orange-500">{currentStreak}</Text>
-              <Text className="text-sm text-gray-600">Day Streak</Text>
+              <Text className="text-sm text-gray-600">Araw na Tuloy-tuloy</Text>
             </View>
           </View>
         </View>
@@ -104,7 +104,7 @@ export default function TabOneScreen() {
 
       {/* Quick Actions */}
       <View className="px-4 mb-6">
-        <Text className="text-xl font-bold text-gray-800 mb-4">Quick Actions</Text>
+        <Text className="text-xl font-bold text-gray-800 mb-4">Mabibiling Aksyon</Text>
         <View className="flex-row flex-wrap justify-between">
           {quickActions.map((action, index) => (
             <TouchableOpacity
@@ -133,17 +133,17 @@ export default function TabOneScreen() {
 
       {/* Learning Tips */}
       <View className="px-4 mb-8">
-        <Text className="text-xl font-bold text-gray-800 mb-4">Learning Tips</Text>
+        <Text className="text-xl font-bold text-gray-800 mb-4">Mga Tip sa Pag-aaral</Text>
         <View className="bg-secondary-50 rounded-xl p-4 border border-secondary-200">
           <View className="flex-row items-center mb-3">
             <Ionicons name="bulb-outline" size={24} color="#0B4CA7" />
             <Text className="text-lg font-semibold text-secondary-700 ml-2">
-              Did you know?
+              Alam niyo ba?
             </Text>
           </View>
           <Text className="text-secondary-600 leading-5">
-            Baybayin was historically written from bottom to top, then left to right in columns. 
-            Today, it's commonly written horizontally like modern text!
+            Ang Baybayin ay dating sinusulat mula sa ibaba papunta sa itaas, pagkatapos mula kaliwa papunta sa kanan sa mga kolum. 
+            Ngayon, karaniwang sinusulat ito nang pahalang tulad ng modernong teksto!
           </Text>
         </View>
       </View>

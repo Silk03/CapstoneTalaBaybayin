@@ -83,7 +83,7 @@ export default function LeaderboardScreen() {
       setUserRank(currentUserRank);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
-      Alert.alert('Error', 'Failed to load leaderboard. Please try again.');
+      Alert.alert('Error', 'Hindi ma-load ang leaderboard. Subukan ulit.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -171,7 +171,7 @@ export default function LeaderboardScreen() {
     <View className="bg-white p-5 border-b border-gray-200">
       <Text className="text-2xl font-bold text-gray-800 text-center">Leaderboard</Text>
       <Text className="text-sm text-gray-600 text-center mt-1">
-        {userRank ? `Your rank: #${userRank}` : 'Keep learning to get ranked!'}
+        {userRank ? `Inyong ranggo: #${userRank}` : 'Magpatuloy sa pag-aaral para makakuha ng ranggo!'}
       </Text>
       
       {/* Filter Options */}
@@ -185,7 +185,7 @@ export default function LeaderboardScreen() {
           <Text className={`text-xs ${
             filter.category === 'total-score' ? 'text-white' : 'text-gray-600'
           }`}>
-            Total Score
+            Kabuuang Puntos
           </Text>
         </TouchableOpacity>
         
@@ -211,7 +211,7 @@ export default function LeaderboardScreen() {
           <Text className={`text-xs ${
             filter.category === 'streak' ? 'text-white' : 'text-gray-600'
           }`}>
-            Streak
+            Dagdag pang Araw
           </Text>
         </TouchableOpacity>
       </View>
@@ -221,15 +221,15 @@ export default function LeaderboardScreen() {
   const renderEmpty = () => (
     <View className="flex-1 justify-center items-center p-10">
       <Ionicons name="trophy-outline" size={64} color="#D1D5DB" />
-      <Text className="text-lg font-medium text-gray-600 mt-3">No rankings yet</Text>
-      <Text className="text-sm text-gray-600 text-center mt-1">Complete lessons and quizzes to appear on the leaderboard!</Text>
+      <Text className="text-lg font-medium text-gray-600 mt-3">Wala pang ranggo</Text>
+      <Text className="text-sm text-gray-600 text-center mt-1">Tapusin ang mga aralin at quiz para makita sa leaderboard!</Text>
     </View>
   );
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-lg text-gray-600">Loading leaderboard...</Text>
+        <Text className="text-lg text-gray-600">Naglo-load ng leaderboard...</Text>
       </View>
     );
   }

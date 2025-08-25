@@ -44,6 +44,19 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
     }
   };
 
+  const getDifficultyText = (difficulty: DifficultyLevel) => {
+    switch (difficulty) {
+      case DifficultyLevel.BEGINNER:
+        return 'Pasimula';
+      case DifficultyLevel.INTERMEDIATE:
+        return 'Katamtaman';
+      case DifficultyLevel.ADVANCED:
+        return 'Mahirap';
+      default:
+        return 'Hindi Alam';
+    }
+  };
+
   const renderLessonItem = ({ item }: { item: Lesson }) => {
     const isCompleted = isLessonCompleted(item.id);
     const lessonProgress = getLessonProgress(item.id);
@@ -70,7 +83,7 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
             <Text className="text-sm text-secondary-600 leading-5">{item.description}</Text>
             {isCompleted && lessonProgress && (
               <Text className="text-xs text-green-600 font-semibold mt-1">
-                Score: {Math.round(lessonProgress.score)} points
+                Puntos: {Math.round(lessonProgress.score)} puntos
               </Text>
             )}
             {item.badge && (
@@ -89,7 +102,7 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
                 color="white" 
               />
               <Text className="text-white text-xs font-bold ml-1">
-                {item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}
+                {getDifficultyText(item.difficulty)}
               </Text>
             </View>
             
@@ -101,7 +114,7 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
         
         <View className="flex-row justify-between items-center pt-3 border-t border-secondary-200">
           <Text className="text-sm text-secondary-600 font-medium">
-            {item.characters.length} characters
+            {item.characters.length} mga titik
           </Text>
           <Ionicons name="chevron-forward" size={20} color="#0B4CA7" />
         </View>
@@ -112,8 +125,8 @@ export default function LessonListScreen({ onSelectLesson }: LessonListScreenPro
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="p-5 bg-primary">
-        <Text className="text-3xl font-bold text-white mb-1">Baybayin Lessons</Text>
-        <Text className="text-base text-orange-100">Master the ancient Filipino script</Text>
+        <Text className="text-3xl font-bold text-white mb-1">Mga Aralin sa Baybayin</Text>
+        <Text className="text-base text-orange-100">Matutunan ang sinaunang sulat ng Pilipino</Text>
       </View>
 
       <FlatList

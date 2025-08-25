@@ -44,6 +44,19 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
     }
   };
 
+  const getDifficultyText = (difficulty: DifficultyLevel) => {
+    switch (difficulty) {
+      case DifficultyLevel.BEGINNER:
+        return 'Pasimula';
+      case DifficultyLevel.INTERMEDIATE:
+        return 'Katamtaman';
+      case DifficultyLevel.ADVANCED:
+        return 'Mahirap';
+      default:
+        return 'Hindi Alam';
+    }
+  };
+
   const isQuizUnlocked = (quiz: Quiz): boolean => {
     if (!quiz.prerequisiteLessons || !userProgress) return true;
     
@@ -88,7 +101,7 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
                   color="white" 
                 />
                 <Text className="text-white text-xs font-bold ml-1">
-                  {item.difficulty.charAt(0).toUpperCase() + item.difficulty.slice(1)}
+                  {getDifficultyText(item.difficulty)}
                 </Text>
               </View>
             )}
@@ -98,7 +111,7 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
         <View className="flex-row justify-between items-center mb-2">
           <View className="flex-row items-center">
             <Ionicons name="help-circle-outline" size={16} color="#0B4CA7" />
-            <Text className="text-sm text-secondary-600 ml-1">{item.questions.length} questions</Text>
+            <Text className="text-sm text-secondary-600 ml-1">{item.questions.length} mga tanong</Text>
           </View>
           
           {item.timeLimit && (
@@ -112,14 +125,14 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
           
           <View className="flex-row items-center">
             <Ionicons name="checkmark-circle-outline" size={16} color="#0B4CA7" />
-            <Text className="text-sm text-secondary-600 ml-1">{item.passingScore}% to pass</Text>
+            <Text className="text-sm text-secondary-600 ml-1">{item.passingScore}% para pumasa</Text>
           </View>
         </View>
 
         {!isUnlocked && item.prerequisiteLessons && (
           <View className="bg-secondary-50 p-3 rounded-lg mt-2 border border-secondary-200">
             <Text className="text-sm text-secondary-600 text-center">
-              Complete lessons {item.prerequisiteLessons.join(', ')} to unlock
+              Kumpletuhin ang mga aralin {item.prerequisiteLessons.join(', ')} para ma-unlock
             </Text>
           </View>
         )}
@@ -130,8 +143,8 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="p-5 bg-primary">
-        <Text className="text-3xl font-bold text-white mb-1">Baybayin Quizzes</Text>
-        <Text className="text-base text-orange-100">Test your knowledge and earn points!</Text>
+        <Text className="text-3xl font-bold text-white mb-1">Mga Pagsusulit sa Baybayin</Text>
+        <Text className="text-base text-orange-100">Subukin ang inyong kaalaman at kumita ng puntos!</Text>
       </View>
 
       <FlatList

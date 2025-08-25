@@ -106,12 +106,12 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
 
   const menuItems = [
     { title: 'Dashboard', icon: 'home-outline', route: '/(tabs)/', tab: 'index' },
-    { title: 'Lessons', icon: 'book-outline', route: '/(tabs)/two', tab: 'two' },
-    { title: 'Progress', icon: 'bar-chart-outline', route: '/(tabs)/progress', tab: 'progress' },
-    { title: 'Quizzes', icon: 'help-circle-outline', route: '/(tabs)/quizzes', tab: 'quizzes' },
-    { title: 'Handwriting', icon: 'create-outline', route: '/(tabs)/handwriting', tab: 'handwriting' },
-    { title: 'Leaderboard', icon: 'trophy-outline', route: '/(tabs)/leaderboard', tab: 'leaderboard' },
-    { title: 'Translate', icon: 'language-outline', route: '/(tabs)/translation', tab: 'translation' },
+    { title: 'Aralin', icon: 'book-outline', route: '/(tabs)/two', tab: 'two' },
+    { title: 'Pag-unlad', icon: 'bar-chart-outline', route: '/(tabs)/progress', tab: 'progress' },
+    { title: 'Pagsusulit', icon: 'help-circle-outline', route: '/(tabs)/quizzes', tab: 'quizzes' },
+    { title: 'Pagsulat', icon: 'create-outline', route: '/(tabs)/handwriting', tab: 'handwriting' },
+    { title: 'Talaan ng mga Nanalo', icon: 'trophy-outline', route: '/(tabs)/leaderboard', tab: 'leaderboard' },
+    { title: 'Pagsasalin', icon: 'language-outline', route: '/(tabs)/translation', tab: 'translation' },
   ];
 
   const handleMenuItemPress = (route: string) => {
@@ -240,7 +240,7 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
                   >
                     <Ionicons name="settings-outline" size={22} color="#0B4CA7" />
                     <Text className="ml-4 text-base font-medium text-secondary">
-                      Profile Settings
+                      Mga Setting ng Profile
                     </Text>
                   </TouchableOpacity>
                   
@@ -251,7 +251,7 @@ export default function HamburgerMenu({ currentTab }: HamburgerMenuProps) {
                   >
                     <Ionicons name="log-out-outline" size={22} color="#DC2626" />
                     <Text className="ml-4 text-base font-medium text-red-600">
-                      Logout
+                      Mag-logout
                     </Text>
                   </TouchableOpacity>
                 </Animated.View>

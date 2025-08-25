@@ -28,23 +28,23 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
 
   const handleLogout = () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      'Mag-logout',
+      'Sigurado ka bang gusto mo mag-logout?',
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: logout }
+        { text: 'Huwag', style: 'cancel' },
+        { text: 'Mag-logout', style: 'destructive', onPress: logout }
       ]
     );
   };
 
   const handleUpdateProfile = async () => {
     if (!username.trim()) {
-      Alert.alert('Error', 'Username cannot be empty');
+      Alert.alert('Error', 'Hindi pwedeng walang laman ang username');
       return;
     }
 
     if (username.length < 3) {
-      Alert.alert('Error', 'Username must be at least 3 characters');
+      Alert.alert('Error', 'Ang username ay dapat hindi bababa sa 3 na titik');
       return;
     }
 
@@ -72,10 +72,10 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
         });
       }
 
-      Alert.alert('Success', 'Profile updated successfully!');
+      Alert.alert('Tagumpay', 'Matagumpay na na-update ang profile!');
       onBack();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update profile');
+      Alert.alert('Error', error.message || 'Hindi ma-update ang profile');
     } finally {
       setLoading(false);
     }
@@ -87,7 +87,7 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
         <TouchableOpacity onPress={onBack} className="mr-4">
           <Ionicons name="arrow-back" size={24} color="#0B4CA7" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-secondary-700">Profile Settings</Text>
+        <Text className="text-xl font-bold text-secondary-700">Mga Setting ng Profile</Text>
       </View>
 
       <ScrollView className="flex-1">
@@ -98,11 +98,11 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
               className="border border-secondary-300 rounded-lg p-3 text-base bg-white focus:border-secondary-500"
               value={username}
               onChangeText={setUsername}
-              placeholder="Enter your username"
+              placeholder="Lagay ang inyong username"
               autoCapitalize="none"
               placeholderTextColor="#777"
             />
-            <Text className="text-xs text-secondary-500 mt-1">This will be displayed on the leaderboard</Text>
+            <Text className="text-xs text-secondary-500 mt-1">Ito ay makikita sa leaderboard</Text>
           </View>
 
           <View className="mb-6">
@@ -110,7 +110,7 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
             <Text className="text-base text-secondary-600 p-3 bg-secondary-50 rounded-lg border border-secondary-200">
               {user?.email}
             </Text>
-            <Text className="text-xs text-secondary-500 mt-1">Email cannot be changed</Text>
+            <Text className="text-xs text-secondary-500 mt-1">Hindi mababago ang email</Text>
           </View>
 
           <TouchableOpacity
@@ -121,7 +121,7 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
             disabled={loading}
           >
             <Text className="text-white text-base font-medium">
-              {loading ? 'Updating...' : 'Update Profile'}
+              {loading ? 'Ina-update...' : 'I-update ang Profile'}
             </Text>
           </TouchableOpacity>
 
@@ -134,7 +134,7 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
               <View className="flex-row items-center">
                 <Ionicons name="log-out-outline" size={20} color="white" />
                 <Text className="text-white text-base font-medium ml-2">
-                  Logout
+                  Mag-logout
                 </Text>
               </View>
             </TouchableOpacity>

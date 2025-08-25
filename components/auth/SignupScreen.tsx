@@ -25,31 +25,31 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
 
   const handleSignup = async () => {
     if (!email || !password || !confirmPassword || !username) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Pakipunan ang lahat ng patlang');
       return;
     }
 
     if (username.length < 3) {
-      Alert.alert('Error', 'Username must be at least 3 characters');
+      Alert.alert('Error', 'Ang username ay dapat hindi bababa sa 3 na titik');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert('Error', 'Hindi magkatugma ang mga password');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      Alert.alert('Error', 'Ang password ay dapat hindi bababa sa 6 na titik');
       return;
     }
 
     try {
       setLoading(true);
       await signup(email, password, username);
-      Alert.alert('Success', 'Account created successfully!');
+      Alert.alert('Tagumpay', 'Matagumpay na nagawa ang account!');
     } catch (error: any) {
-      Alert.alert('Signup Error', error.message);
+      Alert.alert('Error sa Pag-signup', error.message);
     } finally {
       setLoading(false);
     }
@@ -63,15 +63,15 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 20 }}>
         <View className="items-center mb-10">
           <Text className="text-4xl font-bold text-primary mb-2">TalaBaybayin</Text>
-          <Text className="text-base text-gray-600 text-center">Join the Journey of Learning</Text>
+          <Text className="text-base text-gray-600 text-center">Sumama sa Paglalakbay ng Pag-aaral</Text>
         </View>
 
         <View className="bg-white p-8 rounded-2xl shadow-sm">
-          <Text className="text-2xl font-bold text-center mb-8 text-gray-800">Create Account</Text>
+          <Text className="text-2xl font-bold text-center mb-8 text-gray-800">Gumawa ng Account</Text>
           
           <TextInput
             className="border border-gray-300 p-4 rounded-lg mb-4 text-base bg-gray-50"
-            placeholder="Username"
+            placeholder="Pangalan ng user"
             value={username}
             onChangeText={setUsername}
             autoCapitalize="none"
@@ -99,7 +99,7 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
 
           <TextInput
             className="border border-gray-300 p-4 rounded-lg mb-4 text-base bg-gray-50"
-            placeholder="Confirm Password"
+            placeholder="Ulitin ang Password"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
@@ -112,14 +112,14 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
             disabled={loading}
           >
             <Text className="text-white text-lg font-bold">
-              {loading ? 'Creating Account...' : 'Sign Up'}
+              {loading ? 'Ginagawa ang Account...' : 'Mag-signup'}
             </Text>
           </TouchableOpacity>
 
           <View className="flex-row justify-center mt-5">
-            <Text className="text-gray-600 text-base">Already have an account? </Text>
+            <Text className="text-gray-600 text-base">May account na? </Text>
             <TouchableOpacity onPress={onSwitchToLogin}>
-              <Text className="text-primary text-lg font-bold">Sign In</Text>
+              <Text className="text-primary text-lg font-bold">Mag-login</Text>
             </TouchableOpacity>
           </View>
         </View>

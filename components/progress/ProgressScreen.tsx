@@ -8,7 +8,7 @@ export default function ProgressScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-base text-gray-600">Loading progress...</Text>
+        <Text className="text-base text-gray-600">Naglo-load ng progreso...</Text>
       </View>
     );
   }
@@ -16,7 +16,7 @@ export default function ProgressScreen() {
   if (!userProgress) {
     return (
       <View className="flex-1 bg-background">
-        <Text className="text-red-500 text-center mt-10">No progress data available</Text>
+        <Text className="text-red-500 text-center mt-10">Walang makitang datos ng progreso</Text>
       </View>
     );
   }
@@ -46,7 +46,7 @@ export default function ProgressScreen() {
             />
           </View>
           <Text className="text-sm text-gray-600 text-center">
-            {progressPercentage}/100 XP to next level
+            {progressPercentage}/100 XP para sa susunod na level
           </Text>
         </View>
       </View>
@@ -56,39 +56,39 @@ export default function ProgressScreen() {
         <View className="w-1/2 p-2">
           <View className="bg-white p-4 rounded-lg shadow-sm items-center border-l-4 border-primary">
             <Text className="text-2xl font-bold text-primary">{userProgress.completedLessons.length}</Text>
-            <Text className="text-sm text-gray-600 text-center">Lessons Completed</Text>
+            <Text className="text-sm text-gray-600 text-center">Natapos na Aralin</Text>
           </View>
         </View>
         
         <View className="w-1/2 p-2">
           <View className="bg-secondary-50 p-4 rounded-lg shadow-sm items-center border-l-4 border-secondary">
             <Text className="text-2xl font-bold text-secondary">{userProgress.streak}</Text>
-            <Text className="text-sm text-secondary-600 text-center">Day Streak</Text>
+            <Text className="text-sm text-secondary-600 text-center">Dagdag pang Araw</Text>
           </View>
         </View>
         
         <View className="w-1/2 p-2">
           <View className="bg-white p-4 rounded-lg shadow-sm items-center border-l-4 border-primary">
             <Text className="text-2xl font-bold text-primary">{Math.round(userProgress.totalScore)}</Text>
-            <Text className="text-sm text-gray-600 text-center">Total Score</Text>
+            <Text className="text-sm text-gray-600 text-center">Kabuuang Puntos</Text>
           </View>
         </View>
         
         <View className="w-1/2 p-2">
           <View className="bg-secondary-50 p-4 rounded-lg shadow-sm items-center border-l-4 border-secondary">
             <Text className="text-2xl font-bold text-secondary">{userProgress.totalTimeSpent}</Text>
-            <Text className="text-sm text-secondary-600 text-center">Minutes Learned</Text>
+            <Text className="text-sm text-secondary-600 text-center">Minutong Nag-aral</Text>
           </View>
         </View>
       </View>
 
       {/* Recent Achievements */}
       <View className="mx-4 mb-4">
-        <Text className="text-xl font-bold text-gray-800 mb-3">Recent Achievements</Text>
+        <Text className="text-xl font-bold text-gray-800 mb-3">Bagong Nakamit</Text>
         {userProgress.achievements.length === 0 ? (
           <View className="bg-white p-5 rounded-lg shadow-sm">
             <Text className="text-gray-500 text-center">
-              Complete lessons to unlock achievements!
+              Tapusin ang mga aralin para makakuha ng mga parangal!
             </Text>
           </View>
         ) : (
