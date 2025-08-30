@@ -1,14 +1,15 @@
 import React from 'react';
-import { AuthProvider } from '@/contexts/AuthContext';
 import { ProgressProvider } from '@/contexts/ProgressContext';
-import TranslationContainer from '@/components/translation/TranslationContainer';
+import TranslationScreen from '@/components/translation/TranslationScreen';
+import { View } from 'react-native';
 
 export default function TranslationTab() {
+  // Simplified structure - direct translation screen with only necessary provider
   return (
-    <AuthProvider>
-      <ProgressProvider>
-        <TranslationContainer />
-      </ProgressProvider>
-    </AuthProvider>
+    <ProgressProvider>
+      <View style={{ flex: 1 }}>
+        <TranslationScreen onBack={() => {}} />
+      </View>
+    </ProgressProvider>
   );
 }
