@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
+import * as Haptics from 'expo-haptics';
 import {
   tagalogToBaybayin,
   baybayinToTagalog,
@@ -24,6 +25,7 @@ import { useProgress } from '../../contexts/ProgressContext';
 import { ActivityType } from '../../types/progress';
 import BaybayinKeyboard from '../common/BaybayinKeyboard';
   import RomanKeyboard from '../common/RomanKeyboard';
+import TextWithCursor from '../common/TextWithCursor';
 import '../../global.css';
 
 interface TranslationScreenProps {
@@ -41,19 +43,38 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
   const [suggestions, setSuggestions] = useState<Array<{ type: 'warning' | 'info' | 'error'; message: string }>>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [hasTrackedActivity, setHasTrackedActivity] = useState(false); // Track if we've already logged activity
+  const [inputCursorPosition, setInputCursorPosition] = useState(0);
+  const [outputCursorPosition, setOutputCursorPosition] = useState(0);
   
   const { trackActivity } = useProgress();
 
-  // Track translation activity when user starts typing
-  const handleInputTextChange = (text: string) => {
+  // Optimized cursor position change handler
+  const handleCursorPositionChange = useCallback((position: number) => {
+    setInputCursorPosition(position);
+  }, []);
+
+  // Optimized input handling with reduced haptic feedback
+  const handleInputTextChange = useCallback((text: string) => {
     setInputText(text);
+    
+    // Reduce haptic feedback frequency to prevent lag
+    if (text.length > inputText.length && text.length % 3 === 0) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     
     // Track activity on first character input
     if (text.length === 1 && !hasTrackedActivity) {
       trackActivity(ActivityType.TRANSLATION_USED);
       setHasTrackedActivity(true);
     }
-  };
+  }, [inputText.length, hasTrackedActivity, trackActivity]);
+
+  // Update cursor position when input text changes
+  useEffect(() => {
+    if (inputCursorPosition > inputText.length) {
+      setInputCursorPosition(inputText.length);
+    }
+  }, [inputText.length, inputCursorPosition]);
 
   // Translate when input changes
   useEffect(() => {
@@ -83,7 +104,9 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
     setSuggestions(newSuggestions);
   }, [inputText, translationMode, useWordMapping]);
 
-  const handleSwapMode = () => {
+  const handleSwapMode = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
     const newMode = translationMode === 'tagalog-to-baybayin' ? 'baybayin-to-tagalog' : 'tagalog-to-baybayin';
     setTranslationMode(newMode);
     
@@ -95,16 +118,18 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
     const tempText = inputText;
     setInputText(outputText);
     setOutputText(tempText);
-  };
+  }, [translationMode, inputText, outputText]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setInputText('');
     setOutputText('');
     setSuggestions([]);
-  };
+  }, []);
 
-  const handleCopy = async (text: string, label: string) => {
+  const handleCopy = useCallback(async (text: string, label: string) => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       // For React Native, we'll use the Share API as a fallback
       await Share.share({
         message: text,
@@ -113,7 +138,7 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
     } catch (error) {
       Alert.alert('Error', 'Hindi maibahagi ang text');
     }
-  };
+  }, []);
 
   const handleShare = async () => {
     try {
@@ -167,32 +192,34 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
     setIsInputFocused(false);
   };
 
-  // Handle Baybayin keyboard text changes
-  const handleBaybayinTextChange = (newText: string) => {
+  // Handle Baybayin keyboard text changes (optimized)
+  const handleBaybayinTextChange = useCallback((newText: string) => {
     handleInputTextChange(newText);
-  };
+  }, [handleInputTextChange]);
 
-  // Handle Roman keyboard text changes
-  const handleRomanTextChange = (newText: string) => {
+  // Handle Roman keyboard text changes (optimized)
+  const handleRomanTextChange = useCallback((newText: string) => {
     handleInputTextChange(newText);
-  };
+  }, [handleInputTextChange]);
 
   // Handle regular text input changes
-  const handleTextInputChange = (newText: string) => {
+  const handleTextInputChange = useCallback((newText: string) => {
     handleInputTextChange(newText);
-  };
+  }, [handleInputTextChange]);
 
-  // Toggle Baybayin keyboard manually
-  const toggleBaybayinKeyboard = () => {
+  // Toggle Baybayin keyboard manually with haptic feedback
+  const toggleBaybayinKeyboard = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setShowKeyboard(!showKeyboard);
     setShowRomanKeyboard(false); // Close Roman keyboard if open
-  };
+  }, [showKeyboard]);
 
-  // Toggle Roman keyboard manually
-  const toggleRomanKeyboard = () => {
+  // Toggle Roman keyboard manually with haptic feedback
+  const toggleRomanKeyboard = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setShowRomanKeyboard(!showRomanKeyboard);
     setShowKeyboard(false); // Close Baybayin keyboard if open
-  };
+  }, [showRomanKeyboard]);
 
   const renderSuggestions = () => {
     if (suggestions.length === 0) return null;
@@ -331,6 +358,24 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
             </View>
           )}
 
+          {/* Typing Instructions */}
+          {(showKeyboard || showRomanKeyboard) && inputText && (
+            <View className="flex-row items-center justify-between gap-2 mb-2 px-1 py-1 bg-blue-50 rounded">
+              <View className="flex-row items-center gap-1">
+                <Ionicons name="create-outline" size={14} color="#3B82F6" />
+                <Text className="text-xs text-blue-600">
+                  Ang cursor ay nagpapakita kung saan susunod na titik
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-1">
+                <Ionicons name="backspace-outline" size={14} color="#EF4444" />
+                <Text className="text-xs text-red-600">
+                  Backspace para magbura
+                </Text>
+              </View>
+            </View>
+          )}
+
           {translationMode === 'baybayin-to-tagalog' ? (
             // Baybayin input mode - use TouchableOpacity instead of TextInput
             <TouchableOpacity
@@ -340,14 +385,33 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               onPress={() => {
                 setShowKeyboard(true);
                 setShowRomanKeyboard(false);
+                // Start cursor at end when opening keyboard
+                if (inputCursorPosition > inputText.length) {
+                  setInputCursorPosition(inputText.length);
+                }
               }}
               activeOpacity={0.7}
             >
-              <Text className={`text-xl font-mono leading-7 ${
-                inputText ? 'text-primary font-bold' : 'text-gray-400 italic font-normal'
-              }`}>
-                {inputText || 'Pindutin dito para mag-type sa Baybayin...'}
-              </Text>
+              <TextWithCursor
+                text={inputText}
+                placeholder="Pindutin dito para mag-type sa Baybayin..."
+                isActive={showKeyboard}
+                cursorPosition={inputCursorPosition}
+                onCursorPositionChange={handleCursorPositionChange}
+                textStyle={{
+                  fontSize: 20,
+                  fontFamily: 'monospace',
+                  lineHeight: 28,
+                  color: '#0B4CA7',
+                  fontWeight: 'bold'
+                }}
+                placeholderStyle={{
+                  fontSize: 16,
+                  color: '#9CA3AF',
+                  fontStyle: 'italic'
+                }}
+                cursorColor="#0B4CA7"
+              />
             </TouchableOpacity>
           ) : (
             // Tagalog input mode - use TouchableOpacity to trigger custom keyboard
@@ -358,14 +422,31 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
               onPress={() => {
                 setShowRomanKeyboard(true);
                 setShowKeyboard(false);
+                // Start cursor at end when opening keyboard
+                if (inputCursorPosition > inputText.length) {
+                  setInputCursorPosition(inputText.length);
+                }
               }}
               activeOpacity={0.7}
             >
-              <Text className={`text-lg leading-6 ${
-                inputText ? 'text-gray-800' : 'text-gray-400 italic'
-              }`}>
-                {inputText || 'Pindutin dito para mag-type sa Tagalog...'}
-              </Text>
+              <TextWithCursor
+                text={inputText}
+                placeholder="Pindutin dito para mag-type sa Tagalog..."
+                isActive={showRomanKeyboard}
+                cursorPosition={inputCursorPosition}
+                onCursorPositionChange={handleCursorPositionChange}
+                textStyle={{
+                  fontSize: 18,
+                  lineHeight: 24,
+                  color: '#1F2937'
+                }}
+                placeholderStyle={{
+                  fontSize: 16,
+                  color: '#9CA3AF',
+                  fontStyle: 'italic'
+                }}
+                cursorColor="#0B4CA7"
+              />
             </TouchableOpacity>
           )}
           <View className="flex-row justify-end gap-3 mt-2">
@@ -475,6 +556,8 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
           onTextChange={handleBaybayinTextChange}
           initialText={inputText}
           placeholder="Type in Baybayin..."
+          cursorPosition={inputCursorPosition}
+          onCursorPositionChange={handleCursorPositionChange}
         />
       )}
       
@@ -485,6 +568,8 @@ export default function TranslationScreen({ onBack }: TranslationScreenProps) {
           onTextChange={handleRomanTextChange}
           initialText={inputText}
           placeholder="Type in Tagalog..."
+          cursorPosition={inputCursorPosition}
+          onCursorPositionChange={handleCursorPositionChange}
         />
       )}
       </View>

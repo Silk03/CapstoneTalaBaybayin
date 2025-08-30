@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   BackHandler,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import '../../global.css';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -27,6 +28,8 @@ interface RomanKeyboardProps {
   onTextChange: (text: string) => void;
   initialText?: string;
   placeholder?: string;
+  cursorPosition?: number;
+  onCursorPositionChange?: (position: number) => void;
 }
 
 export default function RomanKeyboard({
@@ -35,10 +38,23 @@ export default function RomanKeyboard({
   onTextChange,
   initialText = '',
   placeholder = '',
+  cursorPosition = 0,
+  onCursorPositionChange,
 }: RomanKeyboardProps) {
   const [text, setText] = useState(initialText);
+  const [localCursorPosition, setLocalCursorPosition] = useState(cursorPosition);
   const [isShiftPressed, setIsShiftPressed] = useState(false);
   const [isCapsLock, setIsCapsLock] = useState(false);
+
+  // Sync cursor position when prop changes
+  useEffect(() => {
+    setLocalCursorPosition(cursorPosition);
+  }, [cursorPosition]);
+
+  // Sync text when initialText changes
+  useEffect(() => {
+    setText(initialText);
+  }, [initialText]);
 
   // Handle Android back button to close keyboard
   useEffect(() => {
@@ -55,25 +71,39 @@ export default function RomanKeyboard({
     return () => backHandler.remove();
   }, [visible, onClose]);
 
-  const handleKeyPress = (key: string) => {
+  const handleKeyPress = useCallback((key: string) => {
+    // Add haptic feedback for every key press
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     if (key === 'backspace') {
-      const newText = text.slice(0, -1);
-      setText(newText);
-      onTextChange(newText);
+      if (localCursorPosition > 0) {
+        const newText = text.slice(0, localCursorPosition - 1) + text.slice(localCursorPosition);
+        const newCursorPos = localCursorPosition - 1;
+        setText(newText);
+        setLocalCursorPosition(newCursorPos);
+        onTextChange(newText);
+        onCursorPositionChange?.(newCursorPos);
+      }
       return;
     }
 
     if (key === 'space') {
-      const newText = text + ' ';
+      const newText = text.slice(0, localCursorPosition) + ' ' + text.slice(localCursorPosition);
+      const newCursorPos = localCursorPosition + 1;
       setText(newText);
+      setLocalCursorPosition(newCursorPos);
       onTextChange(newText);
+      onCursorPositionChange?.(newCursorPos);
       return;
     }
 
     if (key === 'enter') {
-      const newText = text + '\n';
+      const newText = text.slice(0, localCursorPosition) + '\n' + text.slice(localCursorPosition);
+      const newCursorPos = localCursorPosition + 1;
       setText(newText);
+      setLocalCursorPosition(newCursorPos);
       onTextChange(newText);
+      onCursorPositionChange?.(newCursorPos);
       return;
     }
 
@@ -102,10 +132,13 @@ export default function RomanKeyboard({
       }
     }
 
-    const newText = text + character;
+    const newText = text.slice(0, localCursorPosition) + character + text.slice(localCursorPosition);
+    const newCursorPos = localCursorPosition + 1;
     setText(newText);
+    setLocalCursorPosition(newCursorPos);
     onTextChange(newText);
-  };
+    onCursorPositionChange?.(newCursorPos);
+  }, [text, localCursorPosition, onTextChange, onCursorPositionChange, isShiftPressed, isCapsLock]);
 
   const getKeyWidth = (rowIndex: number, keyIndex: number, totalKeys: number) => {
     const availableWidth = screenWidth - 60; // Account for padding
@@ -150,7 +183,14 @@ export default function RomanKeyboard({
     <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-lg">
       {/* Header */}
       <View className="flex-row justify-between items-center px-4 py-3 bg-secondary-50 border-b border-gray-200">
-        <Text className="text-lg font-semibold text-secondary-700">Tagalog Keyboard</Text>
+        <View className="flex-row items-center gap-2">
+          <Text className="text-lg font-semibold text-secondary-700">Tagalog Keyboard</Text>
+          {text.length > 0 && (
+            <View className="bg-secondary-200 rounded-full px-2 py-1">
+              <Text className="text-xs text-secondary-700 font-medium">{text.length} karakter</Text>
+            </View>
+          )}
+        </View>
         <TouchableOpacity onPress={onClose} className="bg-secondary-100 rounded-full p-2">
           <Ionicons name="close" size={20} color="#0B4CA7" />
         </TouchableOpacity>

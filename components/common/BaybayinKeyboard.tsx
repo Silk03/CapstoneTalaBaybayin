@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
+import * as Haptics from 'expo-haptics';
 import '../../global.css';
 
 const { height: screenHeight } = Dimensions.get('window');
@@ -85,6 +86,8 @@ interface BaybayinKeyboardProps {
   onTextChange: (text: string) => void;
   initialText?: string;
   placeholder?: string;
+  cursorPosition?: number;
+  onCursorPositionChange?: (position: number) => void;
 }
 
 export default function BaybayinKeyboard({
@@ -93,14 +96,27 @@ export default function BaybayinKeyboard({
   onTextChange,
   initialText = '',
   placeholder = '',
+  cursorPosition = 0,
+  onCursorPositionChange,
 }: BaybayinKeyboardProps) {
   const [text, setText] = useState(initialText);
+  const [localCursorPosition, setLocalCursorPosition] = useState(cursorPosition);
   const [romanizedText, setRomanizedText] = useState('');
   const [showVariants, setShowVariants] = useState(false);
   const [variantKey, setVariantKey] = useState<string | null>(null);
   const [variantPosition, setVariantPosition] = useState<{ x: number; y: number } | null>(null);
   const [fadeAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(0.8));
+
+  // Sync cursor position when prop changes
+  useEffect(() => {
+    setLocalCursorPosition(cursorPosition);
+  }, [cursorPosition]);
+
+  // Sync text when initialText changes
+  useEffect(() => {
+    setText(initialText);
+  }, [initialText]);
 
   // Handle Android back button to close keyboard
   useEffect(() => {
@@ -191,17 +207,25 @@ export default function BaybayinKeyboard({
     // Removed speech for vowels - no action on long press for vowels
   };
 
-  const handleVariantSelect = (variant: any) => {
+  const handleVariantSelect = useCallback((variant: any) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    
     if (variant.key.includes('_virama')) {
-      // Handle virama variant
-      const newText = text + variant.baybayin;
+      // Handle virama variant - insert at cursor position
+      const newText = text.slice(0, localCursorPosition) + variant.baybayin + text.slice(localCursorPosition);
+      const newCursorPos = localCursorPosition + variant.baybayin.length;
       setText(newText);
-      onTextChange(newText); // Send to parent immediately
+      setLocalCursorPosition(newCursorPos);
+      onTextChange(newText);
+      onCursorPositionChange?.(newCursorPos);
     } else {
-      // Handle regular variant
-      const newText = text + variant.baybayin;
+      // Handle regular variant - insert at cursor position
+      const newText = text.slice(0, localCursorPosition) + variant.baybayin + text.slice(localCursorPosition);
+      const newCursorPos = localCursorPosition + variant.baybayin.length;
       setText(newText);
-      onTextChange(newText); // Send to parent immediately
+      setLocalCursorPosition(newCursorPos);
+      onTextChange(newText);
+      onCursorPositionChange?.(newCursorPos);
     }
     
     // Animate popup disappearance
@@ -221,7 +245,7 @@ export default function BaybayinKeyboard({
       setVariantKey(null);
       setVariantPosition(null);
     });
-  };
+  }, [text, localCursorPosition, onTextChange, onCursorPositionChange, fadeAnim, scaleAnim]);
   const speakCharacter = async (key: string) => {
     try {
       // Convert key to a more pronounceable form
@@ -245,7 +269,10 @@ export default function BaybayinKeyboard({
     }
   };
 
-  const handleKeyPress = (key: string, baybayin: string) => {
+  const handleKeyPress = useCallback((key: string, baybayin: string) => {
+    // Add haptic feedback for every key press
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
     // Close variants popup if open
     if (showVariants) {
       Animated.parallel([
@@ -268,24 +295,35 @@ export default function BaybayinKeyboard({
     }
 
     if (key === 'backspace') {
-      const newText = text.slice(0, -1);
-      setText(newText);
-      onTextChange(newText); // Send to parent immediately
+      if (localCursorPosition > 0) {
+        const newText = text.slice(0, localCursorPosition - 1) + text.slice(localCursorPosition);
+        const newCursorPos = localCursorPosition - 1;
+        setText(newText);
+        setLocalCursorPosition(newCursorPos);
+        onTextChange(newText);
+        onCursorPositionChange?.(newCursorPos);
+      }
       return;
     }
 
     if (key === 'space') {
-      const newText = text + ' ';
+      const newText = text.slice(0, localCursorPosition) + ' ' + text.slice(localCursorPosition);
+      const newCursorPos = localCursorPosition + 1;
       setText(newText);
-      onTextChange(newText); // Send to parent immediately
+      setLocalCursorPosition(newCursorPos);
+      onTextChange(newText);
+      onCursorPositionChange?.(newCursorPos);
       return;
     }
 
-    // For all characters, add directly (no vowel modifier screen)
-    const newText = text + baybayin;
+    // For all characters, insert at cursor position
+    const newText = text.slice(0, localCursorPosition) + baybayin + text.slice(localCursorPosition);
+    const newCursorPos = localCursorPosition + baybayin.length;
     setText(newText);
-    onTextChange(newText); // Send to parent immediately
-  };
+    setLocalCursorPosition(newCursorPos);
+    onTextChange(newText);
+    onCursorPositionChange?.(newCursorPos);
+  }, [showVariants, fadeAnim, scaleAnim, text, localCursorPosition, onTextChange, onCursorPositionChange]);
 
   const handleDone = () => {
     onTextChange(text);
@@ -322,7 +360,14 @@ export default function BaybayinKeyboard({
       <View className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-lg">
         {/* Header */}
       <View className="flex-row justify-between items-center px-4 py-3 bg-secondary-50 border-b border-gray-200">
-        <Text className="text-lg font-semibold text-secondary-700">Baybayin Keyboard</Text>
+        <View className="flex-row items-center gap-2">
+          <Text className="text-lg font-semibold text-secondary-700">Baybayin Keyboard</Text>
+          {text.length > 0 && (
+            <View className="bg-secondary-200 rounded-full px-2 py-1">
+              <Text className="text-xs text-secondary-700 font-medium">{text.length} karakter</Text>
+            </View>
+          )}
+        </View>
         <TouchableOpacity onPress={onClose} className="bg-secondary-100 rounded-full p-2">
           <Ionicons name="close" size={20} color="#0B4CA7" />
         </TouchableOpacity>
