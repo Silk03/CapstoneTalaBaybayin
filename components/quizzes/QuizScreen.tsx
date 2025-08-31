@@ -10,6 +10,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Quiz, QuizQuestion, QuestionType } from '../../types/quiz';
 import { useProgress } from '../../contexts/ProgressContext';
+import { Badge } from '../../types/progress';
+import BadgeEarnedModal from '../common/BadgeEarnedModal';
 import '../../global.css';
 
 interface QuizScreenProps {
@@ -28,7 +30,9 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   const [showPointsGained, setShowPointsGained] = useState<{ points: number; timeBonus: number; isCorrect: boolean } | null>(null);
   const [totalPointsEarned, setTotalPointsEarned] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState<Set<string>>(new Set());
-  const { addExperience, isQuizCompleted } = useProgress();
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [earnedBadge, setEarnedBadge] = useState<Badge | null>(null);
+  const { addExperience, isQuizCompleted, awardBadge, getQuizAttempts, completeQuiz, getQuestionPoints } = useProgress();
 
   // Add null checks for quiz and questions
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
@@ -43,6 +47,9 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
   const selectedAnswer = answers[currentQuestion?.id || ''];
   const isRetake = isQuizCompleted(quiz.id);
+  const currentAttempts = getQuizAttempts(quiz.id);
+  const maxAttempts = 3;
+  const isLastAttempt = currentAttempts >= maxAttempts - 1;
 
   // Calculate progress percentage for debugging
   const progressPercentage = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
@@ -62,8 +69,29 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
         'You have already completed this quiz. You can retake it for practice, but no points will be awarded.',
         [{ text: 'Continue', style: 'default' }]
       );
+    } else if (currentAttempts > 0) {
+      const remainingAttempts = maxAttempts - currentAttempts;
+      if (remainingAttempts <= 0) {
+        Alert.alert(
+          'Attempt Limit Reached',
+          'You have used all 3 attempts for this quiz. You can still practice, but no badge will be awarded.',
+          [{ text: 'Continue', style: 'default' }]
+        );
+      } else if (isLastAttempt) {
+        Alert.alert(
+          'Final Attempt',
+          `This is your final attempt (${currentAttempts + 1}/3). If you don't pass this time, you won't be able to earn the badge for this quiz.`,
+          [{ text: 'Continue', style: 'default' }]
+        );
+      } else {
+        Alert.alert(
+          'Attempt Warning',
+          `This is attempt ${currentAttempts + 1} of 3. You have ${remainingAttempts - 1} attempts remaining to earn the badge.`,
+          [{ text: 'Continue', style: 'default' }]
+        );
+      }
     }
-  }, [isRetake]);
+  }, [isRetake, currentAttempts, isLastAttempt]);
 
   // Timer effect
   useEffect(() => {
@@ -178,7 +206,148 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
     // Check if this is a retake (no points for retakes)
     const isRetake = isQuizCompleted(quiz.id);
 
-    // Calculate detailed score with time bonuses
+    // Calculate detailed score with time bonuses and track which questions were answered correctly
+    let correctAnswers = 0;
+    let totalPossiblePoints = 0;
+    let totalTimeBonus = 0;
+    let newPointsThisAttempt = 0;
+
+    // Prepare question data for the completeQuiz function with robust checks
+    let questionData: { id: string; correctAnswer: string; points: number }[] = [];
+    
+    if (quiz.questions && Array.isArray(quiz.questions) && quiz.questions.length > 0) {
+      questionData = quiz.questions.map(question => ({
+        id: question.id,
+        correctAnswer: question.correctAnswer,
+        points: question.points
+      }));
+    }
+
+    if (!quiz.questions || quiz.questions.length === 0 || questionData.length === 0) {
+      console.error('Quiz questions are undefined, empty, or questionData failed to prepare');
+      Alert.alert('Error', 'Hindi ma-load ang mga tanong ng quiz');
+      return;
+    }
+
+    quiz.questions.forEach(question => {
+      totalPossiblePoints += question.points;
+      
+      if (answers[question.id] === question.correctAnswer) {
+        correctAnswers++;
+        const answerTime = questionTimes[question.id] || 10; // Default to 10s if no time recorded
+        const scoreData = calculateQuestionScore(answerTime, question.points);
+        totalTimeBonus += scoreData.timeBonus;
+        
+        // Check if we haven't earned points for this question before
+        const alreadyEarnedForQuestion = getQuestionPoints(question.id);
+        if (alreadyEarnedForQuestion === 0) {
+          newPointsThisAttempt += scoreData.points;
+        }
+      }
+    });
+
+    const accuracy = (correctAnswers / quiz.questions.length) * 100;
+    const passed = accuracy >= quiz.passingScore;
+
+    // Complete the quiz and get actual new points earned (this will save the progress)
+    let actualNewPoints = 0;
+    if (!isRetake) {
+      try {
+        // Final safety check before calling completeQuiz
+        if (!questionData || questionData.length === 0) {
+          console.error('questionData is invalid before calling completeQuiz:', questionData);
+          Alert.alert('Error', 'Hindi ma-save ang quiz results dahil sa problema sa mga tanong.');
+          return;
+        }
+        
+        actualNewPoints = await completeQuiz(quiz.id, accuracy, totalPossiblePoints, timeSpent, answers, questionData);
+        
+        if (actualNewPoints > 0) {
+          await addExperience(actualNewPoints);
+        }
+      } catch (error) {
+        console.error('Error completing quiz:', error);
+        Alert.alert('Error', 'Hindi ma-save ang quiz results. Subukan ulit.');
+        return;
+      }
+      
+      // Award badge if quiz has one and player passed, and this is within the 3-attempt limit
+      if (quiz.badge && currentAttempts < maxAttempts && passed) {
+        const newBadge = await awardBadge(
+          quiz.badge.id,
+          quiz.badge.name,
+          quiz.badge.description,
+          quiz.badge.icon,
+          quiz.badge.color,
+          quiz.badge.category,
+          quiz.badge.requirement
+        );
+        
+        if (newBadge) {
+          setEarnedBadge(newBadge);
+          setShowBadgeModal(true);
+          return; // Don't show regular alert, wait for badge modal to close
+        }
+      }
+    }
+
+    // Construct attempt message
+    let attemptMessage = '';
+    let pointsMessage = '';
+    
+    if (!isRetake) {
+      const attemptCount = currentAttempts + 1; // +1 because this quiz will increment the count
+      if (attemptCount >= maxAttempts && !passed) {
+        attemptMessage = '\n⚠️ Hindi na makakakuha ng badge - naubos na ang 3 attempts';
+      } else if (attemptCount >= maxAttempts && passed) {
+        attemptMessage = '\n✅ Nakapasa sa huling attempt!';
+      } else if (!passed) {
+        const remaining = maxAttempts - attemptCount;
+        attemptMessage = `\n⚠️ ${remaining} attempt${remaining > 1 ? 's' : ''} pa para sa badge`;
+      }
+      
+      // Show points message
+      if (actualNewPoints > 0) {
+        pointsMessage = `\n✅ Nakakuha ng ${actualNewPoints} bagong puntos!`;
+      } else if (actualNewPoints === 0 && correctAnswers > 0) {
+        pointsMessage = '\n💡 Walang bagong puntos - na-answer na ang mga tamang sagot dati';
+      }
+    }
+
+    Alert.alert(
+      passed ? 'Nakapasa sa Quiz! 🎉' : 'Natapos ang Quiz',
+      `Tumpak na sagot: ${Math.round(accuracy)}%\n` +
+      `Time Bonus: +${totalTimeBonus} na puntos\n` +
+      `${isRetake ? '⚠️ Walang puntos para sa mga retake' : ''}` +
+      `${passed ? 'Binabati kayo sa magagaling na sagot!' : 'Magpatuloy sa pagsasanay!'}` +
+      pointsMessage +
+      attemptMessage,
+      [
+        {
+          text: 'Tingnan ang mga Sagot',
+          onPress: () => showResults(accuracy, actualNewPoints, timeSpent)
+        },
+        {
+          text: 'Magpatuloy',
+          onPress: () => onComplete(accuracy, actualNewPoints, timeSpent)
+        }
+      ]
+    );
+  };
+
+  const showResults = (score: number, pointsEarned: number, timeSpent: number) => {
+    // TODO: Implement results screen
+    onComplete(score, pointsEarned, timeSpent);
+  };
+
+  const handleBadgeModalClose = () => {
+    setShowBadgeModal(false);
+    setEarnedBadge(null);
+    
+    // Show the completion alert after badge modal closes
+    const endTime = new Date();
+    const timeSpent = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+    
     let correctAnswers = 0;
     let totalPossiblePoints = 0;
     let actualPointsEarned = 0;
@@ -189,7 +358,7 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
       
       if (answers[question.id] === question.correctAnswer) {
         correctAnswers++;
-        const answerTime = questionTimes[question.id] || 10; // Default to 10s if no time recorded
+        const answerTime = questionTimes[question.id] || 10;
         const scoreData = calculateQuestionScore(answerTime, question.points);
         actualPointsEarned += scoreData.points;
         totalTimeBonus += scoreData.timeBonus;
@@ -197,22 +366,13 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
     });
 
     const accuracy = (correctAnswers / quiz.questions.length) * 100;
-    const passed = accuracy >= quiz.passingScore;
-
-    // Add experience points only if passed and not a retake
-    if (passed && !isRetake) {
-      await addExperience(actualPointsEarned);
-    }
-
-    const badgeText = quiz.badge && passed && !isRetake ? `\n\n🏆 Nakuha ang Badge: ${quiz.badge.name}\n${quiz.badge.description}` : '';
-
+    
     Alert.alert(
-      passed ? 'Nakapasa sa Quiz! 🎉' : 'Natapos ang Quiz',
+      'Nakapasa sa Quiz! 🎉',
       `Tumpak na sagot: ${Math.round(accuracy)}%\n` +
       `Nakuhang Puntos: ${actualPointsEarned}/${totalPossiblePoints}\n` +
       `Time Bonus: +${totalTimeBonus} na puntos\n` +
-      `${isRetake ? '⚠️ Walang puntos para sa mga retake' : ''}` +
-      `${passed ? 'Binabati kayo sa mabibiling sagot!' : 'Magpatuloy sa pagsasanay!'}${badgeText}`,
+      `Binabati kayo sa mabibiling sagot!`,
       [
         {
           text: 'Tingnan ang mga Sagot',
@@ -224,11 +384,6 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
         }
       ]
     );
-  };
-
-  const showResults = (score: number, pointsEarned: number, timeSpent: number) => {
-    // TODO: Implement results screen
-    onComplete(score, pointsEarned, timeSpent);
   };
 
   const formatTime = (seconds: number) => {
@@ -425,6 +580,13 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
           <Ionicons name="chevron-forward" size={20} color="white" />
         </TouchableOpacity>
       </View>
+      
+      {/* Badge Earned Modal */}
+      <BadgeEarnedModal
+        visible={showBadgeModal}
+        badge={earnedBadge}
+        onClose={handleBadgeModalClose}
+      />
     </SafeAreaView>
   );
 }

@@ -5,6 +5,8 @@ export interface UserProgress {
   lessonScores: { [lessonId: string]: number }; // scores out of 100
   completedQuizzes: string[]; // quiz IDs
   quizScores: { [quizId: string]: number }; // scores out of 100
+  quizAttempts: { [quizId: string]: number }; // number of attempts per quiz
+  questionPoints: { [questionId: string]: number }; // points earned per individual question
   totalScore: number;
   streak: number; // consecutive days of learning
   lastLearningDate: Date;

@@ -2,12 +2,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Allow users to read/write their own progress data
+    // This covers: completedLessons, lessonScores, completedQuizzes, quizScores, 
+    // quizAttempts, questionPoints, badges, achievements, etc.
     match /userProgress/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Allow authenticated users to read ALL user progress for leaderboard
-    match /userProgress/{userId} {
+    // Allow authenticated users to read ALL user progress for leaderboard functionality
+    match /userProgress/{document=**} {
       allow read: if request.auth != null;
     }
     
@@ -21,22 +23,12 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Allow users to read/write their own quiz attempts
-    match /quizAttempts/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Allow users to read quiz attempt subcollections
-    match /quizAttempts/{userId}/attempts/{attemptId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Allow authenticated users to read quiz data
+    // Allow authenticated users to read quiz data (static content)
     match /quizzes/{document=**} {
       allow read: if request.auth != null;
     }
     
-    // Allow authenticated users to read lesson data
+    // Allow authenticated users to read lesson data (static content)
     match /lessons/{document=**} {
       allow read: if request.auth != null;
     }
@@ -44,6 +36,11 @@ service cloud.firestore {
     // Allow users to read/write their own user profile data
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Optional: Allow reading of public user profiles for social features
+    match /users/{document=**} {
+      allow read: if request.auth != null;
     }
   }
 }

@@ -11,6 +11,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Lesson, BaybayinCharacter } from '../../types/lesson';
 import { useProgress } from '../../contexts/ProgressContext';
+import { Badge } from '../../types/progress';
+import BadgeEarnedModal from '../common/BadgeEarnedModal';
 import '../../global.css';
 
 interface LessonScreenProps {
@@ -26,7 +28,9 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
   const [completedCharacters, setCompletedCharacters] = useState<Set<number>>(new Set());
   const [startTime, setStartTime] = useState<Date>(new Date());
   const [isCompleting, setIsCompleting] = useState(false);
-  const { completeLesson, isLessonCompleted } = useProgress();
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [earnedBadge, setEarnedBadge] = useState<Badge | null>(null);
+  const { completeLesson, isLessonCompleted, awardBadge } = useProgress();
 
   const currentCharacter = lesson.characters[currentCharacterIndex];
   const isLastCharacter = currentCharacterIndex === lesson.characters.length - 1;
@@ -60,13 +64,46 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
         totalCharacters: lesson.characters.length
       });
       
-      await completeLesson(lesson.id, score, timeSpent);
+      try {
+        console.log('LessonScreen: About to complete lesson:', {
+          lessonId: lesson.id,
+          score,
+          timeSpent,
+          wasAlreadyCompleted
+        });
+        
+        await completeLesson(lesson.id, score, timeSpent);
+        
+        console.log('LessonScreen: Lesson completion successful');
+      } catch (error) {
+        console.error('LessonScreen: Failed to complete lesson:', error);
+        Alert.alert('Error', 'Hindi ma-save ang lesson progress. Subukan ulit.');
+        return;
+      }
       
-      const badgeText = lesson.badge ? `\n\n🏆 Nakuha ang Badge: ${lesson.badge.name}\n${lesson.badge.description}` : '';
+      // Check if user should get a badge and not a retake
+      if (lesson.badge && !wasAlreadyCompleted) {
+        const badge = await awardBadge(
+          lesson.badge.id,
+          lesson.badge.name,
+          lesson.badge.description,
+          lesson.badge.icon,
+          lesson.badge.color,
+          lesson.badge.category,
+          lesson.badge.requirement
+        );
+        
+        if (badge) {
+          setEarnedBadge(badge);
+          setShowBadgeModal(true);
+          return; // Exit here, badge modal will handle the completion alert
+        }
+      }
       
+      // Show completion alert if no badge was awarded
       Alert.alert(
         'Natapos ang Aralin! 🎉',
-        `Mahusay! Nakakuha kayo ng ${Math.round(score)} na puntos${!wasAlreadyCompleted ? ' at nakakuha ng experience!' : '!'}${badgeText}`,
+        `Mahusay! Nakakuha kayo ng ${Math.round(score)} na puntos${!wasAlreadyCompleted ? ' at nakakuha ng experience!' : '!'}`,
         [
           {
             text: 'Magpatuloy',
@@ -85,6 +122,31 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
     } finally {
       setIsCompleting(false);
     }
+  };
+
+  const handleBadgeModalClose = () => {
+    setShowBadgeModal(false);
+    setEarnedBadge(null);
+    
+    // Show the completion alert after badge modal closes
+    const endTime = new Date();
+    const timeSpent = Math.floor((endTime.getTime() - startTime.getTime()) / 1000);
+    const score = calculateScore(timeSpent);
+    
+    Alert.alert(
+      'Natapos ang Aralin! 🎉',
+      `Mahusay! Nakakuha kayo ng ${Math.round(score)} na puntos at nakakuha ng experience!`,
+      [
+        {
+          text: 'Magpatuloy',
+          onPress: () => {
+            setTimeout(() => {
+              onComplete();
+            }, 200);
+          }
+        }
+      ]
+    );
   };
 
   const calculateScore = (timeSpentSeconds: number): number => {
@@ -238,6 +300,13 @@ export default function LessonScreen({ lesson, onBack, onComplete }: LessonScree
           <Ionicons name="chevron-forward" size={20} color="white" />
         </TouchableOpacity>
       </View>
+      
+      {/* Badge Earned Modal */}
+      <BadgeEarnedModal
+        visible={showBadgeModal}
+        badge={earnedBadge}
+        onClose={handleBadgeModalClose}
+      />
     </SafeAreaView>
   );
 }

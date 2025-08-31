@@ -3,19 +3,22 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAuth } from './AuthContext';
-import { UserProgress, LessonProgress, Achievement, ActivityType, DailyActivity } from '../types/progress';
+import { UserProgress, LessonProgress, Achievement, ActivityType, DailyActivity, Badge } from '../types/progress';
 
 interface ProgressContextType {
   userProgress: UserProgress | null;
   completeLesson: (lessonId: string, score: number, timeSpent: number) => Promise<void>;
-  completeQuiz: (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }) => Promise<void>;
+  completeQuiz: (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }, questionData: { id: string; correctAnswer: string; points: number }[]) => Promise<number>;
   trackActivity: (activityType: ActivityType) => Promise<void>;
   addExperience: (points: number) => Promise<void>;
   unlockAchievement: (achievement: Achievement) => Promise<void>;
+  awardBadge: (badgeId: string, badgeName: string, description: string, icon: string, color: string, category: 'lesson' | 'quiz' | 'streak' | 'mastery' | 'cultural', requirement: string) => Promise<Badge | null>;
   getLessonProgress: (lessonId: string) => LessonProgress | null;
   isLessonCompleted: (lessonId: string) => boolean;
   isQuizCompleted: (quizId: string) => boolean;
   getQuizScore: (quizId: string) => number;
+  getQuizAttempts: (quizId: string) => number;
+  getQuestionPoints: (questionId: string) => number;
   getUserLevel: () => number;
   loading: boolean;
 }
@@ -62,6 +65,8 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
             lastActivityDate: data.lastActivityDate?.toDate ? data.lastActivityDate.toDate() : (data.lastLearningDate?.toDate ? data.lastLearningDate.toDate() : new Date()),
             dailyActivities: data.dailyActivities || [],
             badges: data.badges || [],
+            quizAttempts: data.quizAttempts || {},
+            questionPoints: data.questionPoints || {},
             achievements: (data.achievements || []).map((achievement: any) => ({
               ...achievement,
               unlockedAt: achievement.unlockedAt?.toDate ? achievement.unlockedAt.toDate() : new Date(achievement.unlockedAt || Date.now())
@@ -77,6 +82,8 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
             lessonScores: {},
             completedQuizzes: [],
             quizScores: {},
+            quizAttempts: {},
+            questionPoints: {},
             totalScore: 0,
             streak: 0,
             lastLearningDate: new Date(),
@@ -103,7 +110,10 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
   }, [user]);
 
   const saveProgress = async (progress: UserProgress) => {
-    if (!user) return;
+    if (!user) {
+      console.error('saveProgress: No user logged in');
+      return;
+    }
     
     try {
       // Ensure display name is included
@@ -111,6 +121,15 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
         ...progress,
         displayName: progress.displayName || user.displayName || user.email?.split('@')[0] || 'Anonymous User'
       };
+      
+      console.log('saveProgress: About to save progress:', {
+        userId: user.uid,
+        completedLessons: progressToSave.completedLessons,
+        lessonScores: progressToSave.lessonScores,
+        badges: progressToSave.badges,
+        experience: progressToSave.experience,
+        level: progressToSave.level
+      });
       
       // Update local state immediately for better UX
       setUserProgress(progressToSave);
@@ -120,18 +139,29 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
       
       console.log('Progress saved successfully to Firestore:', {
         completedLessons: progressToSave.completedLessons,
-        lessonScores: progressToSave.lessonScores
+        lessonScores: progressToSave.lessonScores,
+        saveTimestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Error saving progress:', error);
+      console.error('Error saving progress - DETAILED:', {
+        error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        userId: user.uid
+      });
+      throw error; // Re-throw so calling function knows it failed
     }
   };
 
   const completeLesson = async (lessonId: string, score: number, timeSpent: number) => {
-    if (!userProgress || !user) return;
+    if (!userProgress || !user) {
+      console.error('completeLesson: Missing userProgress or user:', { userProgress: !!userProgress, user: !!user });
+      return;
+    }
 
     console.log('=== COMPLETING LESSON ===');
     console.log('Lesson ID:', lessonId);
+    console.log('Score:', score);
+    console.log('Time spent:', timeSpent);
     console.log('Current completed lessons:', userProgress.completedLessons);
     console.log('Is already completed?', userProgress.completedLessons?.includes(lessonId));
 
@@ -257,25 +287,61 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     }
 
     // Single save operation with all updates
-    await saveProgress(updatedProgress);
-    
-    console.log('=== LESSON COMPLETION SAVED ===');
-    console.log('Final lesson completion state:', {
-      lessonId,
-      completedLessons: updatedProgress.completedLessons,
-      isNowCompleted: updatedProgress.completedLessons.includes(lessonId)
-    });
-    console.log('=== END SAVE CONFIRMATION ===');
+    try {
+      await saveProgress(updatedProgress);
+      
+      console.log('=== LESSON COMPLETION SAVED ===');
+      console.log('Final lesson completion state:', {
+        lessonId,
+        completedLessons: updatedProgress.completedLessons,
+        isNowCompleted: updatedProgress.completedLessons.includes(lessonId),
+        experience: updatedProgress.experience,
+        level: updatedProgress.level
+      });
+      console.log('=== END SAVE CONFIRMATION ===');
+    } catch (error) {
+      console.error('Failed to save lesson completion:', error);
+      throw error; // Let calling component know it failed
+    }
   };
 
-  const completeQuiz = async (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }) => {
-    if (!userProgress || !user) return;
+  const completeQuiz = async (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }, questionData: { id: string; correctAnswer: string; points: number }[]): Promise<number> => {
+    if (!userProgress || !user) return 0;
+    
+    // Safety check for questionData
+    if (!questionData || !Array.isArray(questionData)) {
+      console.error('completeQuiz: questionData is undefined or not an array', {
+        questionData,
+        type: typeof questionData,
+        isArray: Array.isArray(questionData)
+      });
+      return 0;
+    }
 
     // Track the quiz completion activity (this will also update streak if needed)
     await trackActivity(ActivityType.QUIZ_COMPLETED);
 
+    // Track attempts - increment even if quiz was already completed
+    const currentAttempts = (userProgress.quizAttempts?.[quizId] || 0) + 1;
     const isFirstCompletion = !userProgress.completedQuizzes?.includes(quizId);
-    const experienceGained = isFirstCompletion ? Math.floor(score / 2) : Math.floor(score / 4);
+
+    // Calculate new points earned this attempt (only for questions not previously answered correctly)
+    let newPointsEarned = 0;
+    const updatedQuestionPoints = { ...(userProgress.questionPoints || {}) };
+
+    questionData.forEach(question => {
+      const userAnswer = answers[question.id];
+      const isCorrect = userAnswer === question.correctAnswer;
+      const alreadyEarned = updatedQuestionPoints[question.id] || 0;
+
+      // Only award points if correct and haven't earned points for this question before
+      if (isCorrect && alreadyEarned === 0) {
+        updatedQuestionPoints[question.id] = question.points;
+        newPointsEarned += question.points;
+      }
+    });
+
+    const experienceGained = isFirstCompletion ? Math.floor(newPointsEarned / 2) : Math.floor(newPointsEarned / 4);
 
     const updatedProgress: UserProgress = {
       ...userProgress,
@@ -286,7 +352,12 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
         ...(userProgress.quizScores || {}),
         [quizId]: Math.max(userProgress.quizScores?.[quizId] || 0, score)
       },
-      totalScore: userProgress.totalScore + (isFirstCompletion ? score : 0),
+      quizAttempts: {
+        ...(userProgress.quizAttempts || {}),
+        [quizId]: currentAttempts
+      },
+      questionPoints: updatedQuestionPoints,
+      totalScore: userProgress.totalScore + newPointsEarned,
       experience: userProgress.experience + experienceGained,
       totalTimeSpent: userProgress.totalTimeSpent + Math.floor(timeSpent / 60),
       lastLearningDate: new Date(),
@@ -322,6 +393,9 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     }
 
     await saveProgress(updatedProgress);
+    
+    // Return the new points earned for UI feedback
+    return newPointsEarned;
   };
 
   const updateStreak = async () => {
@@ -479,8 +553,43 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     return userProgress?.quizScores[quizId] || 0;
   };
 
+  const getQuizAttempts = (quizId: string): number => {
+    return userProgress?.quizAttempts?.[quizId] || 0;
+  };
+
+  const getQuestionPoints = (questionId: string): number => {
+    return userProgress?.questionPoints?.[questionId] || 0;
+  };
+
   const getUserLevel = (): number => {
     return userProgress?.level || 1;
+  };
+
+  const awardBadge = async (badgeId: string, badgeName: string, description: string, icon: string, color: string, category: 'lesson' | 'quiz' | 'streak' | 'mastery' | 'cultural', requirement: string): Promise<Badge | null> => {
+    if (!userProgress || !user) return null;
+
+    // Check if badge already earned
+    const existingBadge = userProgress.badges?.find(b => b.id === badgeId);
+    if (existingBadge) return null;
+
+    const newBadge: Badge = {
+      id: badgeId,
+      name: badgeName,
+      description,
+      icon,
+      color,
+      category,
+      requirement,
+      earnedAt: new Date()
+    };
+
+    const updatedProgress: UserProgress = {
+      ...userProgress,
+      badges: [...(userProgress.badges || []), newBadge]
+    };
+
+    await saveProgress(updatedProgress);
+    return newBadge;
   };
 
   const value = {
@@ -490,10 +599,13 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     trackActivity,
     addExperience,
     unlockAchievement,
+    awardBadge,
     getLessonProgress,
     isLessonCompleted,
     isQuizCompleted,
     getQuizScore,
+    getQuizAttempts,
+    getQuestionPoints,
     getUserLevel,
     loading,
   };

@@ -7,7 +7,7 @@ import { ActivityType } from '../../types/progress';
 
 export default function QuizzesContainer() {
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
-  const { completeQuiz, trackActivity } = useProgress();
+  const { trackActivity } = useProgress();
 
   const handleSelectQuiz = (quiz: Quiz) => {
     setSelectedQuiz(quiz);
@@ -22,19 +22,15 @@ export default function QuizzesContainer() {
   const handleComplete = async (score: number, totalPoints: number, timeSpent: number) => {
     if (!selectedQuiz) return;
     
-    try {
-      // For now, we'll pass empty answers object since we need to modify QuizScreen to return answers
-      await completeQuiz(selectedQuiz.id, score, totalPoints, timeSpent, {});
-      console.log('Quiz completed successfully:', {
-        quiz: selectedQuiz.title,
-        score,
-        totalPoints,
-        timeSpent
-      });
-    } catch (error) {
-      console.error('Error completing quiz:', error);
-    }
+    console.log('Quiz completed successfully:', {
+      quiz: selectedQuiz.title,
+      score,
+      totalPoints,
+      timeSpent
+    });
     
+    // Quiz completion is already handled by QuizScreen's completeQuiz call
+    // This function just handles the navigation back to quiz list
     setSelectedQuiz(null);
   };
 

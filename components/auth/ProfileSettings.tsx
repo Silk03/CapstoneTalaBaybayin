@@ -14,6 +14,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProgress } from '../../contexts/ProgressContext';
 import { db } from '../../config/firebase';
+import BadgeLibrary from './BadgeLibrary';
 import '../../global.css';
 
 interface ProfileSettingsProps {
@@ -25,6 +26,11 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
   const { userProgress } = useProgress();
   const [username, setUsername] = useState(user?.displayName || '');
   const [loading, setLoading] = useState(false);
+  const [showBadgeLibrary, setShowBadgeLibrary] = useState(false);
+
+  if (showBadgeLibrary) {
+    return <BadgeLibrary onBack={() => setShowBadgeLibrary(false)} />;
+  }
 
   const handleLogout = () => {
     Alert.alert(
@@ -111,6 +117,28 @@ export default function ProfileSettings({ onBack }: ProfileSettingsProps) {
               {user?.email}
             </Text>
             <Text className="text-xs text-secondary-500 mt-1">Hindi mababago ang email</Text>
+          </View>
+
+          {/* Badge Library Section */}
+          <View className="mb-6">
+            <Text className="text-base font-semibold text-secondary-700 mb-3">Mga Nakuha na Badge</Text>
+            <TouchableOpacity
+              className="bg-white border border-secondary-200 rounded-lg p-4 flex-row items-center justify-between"
+              onPress={() => setShowBadgeLibrary(true)}
+            >
+              <View className="flex-row items-center flex-1">
+                <View className="bg-yellow-100 p-2 rounded-full mr-3">
+                  <Ionicons name="trophy" size={20} color="#F59E0B" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-secondary-700">Badge Library</Text>
+                  <Text className="text-sm text-secondary-500">
+                    {userProgress?.badges?.length || 0} nakuhang badge
+                  </Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity

@@ -16,7 +16,7 @@ interface QuizListScreenProps {
 }
 
 export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
-  const { userProgress } = useProgress();
+  const { userProgress, getQuizAttempts } = useProgress();
 
   const getDifficultyColor = (difficulty: DifficultyLevel) => {
     switch (difficulty) {
@@ -60,9 +60,19 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
   const isQuizUnlocked = (quiz: Quiz): boolean => {
     if (!quiz.prerequisiteLessons || !userProgress) return true;
     
-    return quiz.prerequisiteLessons.every(lessonId => 
+    const isUnlocked = quiz.prerequisiteLessons.every(lessonId => 
       userProgress.completedLessons.includes(lessonId)
     );
+
+    // Debug logging for quiz unlocking
+    console.log(`Quiz "${quiz.title}" unlock check:`, {
+      prerequisiteLessons: quiz.prerequisiteLessons,
+      completedLessons: userProgress.completedLessons,
+      isUnlocked,
+      userProgressExists: !!userProgress
+    });
+    
+    return isUnlocked;
   };
 
   const renderQuizItem = ({ item }: { item: Quiz }) => {
@@ -88,6 +98,36 @@ export default function QuizListScreen({ onSelectQuiz }: QuizListScreenProps) {
                 <Text className="text-xs font-semibold text-blue-700">{item.badge.name}</Text>
               </View>
             )}
+            
+            {/* Attempt Information */}
+            {isUnlocked && (() => {
+              const attempts = getQuizAttempts(item.id);
+              const maxAttempts = 3;
+              const completed = userProgress?.completedQuizzes?.includes(item.id);
+              
+              if (completed) {
+                return (
+                  <View className="flex-row items-center mt-2 bg-green-50 px-2 py-1 rounded-full self-start">
+                    <Ionicons name="checkmark-circle" size={12} color="#16A34A" />
+                    <Text className="text-xs font-semibold text-green-700 ml-1">Tapos na</Text>
+                  </View>
+                );
+              } else if (attempts > 0) {
+                const remaining = maxAttempts - attempts;
+                const color = remaining <= 1 ? '#DC2626' : remaining === 2 ? '#D97706' : '#16A34A';
+                const bgColor = remaining <= 1 ? '#FEF2F2' : remaining === 2 ? '#FEF3C7' : '#F0FDF4';
+                
+                return (
+                  <View className="flex-row items-center mt-2 px-2 py-1 rounded-full self-start" style={{ backgroundColor: bgColor }}>
+                    <Ionicons name="warning" size={12} color={color} />
+                    <Text className="text-xs font-semibold ml-1" style={{ color }}>
+                      {remaining} attempt{remaining !== 1 ? 's' : ''} left
+                    </Text>
+                  </View>
+                );
+              }
+              return null;
+            })()}
           </View>
           
           <View className="items-end">
