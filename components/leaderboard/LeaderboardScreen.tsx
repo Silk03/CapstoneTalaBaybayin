@@ -13,6 +13,7 @@ import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { LeaderboardEntry, LeaderboardFilter } from '../../types/leaderboard';
+import LoadingIndicator from '../common/LoadingIndicator';
 import '../../global.css';
 
 export default function LeaderboardScreen() {
@@ -227,11 +228,7 @@ export default function LeaderboardScreen() {
   );
 
   if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-lg text-gray-600">Naglo-load ng leaderboard...</Text>
-      </View>
-    );
+    return <LoadingIndicator text="Naglo-load ng leaderboard..." />;
   }
 
   return (

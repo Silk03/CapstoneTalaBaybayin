@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -111,9 +112,14 @@ export default function SignupScreen({ onSwitchToLogin }: SignupScreenProps) {
             onPress={handleSignup}
             disabled={loading}
           >
-            <Text className="text-white text-lg font-bold">
-              {loading ? 'Ginagawa ang Account...' : 'Mag-signup'}
-            </Text>
+            {loading ? (
+              <View className="flex-row items-center">
+                <ActivityIndicator size="small" color="#F6A06A" />
+                <Text className="text-white text-lg font-bold ml-2">Ginagawa ang Account...</Text>
+              </View>
+            ) : (
+              <Text className="text-white text-lg font-bold">Mag-signup</Text>
+            )}
           </TouchableOpacity>
 
           <View className="flex-row justify-center mt-5">

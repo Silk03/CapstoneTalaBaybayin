@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -76,9 +77,14 @@ export default function LoginScreen({ onSwitchToSignup }: LoginScreenProps) {
             onPress={handleLogin}
             disabled={loading}
           >
-            <Text className="text-white text-lg font-bold">
-              {loading ? 'Pumapasok...' : 'Mag-login'}
-            </Text>
+            {loading ? (
+              <View className="flex-row items-center">
+                <ActivityIndicator size="small" color="#F6A06A" />
+                <Text className="text-white text-lg font-bold ml-2">Pumapasok...</Text>
+              </View>
+            ) : (
+              <Text className="text-white text-lg font-bold">Mag-login</Text>
+            )}
           </TouchableOpacity>
 
           <View className="flex-row justify-center mt-5">

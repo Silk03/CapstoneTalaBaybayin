@@ -14,6 +14,7 @@ import {
   isSpeechAvailable,
   getBestFilipinoVoice
 } from '../../utils/speechUtils';
+import LoadingIndicator from './LoadingIndicator';
 import '../../global.css';
 
 interface VoiceTestingProps {
@@ -96,9 +97,11 @@ export default function VoiceTesting({ visible, onClose }: VoiceTestingProps) {
 
         <ScrollView showsVerticalScrollIndicator={false}>
           {isLoading ? (
-            <View className="py-8 items-center">
-              <Text className="text-gray-600">Naglo-load ng mga boses...</Text>
-            </View>
+            <LoadingIndicator 
+              size="small" 
+              text="Naglo-load ng mga boses..." 
+              className="py-8 items-center" 
+            />
           ) : !speechAvailable ? (
             <View className="py-8 items-center">
               <Text className="text-red-600 text-center">

@@ -1,16 +1,13 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { useProgress } from '../../contexts/ProgressContext';
+import LoadingIndicator from '../common/LoadingIndicator';
 
 export default function ProgressScreen() {
   const { userProgress, loading } = useProgress();
 
   if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <Text className="text-base text-gray-600">Naglo-load ng progreso...</Text>
-      </View>
-    );
+    return <LoadingIndicator text="Naglo-load ng progreso..." />;
   }
 
   if (!userProgress) {

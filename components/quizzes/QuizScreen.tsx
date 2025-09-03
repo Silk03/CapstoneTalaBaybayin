@@ -12,6 +12,7 @@ import { Quiz, QuizQuestion, QuestionType } from '../../types/quiz';
 import { useProgress } from '../../contexts/ProgressContext';
 import { Badge } from '../../types/progress';
 import BadgeEarnedModal from '../common/BadgeEarnedModal';
+import LoadingIndicator from '../common/LoadingIndicator';
 import '../../global.css';
 
 interface QuizScreenProps {
@@ -36,11 +37,7 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
 
   // Add null checks for quiz and questions
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
-    return (
-      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
-        <Text className="text-lg text-gray-600">Loading quiz...</Text>
-      </SafeAreaView>
-    );
+    return <LoadingIndicator text="Loading quiz..." />;
   }
 
   const currentQuestion = quiz.questions[currentQuestionIndex];

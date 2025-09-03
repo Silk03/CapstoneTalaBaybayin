@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { DrawingCanvas } from './DrawingCanvas';
 import { handwritingCharacters } from '../../data/handwriting';
 import { HandwritingStroke, HandwritingCharacter } from '../../types/handwriting';
+import LoadingIndicator from '../common/LoadingIndicator';
 import '../../global.css';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -362,7 +363,11 @@ export default function HandwritingScreen() {
           <View className="items-center justify-center">
             {isLoading ? (
               <View className="bg-gray-100 rounded-xl border-2 border-gray-300 justify-center items-center" style={{ width: canvasSize, height: canvasSize }}>
-                <Text className="text-sm text-gray-600 font-medium">Naglo-load ng progreso...</Text>
+                <LoadingIndicator 
+                  size="small" 
+                  text="Naglo-load ng progreso..." 
+                  className="justify-center items-center" 
+                />
               </View>
             ) : (
               <DrawingCanvas

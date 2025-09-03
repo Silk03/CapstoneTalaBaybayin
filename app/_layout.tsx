@@ -12,7 +12,7 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ProgressProvider } from '@/contexts/ProgressContext';
 import AuthContainer from '@/components/auth/AuthContainer';
-import { View, ActivityIndicator } from 'react-native';
+import LoadingIndicator from '@/components/common/LoadingIndicator';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -62,11 +62,7 @@ function RootLayoutNav() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-background">
-        <ActivityIndicator size="large" color="#C67C4E" />
-      </View>
-    );
+    return <LoadingIndicator text="Naglo-load..." />;
   }
 
   if (!user) {
