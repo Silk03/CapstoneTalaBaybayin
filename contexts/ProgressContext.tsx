@@ -308,6 +308,12 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
   const completeQuiz = async (quizId: string, score: number, totalPoints: number, timeSpent: number, answers: { [questionId: string]: string }, questionData: { id: string; correctAnswer: string; points: number }[]): Promise<number> => {
     if (!userProgress || !user) return 0;
     
+    console.log('=== QUIZ COMPLETION DEBUG START ===');
+    console.log('Quiz ID:', quizId);
+    console.log('Score:', score);
+    console.log('User answers:', answers);
+    console.log('Question data:', questionData);
+    
     // Safety check for questionData
     if (!questionData || !Array.isArray(questionData)) {
       console.error('completeQuiz: questionData is undefined or not an array', {
@@ -324,6 +330,10 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     // Track attempts - increment even if quiz was already completed
     const currentAttempts = (userProgress.quizAttempts?.[quizId] || 0) + 1;
     const isFirstCompletion = !userProgress.completedQuizzes?.includes(quizId);
+    
+    console.log('Current attempts:', currentAttempts);
+    console.log('Is first completion:', isFirstCompletion);
+    console.log('Current questionPoints:', userProgress.questionPoints);
 
     // Calculate new points earned this attempt (only for questions not previously answered correctly)
     let newPointsEarned = 0;
@@ -333,15 +343,36 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
       const userAnswer = answers[question.id];
       const isCorrect = userAnswer === question.correctAnswer;
       const alreadyEarned = updatedQuestionPoints[question.id] || 0;
+      
+      console.log(`Question ${question.id}:`, {
+        userAnswer,
+        correctAnswer: question.correctAnswer,
+        isCorrect,
+        questionPoints: question.points,
+        alreadyEarned
+      });
 
       // Only award points if correct and haven't earned points for this question before
       if (isCorrect && alreadyEarned === 0) {
         updatedQuestionPoints[question.id] = question.points;
         newPointsEarned += question.points;
+        console.log(`✅ Awarded ${question.points} points for question ${question.id}`);
+      } else if (!isCorrect) {
+        console.log(`❌ Wrong answer for question ${question.id}`);
+      } else if (alreadyEarned > 0) {
+        console.log(`⚠️ Already earned ${alreadyEarned} points for question ${question.id}`);
       }
     });
 
     const experienceGained = isFirstCompletion ? Math.floor(newPointsEarned / 2) : Math.floor(newPointsEarned / 4);
+    
+    console.log('Points calculation:', {
+      newPointsEarned,
+      experienceGained,
+      isFirstCompletion,
+      currentTotalScore: userProgress.totalScore,
+      currentExperience: userProgress.experience
+    });
 
     const updatedProgress: UserProgress = {
       ...userProgress,
@@ -393,6 +424,14 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     }
 
     await saveProgress(updatedProgress);
+    
+    console.log('=== QUIZ COMPLETION FINAL RESULTS ===');
+    console.log('New points earned:', newPointsEarned);
+    console.log('Experience gained:', experienceGained);
+    console.log('Updated total score:', updatedProgress.totalScore);
+    console.log('Updated experience:', updatedProgress.experience);
+    console.log('Updated question points:', updatedProgress.questionPoints);
+    console.log('=== QUIZ COMPLETION DEBUG END ===');
     
     // Return the new points earned for UI feedback
     return newPointsEarned;
@@ -502,6 +541,11 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
   const addExperience = async (points: number) => {
     if (!userProgress || !user) return;
 
+    console.log('=== ADD EXPERIENCE DEBUG ===');
+    console.log('Adding experience points:', points);
+    console.log('Current experience:', userProgress.experience);
+    console.log('Current level:', userProgress.level);
+
     const updatedProgress: UserProgress = {
       ...userProgress,
       experience: userProgress.experience + points,
@@ -510,7 +554,12 @@ export const ProgressProvider: React.FC<ProgressProviderProps> = ({ children }) 
     const newLevel = Math.floor(updatedProgress.experience / 100) + 1;
     if (newLevel > userProgress.level) {
       updatedProgress.level = newLevel;
+      console.log('Level up! New level:', newLevel);
     }
+    
+    console.log('Final experience:', updatedProgress.experience);
+    console.log('Final level:', updatedProgress.level);
+    console.log('=== END ADD EXPERIENCE DEBUG ===');
 
     await saveProgress(updatedProgress);
   };

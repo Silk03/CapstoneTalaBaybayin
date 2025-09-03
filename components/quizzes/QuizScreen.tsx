@@ -259,9 +259,7 @@ export default function QuizScreen({ quiz, onBack, onComplete }: QuizScreenProps
         
         actualNewPoints = await completeQuiz(quiz.id, accuracy, totalPossiblePoints, timeSpent, answers, questionData);
         
-        if (actualNewPoints > 0) {
-          await addExperience(actualNewPoints);
-        }
+        // Note: completeQuiz already handles experience points internally, no need to call addExperience again
       } catch (error) {
         console.error('Error completing quiz:', error);
         Alert.alert('Error', 'Hindi ma-save ang quiz results. Subukan ulit.');
